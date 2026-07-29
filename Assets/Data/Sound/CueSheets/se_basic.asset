@@ -1,0 +1,226 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a2a166b4c2c548b991995a3cb1b2885, type: 3}
+  m_Name: se_basic
+  m_EditorClassIdentifier: 
+  cueSheet:
+    id: f199c371-15d1-4e7e-b04b-0f143580674e
+    name: se_common
+    throttleType: 0
+    throttleLimit: 0
+    volume: 1
+    pitch: 1
+    pitchInvert: 0
+    cueList:
+    - id: 576108e7-3472-4596-96aa-6ca34c2e0fb4
+      colorId: 
+      name: se_tap
+      categoryId: 2106939596
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: df555c24-d893-456c-a670-85218730e571
+        colorId: 
+        name: se_tap
+        audioClip: {fileID: 8300000, guid: 29a1e7c676f224c9da0c5a7074266dcd, type: 3}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 6080
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: 4af84b9f-452f-402f-8688-341fa13a080f
+      colorId: 
+      name: se_unlock_stage
+      categoryId: 2106939596
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: d73fa224-6273-40b5-95e3-de6bdafd8f6d
+        colorId: 
+        name: se_unlock_stage
+        audioClip: {fileID: 0}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 0
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: c4c7b889-1e40-4292-babb-ee845d60ae18
+      colorId: 
+      name: se_decide
+      categoryId: 0
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: f61b8981-ac02-45b3-a8fc-cbd44fbf3c84
+        colorId: 
+        name: se_decide
+        audioClip: {fileID: 0}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 0
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: f8127b48-6ad9-4ecc-8735-b4d469b5b4f4
+      colorId: 
+      name: se_ng
+      categoryId: 0
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: 07a4aacc-d86f-4305-bf75-8190f96f51ca
+        colorId: 
+        name: se_ng
+        audioClip: {fileID: 8300000, guid: 242e1a0c180014d10b5e557a70b0d2a6, type: 3}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 5440
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: 9d250b2d-9255-4602-a648-b82f04dc68d4
+      colorId: 
+      name: se_start
+      categoryId: 0
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: df3e863d-bbc7-4f32-8101-11afd7ced739
+        colorId: 
+        name: se_start
+        audioClip: {fileID: 0}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 0
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: c469e289-339b-4430-9043-63c0b0da3507
+      colorId: 
+      name: se_title_tap
+      categoryId: 0
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: 8bfafb82-ca74-4571-a9a4-c5bbef2748ec
+        colorId: 
+        name: se_title_tap
+        audioClip: {fileID: 0}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 0
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0
+    - id: 29dc8ac7-d289-401b-a68b-333d4d4d9837
+      colorId: 
+      name: se_buy
+      categoryId: 2106939596
+      throttleType: 0
+      throttleLimit: 0
+      volume: 1
+      volumeRange: 0
+      pitch: 1
+      pitchRange: 0
+      pitchInvert: 0
+      playType: 0
+      trackList:
+      - id: fd97c708-b8d3-41b3-b16e-af48670f8261
+        colorId: 
+        name: se_buy
+        audioClip: {fileID: 8300000, guid: 899c773eb8e4043519027ae76bccc85a, type: 3}
+        volume: 1
+        volumeRange: 0
+        pitch: 1
+        pitchRange: 0
+        pitchInvert: 0
+        startSample: 0
+        endSample: 55808
+        loopStartSample: 0
+        isLoop: 0
+        randomWeight: 0
+        priority: 0
+        fadeTime: 0

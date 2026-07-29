@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22c6b752c72b4c8abf27ac204ab2ae79, type: 3}
+  m_Name: dat_spread_sheet_setting
+  m_EditorClassIdentifier: 
+  spreadSheetId: 1FvQTB2cWqx3pauUhJnsWaXhf2wAhuGDP796Inm2vOhU
+  sheetDataArray:
+  - name: character
+    id: 0
+    masterName: Character
+  - name: license
+    id: 1834658068
+    masterName: License
+  - name: stage
+    id: 2089747371
+    masterName: Stage
+  - name: player_enhance
+    id: 1365299811
+    masterName: PlayerEnhance
+  ignoreColumnConditions:
+  - type: 0
+    conditionString: '#'
+  ignoreRowConditions:
+  - type: 1
+    conditionInt: 0
+    conditionString: x
+  findNamespaceNameList:
+  - Gre
+  - Gre.pjcode
+  findAssemblyNameList:
+  - Assembly-CSharp.dll
+  constantNamingConvention: 1
+  propertyNamingConvention: 1
+  exportNamespaceName: Gre.pjcode.Data
+  exportScriptDirectoryPath: Assets/Scripts/Gre.pjcode/Data/Master/AutoGenerate/
+  exportCsvDirectoryPath: Assets/AddressableAssets/TextAssets/
+  logLevel: 0

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddb255b17fe5e47269cdbd8be0692356, type: 3}
+  m_Name: dat_audio_global_setting
+  m_EditorClassIdentifier: 
+  throttleType: 1
+  throttleLimit: 0
+  categoryList:
+  - id: 501948793
+    name: Bgm
+    throttleType: 1
+    throttleLimit: 0
+    audioMixerGroup: {fileID: -9088381301232615694, guid: a89f1119f211c49009954f9db4eac03a, type: 2}
+  - id: 2106939596
+    name: Se
+    throttleType: 1
+    throttleLimit: 0
+    audioMixerGroup: {fileID: 6771768682614706284, guid: a89f1119f211c49009954f9db4eac03a, type: 2}
+  - id: 882142640
+    name: Voice
+    throttleType: 1
+    throttleLimit: 0
+    audioMixerGroup: {fileID: 2858459398261034951, guid: a89f1119f211c49009954f9db4eac03a, type: 2}

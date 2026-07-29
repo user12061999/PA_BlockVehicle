@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59283e5cc729427fb821aab18699e2b2, type: 3}
+  m_Name: dat_ad_settings
+  m_EditorClassIdentifier: 
+  _sdkKey: esf2zdXxhTXNRKoBlSHKBMp1kRoceA_4VnMbQdtfU7q9TrlORUZJrEJo_OUZOeRRl_8bTv5E13w1Rvxwi6RvTR
+  _androidSettings:
+    _activeFlag: 1
+    _banners: 
+    _interstitial: 
+    _mrec: 
+    _rewarded: 385b4ca19d02bcef
+  _iosSettings:
+    _activeFlag: 1
+    _banners: 6a79e158daf1a5ea
+    _interstitial: 4f68dcdacbbfbb41
+    _mrec: 7378be8a05bb0a2c
+    _rewarded: 7cfbe578345e1c03
+  _loadRetryDelays:
+  - 1
+  - 3
+  - 5
+  - 5
+  - 5
+  _verboseLogging: 1

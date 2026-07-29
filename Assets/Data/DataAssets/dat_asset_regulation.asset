@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558bc1c72153841048b5bbf834212fba, type: 3}
+  m_Name: dat_asset_regulation
+  m_EditorClassIdentifier: 
+  _set:
+    _values:
+      _keys:
+      - d07b1529-d124-41df-9128-0d38ff181949
+      _values:
+      - _id: d07b1529-d124-41df-9128-0d38ff181949
+        _name:
+          _value: New Asset Regulation
+        _assetGroups:
+          _keys:
+          - 79346bfe-d0b9-4b53-94f6-1bcfc724bf91
+          _values:
+          - _id: 79346bfe-d0b9-4b53-94f6-1bcfc724bf91
+            _name:
+              _value: New Asset Group
+            _filters:
+              _keys:
+              - cdb52ac5-0180-4405-9706-e89f0c1fd66b
+              _values:
+              - rid: 6518217463970398209
+            _filterOrders:
+              _ids:
+              - cdb52ac5-0180-4405-9706-e89f0c1fd66b
+        _constraints:
+          _keys:
+          - 382ce94c-7acd-42d3-88bd-47f101f2abd7
+          _values:
+          - rid: 6518217463970398210
+        _assetGroupOrders:
+          _ids:
+          - 79346bfe-d0b9-4b53-94f6-1bcfc724bf91
+        _constraintOrders:
+          _ids:
+          - 382ce94c-7acd-42d3-88bd-47f101f2abd7
+    _orders:
+      _ids:
+      - d07b1529-d124-41df-9128-0d38ff181949
+  references:
+    version: 2
+    RefIds:
+    - rid: 6518217463970398209
+      type: {class: TypeBasedAssetFilter, ns: AssetRegulationManager.Editor.Core.Model.AssetRegulations.AssetFilterImpl, asm: AssetRegulationManager.Editor}
+      data:
+        _id: cdb52ac5-0180-4405-9706-e89f0c1fd66b
+        _type:
+          _isListMode: 1
+          _values:
+          - _name: Texture2D
+            _fullName: UnityEngine.Texture2D
+            _assemblyQualifiedName: UnityEngine.Texture2D, UnityEngine.CoreModule,
+              Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        _matchWithDerivedTypes: 1
+    - rid: 6518217463970398210
+      type: {class: TextureFormatConstraint, ns: AssetRegulationManager.Editor.Core.Model.AssetRegulations.AssetConstraintImpl, asm: AssetRegulationManager.Editor}
+      data:
+        _id: 382ce94c-7acd-42d3-88bd-47f101f2abd7
+        _target:
+          _isListMode: 1
+          _values: 0400000007000000
+        _format:
+          _isListMode: 1
+          _values: 32000000ffffffff

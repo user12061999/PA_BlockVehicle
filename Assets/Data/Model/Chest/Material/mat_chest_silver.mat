@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: mat_chest_silver
+  m_Shader: {fileID: 4800000, guid: 8d2bb70cbf9db8d4da26e15b26e74248, type: 3}
+  m_Parent: {fileID: 2100000, guid: 0606a7acdc282194dbe1274642761778, type: 2}
+  m_ModifiedSerializedProperties: 2
+  m_ValidKeywords:
+  - _EMISSION
+  - _NORMALMAP
+  - _RECEIVE_SHADOWS_OFF
+  m_InvalidKeywords:
+  - RIM_LIGHT
+  - SHININESS
+  - _ISRIMLIGHT_ON
+  - _ISSHININESS_ON
+  - _METALLICSPECGLOSSMAP
+  - _RIM_LIGHT
+  - _SHININESS
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseColorMap:
+        m_Texture: {fileID: 2800000, guid: de25749c86d55c241a66bdf36c52cef0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 5a86914d187d446f6a5160d2ecf1d635, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 5a86914d187d446f6a5160d2ecf1d635, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: b3621c4b50e4644b8abb73eb09c7cb24, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SmoothnessTex:
+        m_Texture: {fileID: 2800000, guid: 16caedf9979aa8f4c9958b01a4c53cd1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AmbientIntensity: 0.95
+    - _Anisotropy2Reflection: 1
+    - _AnisotropyBitangentWidth: 4.34
+    - _AnisotropyScale: 0.014
+    - _AnisotropyShift: -0.53
+    - _AnisotropyShiftNoiseScale: -0.104
+    - _AnisotropyTangentWidth: 4.2
+    - _IsRimLight: 1
+    - _IsShininess: 1
+    - _Metallic: 0.549
+    - _Reflectance: 0.262
+    - _RimLightBorderRangeMax: 0.4
+    - _ShadowReceive: 0.073
+    - _SpecularToon: 0
+    - _UseBumpMap: 1
+    - _UseReflection: 1
+    - _UseShadow: 1
+    m_Colors:
+    - _AmbientColor: {r: 0.7, g: 0.8, b: 0.9, a: 1}
+    - _EmissionColor: {r: 0.078431375, g: 0.078431375, b: 0.078431375, a: 1}
+    - _ShadeColor: {r: 0.3464311, g: 0.35830975, b: 0.4245283, a: 1}
+    - _ShininessColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &8569329486833683521
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49bd7293b9124af1a7e38a6175c22b7c, type: 3}
+  m_Name: dat_sdk_settings
+  m_EditorClassIdentifier: 
+  _adjustAppToken: hhzxnq3a50xs
+  _adjustLogLevel: 1
+  _adjustEventList:
+  - _name: ad_play_continue
+    _token: ru1trj
+  - _name: ad_play_increase_reward
+    _token: 6w6bdy
+  - _name: adplay_test
+    _token: ya1xre
+  - _name: stage01_clear
+    _token: avqp11
+  - _name: stage01_first_lose
+    _token: 9l50rt
+  - _name: stage1_begin
+    _token: tvuic2
+  - _name: tutorial_1
+    _token: yxf2is
+  - _name: tutorial_begin
+    _token: ummelt
+  - _name: tutorial_end
+    _token: xf5gm7
+  - _name: AdPlayIncreaseReward
+    _token: id1u3t
+  - _name: AdPlayOpenBonusBox
+    _token: dolviy
+  _adSettings: {fileID: 11400000, guid: 0e0359b8e8d4d4784a85f0dbba8d268e, type: 2}
+  _firebaseLogLevel: 0
+  _analyticsCollectionEnabled: 1
+  _reportUncaughtExceptionsAsFatal: 0
