@@ -32,6 +32,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [Header("Scene References")]
     [SerializeField] Transform vehicle;
     [SerializeField] Rigidbody vehicleBody;
+    [SerializeField] SphereCollider sphereCollider;
     [SerializeField] Transform carView;
     [SerializeField] Collider launchDragBox;
     [SerializeField] Transform trackRoot;
@@ -146,6 +147,8 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         if (vehicleBody == null) vehicleBody = vehicle.GetComponent<Rigidbody>();
         if (vehicleBody == null) vehicleBody = vehicle.GetComponentInParent<Rigidbody>();
         if (vehicleBody == null) vehicleBody = vehicle.GetComponentInChildren<Rigidbody>();
+        if (sphereCollider == null && vehicleBody != null) sphereCollider = vehicleBody.GetComponent<SphereCollider>();
+        if (sphereCollider == null) sphereCollider = vehicle.GetComponentInChildren<SphereCollider>();
         if (vehicleBody != null)
         {
             vehicleBody.mass = mass;
@@ -190,6 +193,8 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         ApplySustainDash();
         ApplySlowBrake();
         ApplySlopeAcceleration();
+        ApplySteering(Time.fixedDeltaTime);
+        UpdateRigidbodyRunDistance();
     }
 
     void LateUpdate()
@@ -263,6 +268,8 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
 
         if (!draggingSteer) steerInput = Mathf.MoveTowards(steerInput, 0f, steerReturnSpeed * Time.deltaTime);
         visualSteer = Mathf.MoveTowards(visualSteer, steerInput, steerReturnSpeed * Time.deltaTime);
+        if (vehicleBody != null && !vehicleBody.isKinematic) return;
+
         headingAngle = Mathf.Clamp(headingAngle + visualSteer * steeringSpeed * Time.deltaTime, -maxSteerYaw, maxSteerYaw);
 
         speed = Mathf.MoveTowards(speed, 0f, CurrentFriction() * Time.deltaTime);
@@ -453,6 +460,37 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         float slopeAcceleration = currentTerrain == TerrainKind.Air ? 5f : 15f;
         float acceleration = Mathf.Lerp(0f, slopeAcceleration, slopeAngle / 90f);
         vehicleBody.AddForce(velocityDir * acceleration, ForceMode.Force);
+    }
+
+    void ApplySteering(float deltaTime)
+    {
+        if (state != PlayState.Run || vehicleBody == null || vehicleBody.isKinematic) return;
+        Vector3 velocity = BodyVelocity;
+        float currentSpeed = velocity.magnitude;
+        if (currentSpeed <= 0.001f) return;
+
+        Vector3 targetDirection = (trackRight * steerInput + trackForward).normalized;
+        Vector3 forward = velocity.normalized;
+        if (Vector3.Angle(forward, targetDirection) > 15f)
+        {
+            targetDirection = Vector3.RotateTowards(forward, targetDirection, 15f * Mathf.Deg2Rad, 0f);
+        }
+
+        Vector3 newDirection = Vector3.Lerp(forward, targetDirection, 1.5f * deltaTime);
+        if (newDirection.sqrMagnitude > 0.0001f) BodyVelocity = newDirection.normalized * currentSpeed;
+
+        if (sphereCollider == null) return;
+        float radius = sphereCollider.radius * vehicleBody.transform.localScale.x;
+        if (radius > 0.0001f) vehicleBody.angularVelocity = Vector3.Cross(Vector3.up, BodyVelocity) / radius;
+    }
+
+    void UpdateRigidbodyRunDistance()
+    {
+        if (state != PlayState.Run || vehicleBody == null || vehicleBody.isKinematic) return;
+        Vector3 velocity = BodyVelocity;
+        speed = velocity.magnitude;
+        runDistance += Mathf.Max(0f, Vector3.Dot(velocity * Time.fixedDeltaTime, trackForward));
+        if (runDistance >= goalDistance || speed <= 0.05f) SetState(PlayState.Result);
     }
 
     float TerrainPerformance()
