@@ -240,7 +240,7 @@ public sealed class VehiclePartGridUi : MonoBehaviour
         if (!CanMergePart(source, out VehiclePartDragItem target)) return false;
         if (sourceWasPlaced) RemovePartStats(source.Part, source.Level);
         target.SetLevel(target.Level + 1);
-        ApplyLevelUpgrade(target.Part);
+        ApplyLevelUpgrade(target.Part, target.Level);
         return true;
     }
 
@@ -450,8 +450,7 @@ public sealed class VehiclePartGridUi : MonoBehaviour
         }
         if (playable != null)
         {
-            float scale = level + 1f;
-            playable.ApplyVehiclePartStats(part.launchSpeedBonus * scale, part.steeringBonus * scale, part.frictionReduction * scale);
+            playable.ApplyVehiclePartStats(part.kind, part.launchSpeedBonus, level);
         }
     }
 
@@ -476,16 +475,15 @@ public sealed class VehiclePartGridUi : MonoBehaviour
         RemovePartStats(part, level);
     }
 
-    void ApplyLevelUpgrade(VehiclePartDefinition part)
+    void ApplyLevelUpgrade(VehiclePartDefinition part, int level)
     {
-        if (playable != null) playable.ApplyVehiclePartStats(part.launchSpeedBonus, part.steeringBonus, part.frictionReduction);
+        if (playable != null) playable.ApplyVehiclePartStats(part.kind, part.launchSpeedBonus, level - 1);
     }
 
     void RemovePartStats(VehiclePartDefinition part, int level)
     {
         if (playable == null || part == null) return;
-        float scale = level + 1f;
-        playable.RemoveVehiclePartStats(part.launchSpeedBonus * scale, part.steeringBonus * scale, part.frictionReduction * scale);
+        playable.RemoveVehiclePartStats(part.kind, part.launchSpeedBonus, level);
     }
 
     bool TryGetOriginFromItem(VehiclePartDefinition part, RectTransform item, out Vector2Int origin)

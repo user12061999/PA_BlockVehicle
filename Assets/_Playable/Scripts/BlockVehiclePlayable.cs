@@ -22,6 +22,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
 
     [Header("Scene References")]
     [SerializeField] Transform vehicle;
+    [SerializeField] Rigidbody vehicleBody;
     [SerializeField] Collider launchDragBox;
     [SerializeField] Transform trackRoot;
     [SerializeField] LineRenderer launchLine;
@@ -39,6 +40,12 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [SerializeField] float minLaunchSpeed = 8f;
     [SerializeField] float maxLaunchSpeed = 26f;
     [SerializeField] float screenPullToWorld = 0.015f;
+
+    [Header("Performance")]
+    [SerializeField] float dashPerf;
+    [SerializeField] float dirtPerf;
+    [SerializeField] float waterPerf;
+    [SerializeField] float airPerf;
 
     [Header("Run")]
     [SerializeField] float steeringSpeed = 12f;
@@ -92,6 +99,8 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     float headingAngle;
     float pullDistance;
     float speed;
+    float sustainForceWeight;
+    float sustainDuration;
     Vector3 groundUp = Vector3.up;
     bool draggingLaunch;
     bool draggingSteer;
@@ -119,15 +128,18 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         trackRight = SafeDirection(trackRight, Vector3.right);
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
-        if (vehicle.TryGetComponent(out Rigidbody body))
+        if (vehicleBody == null) vehicleBody = vehicle.GetComponent<Rigidbody>();
+        if (vehicleBody == null) vehicleBody = vehicle.GetComponentInParent<Rigidbody>();
+        if (vehicleBody == null) vehicleBody = vehicle.GetComponentInChildren<Rigidbody>();
+        if (vehicleBody != null)
         {
-            body.mass = mass;
-            SetLinearDamping(body, defaultLinearDamping);
-            SetAngularDamping(body, angularDamping);
+            vehicleBody.mass = mass;
+            SetLinearDamping(vehicleBody, defaultLinearDamping);
+            SetAngularDamping(vehicleBody, angularDamping);
             if (disableVehiclePhysics)
             {
-                body.isKinematic = true;
-                body.useGravity = false;
+                vehicleBody.isKinematic = true;
+                vehicleBody.useGravity = false;
             }
         }
         VehicleCollisionRelay relay = vehicle.GetComponent<VehicleCollisionRelay>();
@@ -154,6 +166,11 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         if (state == PlayState.Aim) UpdateAim();
         else if (state == PlayState.Run) UpdateRun();
         UpdateLaunchLine();
+    }
+
+    void FixedUpdate()
+    {
+        ApplySustainDash();
     }
 
     void LateUpdate()
@@ -196,13 +213,12 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
                 return;
             }
 
-            float t = pullMax > 0f ? launchDrag.magnitude / pullMax : 0f;
-            speed = Mathf.Lerp(minLaunchSpeed, maxLaunchSpeed + speedBonus, t);
             runDistance = 0f;
             steerInput = 0f;
             visualSteer = 0f;
             headingAngle = 0f;
             SetState(PlayState.Run);
+            Dash(new Vector3(-launchDrag.x * 0.7f, 0f, -launchDrag.y), 1.5f, 2f);
         }
     }
 
@@ -291,27 +307,98 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
 
     public void AddSpeedBonus(float bonus)
     {
-        speedBonus += Mathf.Max(0f, bonus);
+        dashPerf += Mathf.Max(0f, bonus);
     }
 
     public void ApplyVehiclePartStats(float launchSpeedBonus, float steeringBonus, float frictionReduction)
     {
-        speedBonus += Mathf.Max(0f, launchSpeedBonus);
+        dashPerf += Mathf.Max(0f, launchSpeedBonus);
         steeringSpeed += Mathf.Max(0f, steeringBonus);
         baseFriction = Mathf.Max(0f, baseFriction - Mathf.Max(0f, frictionReduction));
     }
 
     public void RemoveVehiclePartStats(float launchSpeedBonus, float steeringBonus, float frictionReduction)
     {
-        speedBonus = Mathf.Max(0f, speedBonus - Mathf.Max(0f, launchSpeedBonus));
+        dashPerf = Mathf.Max(0f, dashPerf - Mathf.Max(0f, launchSpeedBonus));
         steeringSpeed = Mathf.Max(0f, steeringSpeed - Mathf.Max(0f, steeringBonus));
         baseFriction += Mathf.Max(0f, frictionReduction);
+    }
+
+    public void ApplyVehiclePartStats(VehiclePartKind kind, float partValue, int level)
+    {
+        AddPerformance(kind, Mathf.Max(0f, partValue) * LevelCount(level));
+    }
+
+    public void RemoveVehiclePartStats(VehiclePartKind kind, float partValue, int level)
+    {
+        AddPerformance(kind, -Mathf.Max(0f, partValue) * LevelCount(level));
+    }
+
+    void Dash(Vector3 forward, float forceMultiplier, float duration)
+    {
+        float addForceWeight = baseAddForceWeight * forceMultiplier;
+        addForceWeight += dashPerf * 0.075f;
+        addForceWeight += dirtPerf * 0.065f;
+        addForceWeight += waterPerf * 0.065f;
+        addForceWeight += airPerf * 0.065f;
+        float totalPerf = dashPerf + dirtPerf + waterPerf + airPerf;
+        addForceWeight *= totalPerf == 0f ? 0.5f : 0.8f;
+
+        Vector3 flatForward = new Vector3(forward.x, 0f, forward.z);
+        if (flatForward.sqrMagnitude <= 0.0001f)
+        {
+            speed = 0f;
+            return;
+        }
+
+        if (vehicleBody != null && !vehicleBody.isKinematic)
+        {
+            Vector3 force = flatForward * addForceWeight;
+            Vector3 torque = new Vector3(flatForward.z, -flatForward.x, 0f) * addForceWeight;
+            vehicleBody.AddForce(force, ForceMode.Impulse);
+            vehicleBody.AddTorque(torque, ForceMode.Impulse);
+            SustainDash(addForceWeight, duration);
+        }
+
+        Vector3 direction = flatForward.normalized;
+        headingAngle = Mathf.Atan2(Vector3.Dot(direction, trackRight), Vector3.Dot(direction, trackForward)) * Mathf.Rad2Deg;
+        speed = flatForward.magnitude * addForceWeight;
+    }
+
+    void SustainDash(float addForceWeight, float duration)
+    {
+        sustainForceWeight = addForceWeight;
+        sustainDuration += duration;
+    }
+
+    void ApplySustainDash()
+    {
+        if (sustainDuration <= 0f || vehicleBody == null || vehicleBody.isKinematic) return;
+        sustainDuration -= Time.fixedDeltaTime;
+        Vector3 forward = vehicle.forward;
+        Vector3 force = new Vector3(forward.x, 0f, forward.z) * sustainForceWeight;
+        Vector3 torque = new Vector3(forward.z, -forward.x, 0f) * sustainForceWeight;
+        vehicleBody.AddForce(force, ForceMode.Force);
+        vehicleBody.AddTorque(torque, ForceMode.Force);
+    }
+
+    void AddPerformance(VehiclePartKind kind, float value)
+    {
+        if (kind == VehiclePartKind.Wheel) dashPerf = Mathf.Max(0f, dashPerf + value);
+        else if (kind == VehiclePartKind.Caterpillar) dirtPerf = Mathf.Max(0f, dirtPerf + value);
+        else if (kind == VehiclePartKind.Chimney) waterPerf = Mathf.Max(0f, waterPerf + value);
+        else if (kind == VehiclePartKind.Wing) airPerf = Mathf.Max(0f, airPerf + value);
+    }
+
+    static int LevelCount(int level)
+    {
+        return 1 << Mathf.Clamp(level, 0, 30);
     }
 
     public void OnVehicleObstacleHit(GameObject obstacle)
     {
         if (state != PlayState.Run) return;
-        if (requireObstacleTag && (obstacle == null || !obstacle.CompareTag(obstacleTag))) return;
+        if (requireObstacleTag && (obstacle == null || obstacle.tag != obstacleTag)) return;
         speed = Mathf.Max(0f, speed - obstacleSpeedLoss);
     }
 
@@ -347,6 +434,8 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         pullDistance = 0f;
         runDistance = 0f;
         speed = 0f;
+        sustainForceWeight = 0f;
+        sustainDuration = 0f;
         steerInput = 0f;
         visualSteer = 0f;
         headingAngle = 0f;
