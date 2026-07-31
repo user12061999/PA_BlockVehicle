@@ -23,6 +23,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [Header("Scene References")]
     [SerializeField] Transform vehicle;
     [SerializeField] Rigidbody vehicleBody;
+    [SerializeField] Transform carView;
     [SerializeField] Collider launchDragBox;
     [SerializeField] Transform trackRoot;
     [SerializeField] LineRenderer launchLine;
@@ -118,6 +119,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         }
 
         if (followCamera == null) followCamera = Camera.main;
+        if (carView == null) carView = vehicle;
         if (launchDragBox == null) launchDragBox = vehicle.GetComponentInChildren<BoxCollider>();
         if (trackRoot != null)
         {
@@ -375,7 +377,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     {
         if (sustainDuration <= 0f || vehicleBody == null || vehicleBody.isKinematic) return;
         sustainDuration -= Time.fixedDeltaTime;
-        Vector3 forward = vehicle.forward;
+        Vector3 forward = carView != null ? carView.forward : vehicle.forward;
         Vector3 force = new Vector3(forward.x, 0f, forward.z) * sustainForceWeight;
         Vector3 torque = new Vector3(forward.z, -forward.x, 0f) * sustainForceWeight;
         vehicleBody.AddForce(force, ForceMode.Force);
