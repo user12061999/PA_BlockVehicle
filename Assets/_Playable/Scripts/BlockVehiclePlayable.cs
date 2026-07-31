@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,6 +19,14 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         Aim,
         Run,
         Result
+    }
+
+    enum TerrainKind
+    {
+        Default,
+        Dirt,
+        Water,
+        Air
     }
 
     [Header("Scene References")]
@@ -54,6 +63,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [SerializeField] float defaultLinearDamping = 0.6f;
     [SerializeField] float angularDamping = 0.01f;
     [SerializeField] float mass = 5f;
+    [SerializeField] float gravityWeight = 1.5f;
     [SerializeField] float baseFriction = 1f;
     [SerializeField] float obstacleSpeedLoss = 8f;
     [SerializeField] bool requireObstacleTag = true;
@@ -102,12 +112,15 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     float speed;
     float sustainForceWeight;
     float sustainDuration;
+    float customGravityWeight = 3f;
     Vector3 groundUp = Vector3.up;
+    TerrainKind currentTerrain;
     bool draggingLaunch;
     bool draggingSteer;
     bool gameEnded;
     bool hasLaunchLineEndpoints;
     int pendingCoins;
+    readonly List<Collider> terrainTriggers = new List<Collider>();
 
     void Awake()
     {
@@ -172,7 +185,10 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
 
     void FixedUpdate()
     {
+        ApplyTerrainDamping();
+        ApplyCustomGravity();
         ApplySustainDash();
+        ApplySlowBrake();
     }
 
     void LateUpdate()
@@ -384,6 +400,53 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         vehicleBody.AddTorque(torque, ForceMode.Force);
     }
 
+    void ApplyTerrainDamping()
+    {
+        if (vehicleBody == null) return;
+
+        float linearDamping = defaultLinearDamping;
+        float terrainPerformance = TerrainPerformance();
+
+        if (currentTerrain == TerrainKind.Dirt)
+        {
+            linearDamping += 0.05f;
+            terrainPerformance *= 1.5f;
+        }
+        else if (currentTerrain == TerrainKind.Water)
+        {
+            linearDamping += 0.075f;
+            terrainPerformance *= 2.5f;
+        }
+        else if (currentTerrain == TerrainKind.Air)
+        {
+            linearDamping = 0.01f;
+        }
+
+        SetLinearDamping(vehicleBody, Mathf.Max(linearDamping - terrainPerformance, 0.01f));
+    }
+
+    void ApplyCustomGravity()
+    {
+        if (vehicleBody == null || vehicleBody.isKinematic) return;
+        customGravityWeight = currentTerrain == TerrainKind.Air ? 3f - airPerf * 0.75f : 3f;
+        vehicleBody.AddForce(Physics.gravity * gravityWeight * customGravityWeight, ForceMode.Acceleration);
+    }
+
+    void ApplySlowBrake()
+    {
+        if (vehicleBody == null || vehicleBody.isKinematic) return;
+        Vector3 velocity = BodyVelocity;
+        if (velocity.sqrMagnitude < 7f * 7f) BodyVelocity = Vector3.MoveTowards(velocity, Vector3.zero, 10f * Time.fixedDeltaTime);
+    }
+
+    float TerrainPerformance()
+    {
+        if (currentTerrain == TerrainKind.Dirt) return dirtPerf;
+        if (currentTerrain == TerrainKind.Water) return waterPerf;
+        if (currentTerrain == TerrainKind.Air) return airPerf;
+        return 0f;
+    }
+
     void AddPerformance(VehiclePartKind kind, float value)
     {
         if (kind == VehiclePartKind.Wheel) dashPerf = Mathf.Max(0f, dashPerf + value);
@@ -400,8 +463,23 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     public void OnVehicleObstacleHit(GameObject obstacle)
     {
         if (state != PlayState.Run) return;
+        if (obstacle != null && IsTerrainTag(obstacle.tag)) return;
         if (requireObstacleTag && (obstacle == null || obstacle.tag != obstacleTag)) return;
         speed = Mathf.Max(0f, speed - obstacleSpeedLoss);
+    }
+
+    public void OnVehicleTriggerEnter(Collider other)
+    {
+        if (other == null || !IsTerrainTag(other.tag)) return;
+        terrainTriggers.Remove(other);
+        terrainTriggers.Add(other);
+        currentTerrain = TerrainFromTag(other.tag);
+    }
+
+    public void OnVehicleTriggerExit(Collider other)
+    {
+        if (other == null || !terrainTriggers.Remove(other)) return;
+        currentTerrain = terrainTriggers.Count > 0 ? TerrainFromTag(terrainTriggers[terrainTriggers.Count - 1].tag) : TerrainKind.Default;
     }
 
     public void GetCoinAndReturnToBuild()
@@ -438,6 +516,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         speed = 0f;
         sustainForceWeight = 0f;
         sustainDuration = 0f;
+        customGravityWeight = 3f;
         steerInput = 0f;
         visualSteer = 0f;
         headingAngle = 0f;
@@ -493,6 +572,39 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     bool PointerInsideAimUi(Vector2 screenPosition)
     {
         return aimUiBlocker != null && RectTransformUtility.RectangleContainsScreenPoint(aimUiBlocker, screenPosition);
+    }
+
+    bool IsTerrainTag(string tagName)
+    {
+        return tagName == "Default" || tagName == "Dirt" || tagName == "Water" || tagName == "Air";
+    }
+
+    TerrainKind TerrainFromTag(string tagName)
+    {
+        if (tagName == "Dirt") return TerrainKind.Dirt;
+        if (tagName == "Water") return TerrainKind.Water;
+        if (tagName == "Air") return TerrainKind.Air;
+        return TerrainKind.Default;
+    }
+
+    Vector3 BodyVelocity
+    {
+        get
+        {
+#if UNITY_6000_0_OR_NEWER
+            return vehicleBody.linearVelocity;
+#else
+            return vehicleBody.velocity;
+#endif
+        }
+        set
+        {
+#if UNITY_6000_0_OR_NEWER
+            vehicleBody.linearVelocity = value;
+#else
+            vehicleBody.velocity = value;
+#endif
+        }
     }
 
     static void SetLinearDamping(Rigidbody body, float value)
@@ -594,6 +706,13 @@ public sealed class VehicleCollisionRelay : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (owner != null) owner.OnVehicleObstacleHit(other.gameObject);
+        if (owner == null) return;
+        owner.OnVehicleTriggerEnter(other);
+        owner.OnVehicleObstacleHit(other.gameObject);
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (owner != null) owner.OnVehicleTriggerExit(other);
     }
 }
