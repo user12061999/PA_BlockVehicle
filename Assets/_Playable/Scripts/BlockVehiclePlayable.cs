@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [System.Serializable]
 public sealed class RoadFrictionZone
@@ -47,6 +48,9 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [Header("Rewards")]
     [SerializeField] VehiclePartGridUi partUi;
     [SerializeField] float coinsPerDistance = 1f;
+    [SerializeField] GameObject resultUi;
+    [SerializeField] Text earnedCoinText;
+    [SerializeField] Button getCoinButton;
 
     [Header("Steer Visual")]
     [SerializeField] float steerSensitivity = 10f;
@@ -85,6 +89,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     bool draggingSteer;
     bool gameEnded;
     bool hasLaunchLineEndpoints;
+    int pendingCoins;
 
     void Awake()
     {
@@ -116,7 +121,18 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         relay.Initialize(this);
         if (followCamera != null) cameraOffset = followCamera.transform.position - vehicle.position;
         CacheLaunchLineEndpoints();
+        if (resultUi != null) resultUi.SetActive(false);
+        if (getCoinButton != null)
+        {
+            getCoinButton.onClick.RemoveListener(GetCoinAndReturnToBuild);
+            getCoinButton.onClick.AddListener(GetCoinAndReturnToBuild);
+        }
         SetState(PlayState.Aim);
+    }
+
+    void OnDestroy()
+    {
+        if (getCoinButton != null) getCoinButton.onClick.RemoveListener(GetCoinAndReturnToBuild);
     }
 
     void Update()
@@ -274,6 +290,16 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         speed = Mathf.Max(0f, speed - obstacleSpeedLoss);
     }
 
+    public void GetCoinAndReturnToBuild()
+    {
+        if (partUi != null) partUi.AddCoins(pendingCoins);
+        pendingCoins = 0;
+        if (resultUi != null) resultUi.SetActive(false);
+        ResetVehicleToStart();
+        gameEnded = false;
+        SetState(PlayState.Aim);
+    }
+
     void SetState(PlayState next)
     {
         state = next;
@@ -281,9 +307,26 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         if (next == PlayState.Result && !gameEnded)
         {
             gameEnded = true;
-            if (partUi != null) partUi.AddCoins(Mathf.FloorToInt(Mathf.Max(0f, runDistance) * Mathf.Max(0f, coinsPerDistance)));
+            pendingCoins = Mathf.FloorToInt(Mathf.Max(0f, runDistance) * Mathf.Max(0f, coinsPerDistance));
+            if (earnedCoinText != null) earnedCoinText.text = pendingCoins.ToString();
+            if (resultUi != null) resultUi.SetActive(true);
             PlayworksBridge.GameEnded();
         }
+    }
+
+    void ResetVehicleToStart()
+    {
+        draggingLaunch = false;
+        draggingSteer = false;
+        pullDistance = 0f;
+        runDistance = 0f;
+        speed = 0f;
+        steerInput = 0f;
+        visualSteer = 0f;
+        headingAngle = 0f;
+        groundUp = Vector3.up;
+        vehicle.SetPositionAndRotation(startPosition, startRotation);
+        if (followCamera != null) followCamera.transform.position = startPosition + cameraOffset;
     }
 
     void UpdateLaunchLine()
