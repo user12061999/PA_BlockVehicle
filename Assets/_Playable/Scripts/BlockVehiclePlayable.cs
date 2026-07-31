@@ -189,6 +189,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         ApplyCustomGravity();
         ApplySustainDash();
         ApplySlowBrake();
+        ApplySlopeAcceleration();
     }
 
     void LateUpdate()
@@ -437,6 +438,21 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         if (vehicleBody == null || vehicleBody.isKinematic) return;
         Vector3 velocity = BodyVelocity;
         if (velocity.sqrMagnitude < 7f * 7f) BodyVelocity = Vector3.MoveTowards(velocity, Vector3.zero, 10f * Time.fixedDeltaTime);
+    }
+
+    void ApplySlopeAcceleration()
+    {
+        if (vehicleBody == null || vehicleBody.isKinematic) return;
+        Vector3 velocity = BodyVelocity;
+        if (velocity.sqrMagnitude < 0.0001f) return;
+
+        Vector3 velocityDir = velocity.normalized;
+        float slopeAngle = Vector3.Angle(Vector3.up, velocityDir) - 90f;
+        if (slopeAngle <= 0f) return;
+
+        float slopeAcceleration = currentTerrain == TerrainKind.Air ? 5f : 15f;
+        float acceleration = Mathf.Lerp(0f, slopeAcceleration, slopeAngle / 90f);
+        vehicleBody.AddForce(velocityDir * acceleration, ForceMode.Force);
     }
 
     float TerrainPerformance()
