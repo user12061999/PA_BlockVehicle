@@ -31,7 +31,11 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [SerializeField] RectTransform aimUiBlocker;
 
     [Header("Launch")]
-    [SerializeField] float maxPullDistance = 4f;
+    [SerializeField] float pullMin = 50f;
+    [SerializeField] float pullMax = 600f;
+    [SerializeField] Vector2 pullClampX = new Vector2(-350f, 350f);
+    [SerializeField] Vector2 pullClampY = new Vector2(-600f, 0f);
+    [SerializeField] float baseAddForceWeight = 0.45f;
     [SerializeField] float minLaunchSpeed = 8f;
     [SerializeField] float maxLaunchSpeed = 26f;
     [SerializeField] float screenPullToWorld = 0.015f;
@@ -39,6 +43,9 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     [Header("Run")]
     [SerializeField] float steeringSpeed = 12f;
     [SerializeField] float goalDistance = 80f;
+    [SerializeField] float defaultLinearDamping = 0.6f;
+    [SerializeField] float angularDamping = 0.01f;
+    [SerializeField] float mass = 5f;
     [SerializeField] float baseFriction = 1f;
     [SerializeField] float obstacleSpeedLoss = 8f;
     [SerializeField] bool requireObstacleTag = true;
@@ -77,6 +84,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     Vector3 launchLineEndPoint;
     Vector2 dragStartScreen;
     Vector2 runDragStart;
+    Vector2 launchDrag;
     float runDistance;
     float speedBonus;
     float steerInput;
@@ -111,10 +119,16 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         trackRight = SafeDirection(trackRight, Vector3.right);
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
-        if (disableVehiclePhysics && vehicle.TryGetComponent(out Rigidbody body))
+        if (vehicle.TryGetComponent(out Rigidbody body))
         {
-            body.isKinematic = true;
-            body.useGravity = false;
+            body.mass = mass;
+            SetLinearDamping(body, defaultLinearDamping);
+            SetAngularDamping(body, angularDamping);
+            if (disableVehiclePhysics)
+            {
+                body.isKinematic = true;
+                body.useGravity = false;
+            }
         }
         VehicleCollisionRelay relay = vehicle.GetComponent<VehicleCollisionRelay>();
         if (relay == null) relay = vehicle.gameObject.AddComponent<VehicleCollisionRelay>();
@@ -156,6 +170,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
             if (PointerOverUi() || PointerInsideAimUi(pointer)) return;
             if (!CanStartLaunchDrag(pointer)) return;
             draggingLaunch = true;
+            launchDrag = Vector2.zero;
             dragStartScreen = pointer;
         }
 
@@ -163,15 +178,25 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
 
         if (PointerHeld(out pointer))
         {
-            pullDistance = Mathf.Clamp((dragStartScreen.y - pointer.y) * screenPullToWorld, 0f, maxPullDistance);
-            vehicle.position = startPosition - trackForward * pullDistance;
+            launchDrag = ClampLaunchDrag(pointer - dragStartScreen);
+            pullDistance = -launchDrag.y * screenPullToWorld;
+            vehicle.position = startPosition + (trackRight * launchDrag.x + trackForward * launchDrag.y) * screenPullToWorld;
             vehicle.rotation = startRotation;
         }
 
         if (PointerUp(out _))
         {
             draggingLaunch = false;
-            float t = maxPullDistance > 0f ? pullDistance / maxPullDistance : 0f;
+            launchDrag = ClampLaunchDrag(launchDrag);
+            if (launchDrag.y > -pullMin && launchDrag.magnitude < pullMin)
+            {
+                launchDrag = Vector2.zero;
+                pullDistance = 0f;
+                vehicle.SetPositionAndRotation(startPosition, startRotation);
+                return;
+            }
+
+            float t = pullMax > 0f ? launchDrag.magnitude / pullMax : 0f;
             speed = Mathf.Lerp(minLaunchSpeed, maxLaunchSpeed + speedBonus, t);
             runDistance = 0f;
             steerInput = 0f;
@@ -318,6 +343,7 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     {
         draggingLaunch = false;
         draggingSteer = false;
+        launchDrag = Vector2.zero;
         pullDistance = 0f;
         runDistance = 0f;
         speed = 0f;
@@ -344,6 +370,14 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
         launchLine.SetPosition(3, launchLineEndPoint);
     }
 
+    Vector2 ClampLaunchDrag(Vector2 drag)
+    {
+        drag.x = Mathf.Clamp(drag.x, pullClampX.x, pullClampX.y);
+        drag.y = Mathf.Clamp(drag.y, pullClampY.x, pullClampY.y);
+        if (drag.magnitude > pullMax) drag = drag.normalized * pullMax;
+        return drag;
+    }
+
     void CacheLaunchLineEndpoints()
     {
         if (launchLine == null || launchLine.positionCount <= 0) return;
@@ -368,6 +402,24 @@ public sealed class BlockVehiclePlayable : MonoBehaviour
     bool PointerInsideAimUi(Vector2 screenPosition)
     {
         return aimUiBlocker != null && RectTransformUtility.RectangleContainsScreenPoint(aimUiBlocker, screenPosition);
+    }
+
+    static void SetLinearDamping(Rigidbody body, float value)
+    {
+#if UNITY_6000_0_OR_NEWER
+        body.linearDamping = value;
+#else
+        body.drag = value;
+#endif
+    }
+
+    static void SetAngularDamping(Rigidbody body, float value)
+    {
+#if UNITY_6000_0_OR_NEWER
+        body.angularDamping = value;
+#else
+        body.angularDrag = value;
+#endif
     }
 
     static Vector3 SafeDirection(Vector3 value, Vector3 fallback)
