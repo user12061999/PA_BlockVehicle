@@ -18,13 +18,15 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float maxSpeed = 30f;
     [SerializeField] private float friction = 8f;
     [SerializeField] private float steerSpeed = 14f;
-    [SerializeField] private float finishDistance = 90f;
+    [SerializeField] private float turnSpeed = 110f;
     [SerializeField] private LayerMask groundMask = ~0;
     [SerializeField] private float groundRayHeight = 8f;
     [SerializeField] private float groundOffset = 0.08f;
 
     Transform vehicle;
     InGamePuzzleUiView puzzleUi;
+    InGameResultUiView resultUi;
+    GameObject buildUi;
     Camera followCamera;
     Vector3 startPosition;
     Quaternion startRotation;
@@ -49,6 +51,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         vehicle = found.transform;
         puzzleUi = FindAnyObjectByType<InGamePuzzleUiView>();
+        resultUi = FindAnyObjectByType<InGameResultUiView>(FindObjectsInactive.Include);
+        if (resultUi != null) resultUi.SetClaimAction(ResetRun);
+        buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
         followCamera = Camera.main;
@@ -66,7 +71,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         foreach (Button button in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
-            if (button.name.Contains("Continue")) button.onClick.AddListener(PlayworksBridge.InstallFullGame);
+            if (button.name.Contains("Continue") && (resultUi == null || !button.transform.IsChildOf(resultUi.transform))) button.onClick.AddListener(PlayworksBridge.InstallFullGame);
             if (button.name.Contains("Start")) button.onClick.AddListener(HideBuildUi);
         }
     }
@@ -112,29 +117,57 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void UpdateRun()
     {
-        if (PointerHeld(out Vector2 pointer)) steer = Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f);
-        else steer = Mathf.MoveTowards(steer, 0f, Time.deltaTime * 4f);
+        float targetSteer = 0f;
+        if (PointerHeld(out Vector2 pointer)) targetSteer = Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f);
+        steer = Mathf.MoveTowards(steer, targetSteer, Time.deltaTime * 4f);
 
         speed = Mathf.MoveTowards(speed, 0f, friction * Time.deltaTime);
-        Vector3 forward = startRotation * Vector3.forward;
-        Vector3 right = startRotation * Vector3.right;
-        Vector3 move = (forward + right * steer * 0.35f).normalized * speed * Time.deltaTime;
+        Vector3 forward = vehicle.forward;
+        if (Mathf.Abs(steer) > 0.001f) forward = Quaternion.AngleAxis(steer * turnSpeed * Time.deltaTime, vehicle.up) * forward;
+        Vector3 move = forward.normalized * speed * Time.deltaTime;
         vehicle.position += move;
         SnapToGround(move.sqrMagnitude > 0f ? move : forward, false);
-        distance += Mathf.Max(0f, Vector3.Dot(move, forward));
+        distance += move.magnitude;
 
-        float targetDistance = finishDistance * (puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier);
-        if (distance >= targetDistance || speed <= 0f)
+        if (speed <= 0f)
         {
-            state = State.Done;
-            PlayworksBridge.GameEnded();
+            FinishRun();
         }
     }
 
-    static void HideBuildUi()
+    void FinishRun()
     {
-        GameObject puzzleUi = GameObject.Find("PuzzleUi");
-        if (puzzleUi != null) puzzleUi.SetActive(false);
+        if (state == State.Done) return;
+
+        state = State.Done;
+        if (resultUi != null) resultUi.Open((int)distance);
+        PlayworksBridge.GameEnded();
+    }
+
+    void ResetRun()
+    {
+        pull = 0f;
+        speed = 0f;
+        distance = 0f;
+        steer = 0f;
+        dragging = false;
+        state = State.Aim;
+        vehicle.SetPositionAndRotation(startPosition, startRotation);
+        SnapToGround(startRotation * Vector3.forward, true);
+        if (followCamera != null) followCamera.transform.position = vehicle.position + cameraOffset;
+        ShowBuildUi();
+    }
+
+    void HideBuildUi()
+    {
+        if (puzzleUi != null) puzzleUi.SetOpen(false);
+        else if (buildUi != null) buildUi.SetActive(false);
+    }
+
+    void ShowBuildUi()
+    {
+        if (puzzleUi != null) puzzleUi.SetOpen(true, true);
+        else if (buildUi != null) buildUi.SetActive(true);
     }
 
     static bool PointerDown(out Vector2 position)

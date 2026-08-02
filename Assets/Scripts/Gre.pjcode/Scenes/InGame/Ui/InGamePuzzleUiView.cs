@@ -77,7 +77,7 @@ namespace Gre.pjcode.Scenes.InGame
                 addForceWeight += _runTerrainPerformances[(int)TerrainType.Water] * 0.065f;
                 addForceWeight += _runTerrainPerformances[(int)TerrainType.Air] * 0.065f;
                 addForceWeight *= GetRunPerformanceTotal() == 0f ? 0.5f : 0.8f;
-                return addForceWeight / 0.5f;
+                return Mathf.Clamp(addForceWeight / 0.5f + GetRunPerformanceTotal() * 2f, 1f, 3f);
             }
         }
 
@@ -612,6 +612,7 @@ namespace Gre.pjcode.Scenes.InGame
         Vector2 _homePosition;
         Transform _startParent;
         Vector2 _startPosition;
+        Vector2 _dragScreenOffset;
         float _cellSize;
         Sprite _blockSprite;
         Color _color;
@@ -655,6 +656,9 @@ namespace Gre.pjcode.Scenes.InGame
             _startParent = transform.parent;
             _startPosition = _rect.anchoredPosition;
             if (_dragLayer != null) _rect.SetParent(_dragLayer, true);
+            float scale = _canvas == null ? 1f : _canvas.scaleFactor;
+            _dragScreenOffset = Vector2.up * _cellSize * scale;
+            _rect.anchoredPosition += Vector2.up * _cellSize;
             transform.SetAsLastSibling();
         }
 
@@ -666,7 +670,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            _owner.DropPart(this, eventData.position);
+            _owner.DropPart(this, eventData.position + _dragScreenOffset);
         }
 
         public void PlaceOn(RectTransform parent, Vector2 anchoredPosition, int cellIndex)
