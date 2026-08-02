@@ -18,12 +18,7 @@ public static class PlayworksBridge
     {
         Type type = Type.GetType(typeName + ", Unity.Luna") ?? Type.GetType(typeName);
         MethodInfo method = type != null ? type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static) : null;
-        if (method != null)
-        {
-            method.Invoke(null, null);
-            return;
-        }
-
-        Debug.Log("Playworks API not available in editor: " + typeName + "." + methodName);
+        if (method != null) method.Invoke(null, null);
+        else Debug.Log("Playworks API not available in editor: " + typeName + "." + methodName);
     }
 }
