@@ -16,7 +16,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             _boardSize = boardSize;
             _cellSize = cellSize;
-            _rectTransform ??= transform as RectTransform;
+            if (_rectTransform == null) _rectTransform = transform as RectTransform;
         }
 
         public Vector2 GetPositionOnBoard(Vector2Int cellPos)

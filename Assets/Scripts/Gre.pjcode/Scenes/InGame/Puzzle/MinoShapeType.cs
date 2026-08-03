@@ -29,7 +29,7 @@ namespace Gre.pjcode.Scenes.InGame
 
     public static class MinoShapeTypeExtensions
     {
-        static readonly Dictionary<MinoShapeType, Vector2Int[]> Patterns = new()
+        static readonly Dictionary<MinoShapeType, Vector2Int[]> Patterns = new Dictionary<MinoShapeType, Vector2Int[]>()
         {
             { MinoShapeType.A, new[] { Vector2Int.zero, new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(2, 0) } },
             { MinoShapeType.B, new[] { Vector2Int.zero, new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(1, 1) } },
@@ -53,7 +53,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         public static Vector2Int[] GetBlockPattern(this MinoShapeType type, int rotate)
         {
-            if (!Patterns.TryGetValue(type, out Vector2Int[] src)) return Array.Empty<Vector2Int>();
+            if (!Patterns.TryGetValue(type, out Vector2Int[] src)) return new Vector2Int[0];
 
             Vector2Int[] result = new Vector2Int[src.Length];
             for (int i = 0; i < src.Length; i++)

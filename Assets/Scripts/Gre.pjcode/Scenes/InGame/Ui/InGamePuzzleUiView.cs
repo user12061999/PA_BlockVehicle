@@ -1,5 +1,6 @@
 using Gre.UI;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -8,6 +9,12 @@ namespace Gre.pjcode.Scenes.InGame
 {
     public sealed class InGamePuzzleUiView : MonoBehaviour
     {
+        enum BuyPriceMode
+        {
+            PriceList,
+            Exponential
+        }
+
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private Board _board;
         [SerializeField] private Object _minoPrefab;
@@ -40,6 +47,12 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private GameObject _bonusBoxOpenButtonDefaultLayer;
         [SerializeField] private GameObject _bonusBoxOpenButtonFreeLayer;
         [SerializeField] private GameObject _bonusBoxOpenButtonTapGuide;
+        [SerializeField] private TMP_Text _currentGoldText;
+        [SerializeField] private TMP_Text _buyPartPriceText;
+        [SerializeField] private BuyPriceMode _buyPriceMode = BuyPriceMode.PriceList;
+        [SerializeField] private int[] _buyPriceList = new[] { 30, 130, 150, 200, 280, 400, 500, 980, 1120, 1250, 1500 };
+        [SerializeField] private int _buyPriceBase = 30;
+        [SerializeField] private float _buyPriceMultiplier = 1.5f;
         [SerializeField] private PartDataAsset _partDataAsset;
         [SerializeField] private int _startingGold = 10000;
         [SerializeField] private Vector2Int _runtimeGridSize = new Vector2Int(4, 4);
@@ -52,15 +65,16 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private Color _legendPartColor = new Color(1f, 0.82f, 0.12f, 1f);
 
         static readonly int[] RuntimePartIds = { 9, 0, 2, 1 };
-        readonly List<RectTransform> _runtimeCells = new();
-        readonly List<RuntimePuzzlePartIcon> _runtimeParts = new();
-        readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new();
-        readonly List<RuntimePuzzlePartIcon> _placedParts = new();
+        readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
+        readonly List<RuntimePuzzlePartIcon> _runtimeParts = new List<RuntimePuzzlePartIcon>();
+        readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
+        readonly List<RuntimePuzzlePartIcon> _placedParts = new List<RuntimePuzzlePartIcon>();
         readonly float[] _runTerrainPerformances = new float[(int)TerrainType.Max];
         CarView _carView;
         int _gold;
         int _buyPrice = 30;
         int _buyCursor;
+        int _buyCount;
 
         public Board Board => _board;
         public Sprite BoostIconSprite => _boostIcon == null ? null : _boostIcon.sprite;
@@ -83,14 +97,14 @@ namespace Gre.pjcode.Scenes.InGame
 
         void Awake()
         {
-            _canvasGroup ??= GetComponent<CanvasGroup>();
-            _buyButton ??= FindButton("BuyButton");
-            _playButton ??= FindButton("StartButton");
-            _autoMergeButton ??= FindButton("AutoMergeButton");
-            _boostEvolveButton ??= FindButton("UpgradeButton");
-            _bonusBoxOpenButton ??= FindButton("OpenButton");
-            _partDataAsset ??= Resources.Load<PartDataAsset>("dat_part");
-            _carView = FindAnyObjectByType<CarView>();
+            if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
+            if (_buyButton == null) _buyButton = FindButton("BuyButton");
+            if (_playButton == null) _playButton = FindButton("StartButton");
+            if (_autoMergeButton == null) _autoMergeButton = FindButton("AutoMergeButton");
+            if (_boostEvolveButton == null) _boostEvolveButton = FindButton("UpgradeButton");
+            if (_bonusBoxOpenButton == null) _bonusBoxOpenButton = FindButton("OpenButton");
+            if (_partDataAsset == null) _partDataAsset = Resources.Load<PartDataAsset>("dat_part");
+            _carView = FindObjectOfType<CarView>();
             if (_performanceValueTexts == null || _performanceValueTexts.Length == 0)
             {
                 _performanceValueTexts = new[]
@@ -135,6 +149,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void SetBuyPrice(int price)
         {
+            if (_buyPartPriceText != null) _buyPartPriceText.text = price.ToString();
             if (_buyButton == null) return;
             _buyButton.SetText(price.ToString());
             _buyButton.SetState(_gold >= price ? ButtonState.Enable : ButtonState.Disable);
@@ -209,7 +224,7 @@ namespace Gre.pjcode.Scenes.InGame
             foreach (RuntimePuzzlePartIcon icon in _placedParts)
             {
                 if (icon == null || !_partDataAsset.TryGetPartData(icon.PartId, out PartData partData)) continue;
-                if (partData?.PerformanceData == null) continue;
+                if (partData == null || partData.PerformanceData == null) continue;
                 int index = (int)partData.PerformanceData.TerrainType;
                 int count = (int)Mathf.Pow(2, icon.Level - 1);
                 int levelBonus = (icon.Level - 1) * 5;
@@ -233,6 +248,7 @@ namespace Gre.pjcode.Scenes.InGame
             _occupiedCells.Clear();
             _placedParts.Clear();
             _buyCursor = 0;
+            _buyCount = 0;
             float cellSize = GetRuntimeCellSize();
             if (_board != null) _board.Setup(_runtimeGridSize, cellSize);
 
@@ -263,6 +279,7 @@ namespace Gre.pjcode.Scenes.InGame
             SetGold(_gold);
             CreateTrayPart(RuntimePartIds[_buyCursor % RuntimePartIds.Length], GetRuntimeCellSize());
             _buyCursor++;
+            _buyCount++;
             UpdateBuyPrice();
         }
 
@@ -275,7 +292,7 @@ namespace Gre.pjcode.Scenes.InGame
             RectTransform listItem = CreateListItem($"PartSlot_{partId}", cellSize);
             RectTransform icon = CreateMinoIcon($"Part_{partId}", listItem, cellSize);
             RuntimePuzzlePartIcon drag = icon.gameObject.AddComponent<RuntimePuzzlePartIcon>();
-            drag.Setup(this, partId, pattern, cellSize, partData.GetMinoSprite(1), partData.GetBlockSprite(1), _runtimeBlockColor, _minoDragLayer, _boardGuidePrefab);
+            drag.Setup(this, partId, pattern, cellSize, partData.GetMinoSprite(1), partData.GetBlockSprite(1), _runtimeBlockColor, _minoDragLayer, _boardGuidePrefab, partData.Rotate, partData.MinoSpriteScale);
             _runtimeParts.Add(drag);
         }
 
@@ -330,7 +347,7 @@ namespace Gre.pjcode.Scenes.InGame
             Destroy(source.gameObject);
             if (_carView != null && !string.IsNullOrEmpty(target.LinkedPartUniqueId)) _carView.DetachPart(target.LinkedPartUniqueId);
 
-            target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1));
+            target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1), GetMinoSpriteScale(target.PartId));
             AttachCarPart(target);
             UpdateBuyPrice();
             UpdatePerformanceFromPlacedParts();
@@ -353,7 +370,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (icon == null || !icon.IsPlaced) return;
 
-            List<int> removeCells = new();
+            List<int> removeCells = new List<int>();
             foreach (KeyValuePair<int, RuntimePuzzlePartIcon> pair in _occupiedCells)
             {
                 if (pair.Value == icon) removeCells.Add(pair.Key);
@@ -370,6 +387,7 @@ namespace Gre.pjcode.Scenes.InGame
         void SetGold(int value)
         {
             _gold = value;
+            if (_currentGoldText != null) _currentGoldText.text = _gold.ToString();
             Canvas canvas = GetComponentInParent<Canvas>();
             CustomText[] texts = canvas == null ? GetComponentsInChildren<CustomText>(true) : canvas.GetComponentsInChildren<CustomText>(true);
             foreach (CustomText text in texts)
@@ -380,29 +398,20 @@ namespace Gre.pjcode.Scenes.InGame
 
         void UpdateBuyPrice()
         {
-            int partsCount = 0;
-            foreach (RuntimePuzzlePartIcon icon in _runtimeParts)
-            {
-                if (icon != null) partsCount += (int)Mathf.Pow(2, icon.Level - 1);
-            }
-
-            _buyPrice = GetBuyPrice(partsCount);
+            _buyPrice = GetBuyPrice(_buyCount);
             SetBuyPrice(_buyPrice);
         }
 
-        static int GetBuyPrice(int partsCount)
+        int GetBuyPrice(int buyCount)
         {
-            if (partsCount == 0) return 30;
-            if (partsCount <= 1) return 130;
-            if (partsCount <= 2) return 150;
-            if (partsCount <= 3) return 200;
-            if (partsCount <= 7) return 280;
-            if (partsCount <= 9) return 400;
-            if (partsCount <= 11) return 500;
-            if (partsCount <= 14) return 980;
-            if (partsCount <= 16) return 1120;
-            if (partsCount <= 17) return 1250;
-            return 1500;
+            int index = Mathf.Max(0, buyCount);
+            if (_buyPriceMode == BuyPriceMode.PriceList && _buyPriceList != null && _buyPriceList.Length > 0)
+            {
+                return Mathf.Max(0, _buyPriceList[Mathf.Min(index, _buyPriceList.Length - 1)]);
+            }
+
+            float multiplier = Mathf.Max(1f, _buyPriceMultiplier);
+            return Mathf.Max(0, Mathf.RoundToInt(_buyPriceBase * Mathf.Pow(multiplier, index)));
         }
 
         float GetRunPerformanceTotal()
@@ -451,6 +460,12 @@ namespace Gre.pjcode.Scenes.InGame
         Sprite GetBlockSprite(int partId, int level)
         {
             return _partDataAsset.TryGetPartData(partId, out PartData partData) ? partData.GetBlockSprite(level) : null;
+        }
+
+        float GetMinoSpriteScale(int partId)
+        {
+            PartData partData;
+            return _partDataAsset.TryGetPartData(partId, out partData) ? partData.MinoSpriteScale : 1f;
         }
 
         int GetCellIndex(Vector2 screenPosition)
@@ -614,6 +629,8 @@ namespace Gre.pjcode.Scenes.InGame
         Vector2 _startPosition;
         Vector2 _dragScreenOffset;
         float _cellSize;
+        int _spriteRotate;
+        float _spriteScale = 1f;
         Sprite _blockSprite;
         Color _color;
         CustomImage _blockPrefab;
@@ -634,7 +651,9 @@ namespace Gre.pjcode.Scenes.InGame
             Sprite blockSprite,
             Color color,
             RectTransform dragLayer,
-            CustomImage blockPrefab)
+            CustomImage blockPrefab,
+            int spriteRotate,
+            float spriteScale)
         {
             _owner = owner;
             PartId = partId;
@@ -643,6 +662,8 @@ namespace Gre.pjcode.Scenes.InGame
             _blockSprite = blockSprite;
             _color = color;
             _blockPrefab = blockPrefab;
+            _spriteRotate = spriteRotate;
+            _spriteScale = spriteScale;
             _rect = transform as RectTransform;
             _canvas = GetComponentInParent<Canvas>();
             _dragLayer = dragLayer;
@@ -713,10 +734,11 @@ namespace Gre.pjcode.Scenes.InGame
             if (_homeParent != null) _homeParent.gameObject.SetActive(true);
         }
 
-        public void SetLevel(int level, Sprite partSprite, Sprite blockSprite)
+        public void SetLevel(int level, Sprite partSprite, Sprite blockSprite, float spriteScale)
         {
             Level = level;
             if (blockSprite != null) _blockSprite = blockSprite;
+            _spriteScale = spriteScale;
             BuildBlocks(Pattern as Vector2Int[] ?? new List<Vector2Int>(Pattern).ToArray(), _cellSize, partSprite, _blockSprite, _color, _blockPrefab);
         }
 
@@ -744,12 +766,14 @@ namespace Gre.pjcode.Scenes.InGame
                 image.raycastTarget = true;
             }
 
-            Image partImage = CreateBlock(Vector2Int.zero, cellSize * 1.25f, null).gameObject.AddComponent<Image>();
+            RectTransform partRect = CreateBlock(Vector2Int.zero, cellSize * 1.25f * Mathf.Max(0.01f, _spriteScale), null);
+            Image partImage = partRect.gameObject.AddComponent<Image>();
             partImage.name = "PartImage";
             partImage.sprite = sprite;
             partImage.preserveAspect = true;
             partImage.raycastTarget = false;
-            partImage.rectTransform.anchoredPosition = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
+            partRect.anchoredPosition = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
+            partRect.localEulerAngles = new Vector3(0f, 0f, _spriteRotate * 90f);
         }
 
         RectTransform CreateBlock(Vector2Int offset, float cellSize, CustomImage prefab)

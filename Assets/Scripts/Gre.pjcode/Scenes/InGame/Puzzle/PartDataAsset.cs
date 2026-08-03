@@ -7,7 +7,7 @@ namespace Gre.pjcode.Scenes.InGame
     [CreateAssetMenu(fileName = "dat_part", menuName = "Grenge/DataAsset/PartDataAsset")]
     public sealed class PartDataAsset : ScriptableObject
     {
-        [SerializeField] private List<PartData> _partDataList = new();
+        [SerializeField] private List<PartData> _partDataList = new List<PartData>();
 
         public IReadOnlyList<PartData> PartDataList => _partDataList;
 
@@ -46,13 +46,15 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private MinoShapeType _shapeType;
         [SerializeField] private GameObject _prefab;
         [SerializeField] private Sprite _minoSprite;
+        [SerializeField] private float _minoSpriteScale = 1f;
         [SerializeField] private Sprite _blockSprite;
         [SerializeField] [Range(0, 3)] private int _rotate;
         [SerializeField] private PerformanceData _performanceData;
-        [SerializeField] private List<PartViewData> _levelUpViews = new();
+        [SerializeField] private List<PartViewData> _levelUpViews = new List<PartViewData>();
 
         public MinoShapeType ShapeType => _shapeType;
         public int Rotate => _rotate;
+        public float MinoSpriteScale => _minoSpriteScale;
         public PerformanceData PerformanceData => _performanceData;
         public IReadOnlyList<PartViewData> LevelUpViews => _levelUpViews;
         public PartView Prefab => _prefab == null ? null : _prefab.GetComponent<PartView>();
@@ -61,21 +63,21 @@ namespace Gre.pjcode.Scenes.InGame
         {
             var index = level - 2;
             if (index < 0 || _levelUpViews.Count == 0) return Prefab;
-            return index >= _levelUpViews.Count ? _levelUpViews[^1].Prefab : _levelUpViews[index].Prefab;
+            return index >= _levelUpViews.Count ? _levelUpViews[_levelUpViews.Count - 1].Prefab : _levelUpViews[index].Prefab;
         }
 
         public Sprite GetMinoSprite(int level)
         {
             var index = level - 2;
             if (index < 0 || _levelUpViews.Count == 0) return _minoSprite;
-            return index >= _levelUpViews.Count ? _levelUpViews[^1].MinoSprite : _levelUpViews[index].MinoSprite;
+            return index >= _levelUpViews.Count ? _levelUpViews[_levelUpViews.Count - 1].MinoSprite : _levelUpViews[index].MinoSprite;
         }
 
         public Sprite GetBlockSprite(int level)
         {
             var index = level - 2;
             if (index < 0 || _levelUpViews.Count == 0) return _blockSprite;
-            var sprite = index >= _levelUpViews.Count ? _levelUpViews[^1].BlockSprite : _levelUpViews[index].BlockSprite;
+            var sprite = index >= _levelUpViews.Count ? _levelUpViews[_levelUpViews.Count - 1].BlockSprite : _levelUpViews[index].BlockSprite;
             return sprite != null ? sprite : _blockSprite;
         }
 

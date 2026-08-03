@@ -50,8 +50,8 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
 
         vehicle = found.transform;
-        puzzleUi = FindAnyObjectByType<InGamePuzzleUiView>();
-        resultUi = FindAnyObjectByType<InGameResultUiView>(FindObjectsInactive.Include);
+        puzzleUi = FindObjectOfType<InGamePuzzleUiView>();
+        resultUi = FindSceneObjectOfType<InGameResultUiView>();
         if (resultUi != null) resultUi.SetClaimAction(ResetRun);
         buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
@@ -69,8 +69,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
             body.useGravity = false;
         }
 
-        foreach (Button button in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        foreach (Button button in Resources.FindObjectsOfTypeAll<Button>())
         {
+            if (!button.gameObject.scene.IsValid()) continue;
             if (button.name.Contains("Continue") && (resultUi == null || !button.transform.IsChildOf(resultUi.transform))) button.onClick.AddListener(PlayworksBridge.InstallFullGame);
             if (button.name.Contains("Start")) button.onClick.AddListener(HideBuildUi);
         }
@@ -212,6 +213,16 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (EventSystem.current == null) return false;
         if (Input.touchCount > 0) return EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
         return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    static T FindSceneObjectOfType<T>() where T : Component
+    {
+        foreach (T item in Resources.FindObjectsOfTypeAll<T>())
+        {
+            if (item != null && item.gameObject.scene.IsValid()) return item;
+        }
+
+        return null;
     }
 
     void SnapToGround(Vector3 preferredForward, bool immediate)

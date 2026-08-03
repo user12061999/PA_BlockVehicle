@@ -26,7 +26,7 @@ namespace Gre.pjcode.Scenes.InGame
             _claimButton.onClick.AddListener(() =>
             {
                 SetOpen(false);
-                action?.Invoke();
+                if (action != null) action.Invoke();
             });
         }
 
@@ -53,8 +53,8 @@ namespace Gre.pjcode.Scenes.InGame
 
         void CacheViews()
         {
-            _canvasGroup ??= GetComponent<CanvasGroup>();
-            _claimButton ??= GetComponentInChildren<Button>(true);
+            if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
+            if (_claimButton == null) _claimButton = GetComponentInChildren<Button>(true);
             if (_earnedGoldTmpText != null || _earnedGoldText != null) return;
 
             foreach (Transform child in GetComponentsInChildren<Transform>(true))

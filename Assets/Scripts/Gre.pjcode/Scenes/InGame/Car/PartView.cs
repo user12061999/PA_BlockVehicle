@@ -86,7 +86,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         void ApplyViewColor()
         {
-            _propertyBlock ??= new MaterialPropertyBlock();
+            if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
             foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
             {
                 renderer.GetPropertyBlock(_propertyBlock);
