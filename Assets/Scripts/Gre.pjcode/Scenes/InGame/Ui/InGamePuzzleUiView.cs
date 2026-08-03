@@ -103,7 +103,6 @@ namespace Gre.pjcode.Scenes.InGame
             if (_autoMergeButton == null) _autoMergeButton = FindButton("AutoMergeButton");
             if (_boostEvolveButton == null) _boostEvolveButton = FindButton("UpgradeButton");
             if (_bonusBoxOpenButton == null) _bonusBoxOpenButton = FindButton("OpenButton");
-            if (_partDataAsset == null) _partDataAsset = Resources.Load<PartDataAsset>("dat_part");
             _carView = FindObjectOfType<CarView>();
             if (_performanceValueTexts == null || _performanceValueTexts.Length == 0)
             {
@@ -153,6 +152,13 @@ namespace Gre.pjcode.Scenes.InGame
             if (_buyButton == null) return;
             _buyButton.SetText(price.ToString());
             _buyButton.SetState(_gold >= price ? ButtonState.Enable : ButtonState.Disable);
+        }
+
+        public void AddGold(int amount)
+        {
+            if (amount <= 0) return;
+            SetGold(_gold + amount);
+            UpdateBuyPrice();
         }
 
         public void SetPerformance(int[] performances)
@@ -273,10 +279,15 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (_partDataAsset == null || _minoListRoot == null) return;
             UpdateBuyPrice();
-            if (_gold < _buyPrice) return;
+            if (_gold < _buyPrice)
+            {
+                PlayableSoundEffects.Play(PlayableSfx.Cancel);
+                return;
+            }
 
             _gold -= _buyPrice;
             SetGold(_gold);
+            PlayableSoundEffects.Play(PlayableSfx.Buy);
             CreateTrayPart(RuntimePartIds[_buyCursor % RuntimePartIds.Length], GetRuntimeCellSize());
             _buyCursor++;
             _buyCount++;
@@ -309,6 +320,7 @@ namespace Gre.pjcode.Scenes.InGame
             {
                 RemovePlacedPart(icon);
                 icon.PlaceInTray();
+                PlayableSoundEffects.Play(PlayableSfx.PartSet);
                 UpdatePerformanceFromPlacedParts();
                 return;
             }
@@ -317,6 +329,7 @@ namespace Gre.pjcode.Scenes.InGame
             Vector2Int origin = GetCellPosition(cellIndex);
             if (cellIndex < 0 || !CanPlace(icon, origin))
             {
+                PlayableSoundEffects.Play(PlayableSfx.Cancel);
                 icon.ReturnToStart();
                 return;
             }
@@ -329,6 +342,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             if (!_placedParts.Contains(icon)) _placedParts.Add(icon);
             icon.PlaceOn(_gridRoot, _runtimeCells[cellIndex].anchoredPosition, cellIndex);
+            PlayableSoundEffects.Play(PlayableSfx.PartSet);
             AttachCarPart(icon);
             UpdatePerformanceFromPlacedParts();
         }
@@ -337,6 +351,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (source.PartId != target.PartId || source.Level != target.Level)
             {
+                PlayableSoundEffects.Play(PlayableSfx.Cancel);
                 source.ReturnToStart();
                 return;
             }
@@ -348,6 +363,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_carView != null && !string.IsNullOrEmpty(target.LinkedPartUniqueId)) _carView.DetachPart(target.LinkedPartUniqueId);
 
             target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1), GetMinoSpriteScale(target.PartId));
+            PlayableSoundEffects.Play(PlayableSfx.Merge);
             AttachCarPart(target);
             UpdateBuyPrice();
             UpdatePerformanceFromPlacedParts();
@@ -674,6 +690,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            PlayableSoundEffects.Play(PlayableSfx.PartPick);
             _startParent = transform.parent;
             _startPosition = _rect.anchoredPosition;
             if (_dragLayer != null) _rect.SetParent(_dragLayer, true);
@@ -798,5 +815,96 @@ namespace Gre.pjcode.Scenes.InGame
             return block;
         }
 
+    }
+
+    public enum PlayableSfx
+    {
+        Tap,
+        Cancel,
+        Buy,
+        PartPick,
+        PartSet,
+        Merge,
+        Pull,
+        Launch,
+        Coin,
+        Collision,
+        Finish,
+        Claim,
+        Count
+    }
+
+    public sealed class PlayableSoundEffects : MonoBehaviour
+    {
+        static PlayableSoundEffects _instance;
+        static readonly AudioClip[] _clips = new AudioClip[(int)PlayableSfx.Count];
+
+        [SerializeField] private float _volume = 1f;
+        [SerializeField] private AudioSource _audioSource;
+
+        void Awake()
+        {
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+            EnsureAudioSource();
+        }
+
+        public static void Register(PlayableSfx cue, AudioClip clip)
+        {
+            int index = (int)cue;
+            if (index < 0 || index >= _clips.Length) return;
+            _clips[index] = clip;
+        }
+
+        public static void Play(PlayableSfx cue)
+        {
+            PlayableSoundEffects player = Instance();
+            if (player == null) return;
+            player.PlayInternal(cue);
+        }
+
+        static PlayableSoundEffects Instance()
+        {
+            if (_instance != null) return _instance;
+
+            PlayableSoundEffects found = FindObjectOfType<PlayableSoundEffects>();
+            if (found != null)
+            {
+                _instance = found;
+                return _instance;
+            }
+
+            GameObject go = new GameObject("PlayableSoundEffects");
+            _instance = go.AddComponent<PlayableSoundEffects>();
+            return _instance;
+        }
+
+        void PlayInternal(PlayableSfx cue)
+        {
+            EnsureAudioSource();
+            AudioClip clip = GetClip(cue);
+            if (clip != null) _audioSource.PlayOneShot(clip, _volume);
+        }
+
+        void EnsureAudioSource()
+        {
+            if (_audioSource == null) _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
+            _audioSource.playOnAwake = false;
+            _audioSource.spatialBlend = 0f;
+        }
+
+        static AudioClip GetClip(PlayableSfx cue)
+        {
+            int index = (int)cue;
+            if (index < 0 || index >= _clips.Length) return null;
+            return _clips[index];
+        }
     }
 }

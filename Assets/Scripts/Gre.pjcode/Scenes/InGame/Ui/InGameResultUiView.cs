@@ -25,6 +25,7 @@ namespace Gre.pjcode.Scenes.InGame
             _claimButton.onClick.RemoveAllListeners();
             _claimButton.onClick.AddListener(() =>
             {
+                PlayableSoundEffects.Play(PlayableSfx.Claim);
                 SetOpen(false);
                 if (action != null) action.Invoke();
             });

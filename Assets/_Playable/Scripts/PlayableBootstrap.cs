@@ -1,4 +1,6 @@
 using Gre.pjcode.Scenes.InGame;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -22,8 +24,30 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private LayerMask groundMask = ~0;
     [SerializeField] private float groundRayHeight = 8f;
     [SerializeField] private float groundOffset = 0.08f;
+    [SerializeField] private LayerMask interactionMask = ~0;
+    [SerializeField] private float collisionRadius = 1.35f;
+    [SerializeField] private float collisionCenterHeight = 1f;
+    [SerializeField] private float collisionSpeedMultiplier = 0.55f;
+    [SerializeField] private float collisionTiltAngle = 18f;
+    [SerializeField] private float collisionTiltReturnSpeed = 90f;
+    [SerializeField] private int coinAmountFallback = 100;
+    [Header("Sound Effects")]
+    [SerializeField] private AudioClip sfxTap;
+    [SerializeField] private AudioClip sfxCancel;
+    [SerializeField] private AudioClip sfxBuy;
+    [SerializeField] private AudioClip sfxPartPick;
+    [SerializeField] private AudioClip sfxPartSet;
+    [SerializeField] private AudioClip sfxMerge;
+    [SerializeField] private AudioClip sfxPull;
+    [SerializeField] private AudioClip sfxLaunch;
+    [SerializeField] private AudioClip sfxCoin;
+    [SerializeField] private AudioClip sfxCollision;
+    [SerializeField] private AudioClip sfxFinish;
+    [SerializeField] private AudioClip sfxClaim;
 
     Transform vehicle;
+    CarView carView;
+    CarSphereTracer carTracer;
     InGamePuzzleUiView puzzleUi;
     InGameResultUiView resultUi;
     GameObject buildUi;
@@ -37,10 +61,17 @@ public sealed class PlayableBootstrap : MonoBehaviour
     float speed;
     float distance;
     float steer;
+    float collisionTilt;
     bool dragging;
+    readonly RaycastHit[] interactionHits = new RaycastHit[16];
+    readonly Collider[] interactionOverlaps = new Collider[16];
+    readonly HashSet<int> collectedCoinIds = new HashSet<int>();
+    readonly List<GameObject> collectedCoins = new List<GameObject>();
 
     void Awake()
     {
+        RegisterSoundEffects();
+
         GameObject found = GameObject.Find(vehicleName);
         if (found == null)
         {
@@ -50,6 +81,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
 
         vehicle = found.transform;
+        carView = vehicle.GetComponentInChildren<CarView>();
+        if (carView == null) carView = FindObjectOfType<CarView>();
+        carTracer = vehicle.GetComponent<CarSphereTracer>();
         puzzleUi = FindObjectOfType<InGamePuzzleUiView>();
         resultUi = FindSceneObjectOfType<InGameResultUiView>();
         if (resultUi != null) resultUi.SetClaimAction(ResetRun);
@@ -81,6 +115,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (state == State.Aim) UpdateAim();
         else if (state == State.Run) UpdateRun();
+        UpdateCollisionTilt();
     }
 
     void LateUpdate()
@@ -95,6 +130,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             dragging = true;
             dragStart = pointer;
+            PlayableSoundEffects.Play(PlayableSfx.Pull);
         }
 
         if (!dragging) return;
@@ -112,6 +148,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
             speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier;
             state = State.Run;
+            PlayableSoundEffects.Play(PlayableSfx.Launch);
             HideBuildUi();
         }
     }
@@ -126,7 +163,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
         Vector3 forward = vehicle.forward;
         if (Mathf.Abs(steer) > 0.001f) forward = Quaternion.AngleAxis(steer * turnSpeed * Time.deltaTime, vehicle.up) * forward;
         Vector3 move = forward.normalized * speed * Time.deltaTime;
+        Vector3 previousPosition = vehicle.position;
         vehicle.position += move;
+        HandleRunInteractions(previousPosition, move);
         SnapToGround(move.sqrMagnitude > 0f ? move : forward, false);
         distance += move.magnitude;
 
@@ -136,11 +175,28 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
     }
 
+    void RegisterSoundEffects()
+    {
+        PlayableSoundEffects.Register(PlayableSfx.Tap, sfxTap);
+        PlayableSoundEffects.Register(PlayableSfx.Cancel, sfxCancel);
+        PlayableSoundEffects.Register(PlayableSfx.Buy, sfxBuy);
+        PlayableSoundEffects.Register(PlayableSfx.PartPick, sfxPartPick);
+        PlayableSoundEffects.Register(PlayableSfx.PartSet, sfxPartSet);
+        PlayableSoundEffects.Register(PlayableSfx.Merge, sfxMerge);
+        PlayableSoundEffects.Register(PlayableSfx.Pull, sfxPull);
+        PlayableSoundEffects.Register(PlayableSfx.Launch, sfxLaunch);
+        PlayableSoundEffects.Register(PlayableSfx.Coin, sfxCoin);
+        PlayableSoundEffects.Register(PlayableSfx.Collision, sfxCollision);
+        PlayableSoundEffects.Register(PlayableSfx.Finish, sfxFinish);
+        PlayableSoundEffects.Register(PlayableSfx.Claim, sfxClaim);
+    }
+
     void FinishRun()
     {
         if (state == State.Done) return;
 
         state = State.Done;
+        PlayableSoundEffects.Play(PlayableSfx.Finish);
         if (resultUi != null) resultUi.Open((int)distance);
         PlayworksBridge.GameEnded();
     }
@@ -151,10 +207,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
         speed = 0f;
         distance = 0f;
         steer = 0f;
+        collisionTilt = 0f;
         dragging = false;
         state = State.Aim;
+        RestoreCoins();
         vehicle.SetPositionAndRotation(startPosition, startRotation);
         SnapToGround(startRotation * Vector3.forward, true);
+        if (carView != null) carView.SetTiltBody(0f);
         if (followCamera != null) followCamera.transform.position = vehicle.position + cameraOffset;
         ShowBuildUi();
     }
@@ -169,6 +228,124 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (puzzleUi != null) puzzleUi.SetOpen(true, true);
         else if (buildUi != null) buildUi.SetActive(true);
+    }
+
+    void HandleRunInteractions(Vector3 previousPosition, Vector3 move)
+    {
+        if (move.sqrMagnitude <= 0f) return;
+
+        Vector3 center = vehicle.position + Vector3.up * collisionCenterHeight;
+        int overlapCount = Physics.OverlapSphereNonAlloc(center, collisionRadius, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < overlapCount; i++)
+        {
+            TryCollectCoin(interactionOverlaps[i]);
+        }
+
+        Vector3 direction = move.normalized;
+        Vector3 origin = previousPosition + Vector3.up * collisionCenterHeight;
+        int hitCount = Physics.SphereCastNonAlloc(origin, collisionRadius, direction, interactionHits, move.magnitude + collisionRadius, interactionMask, QueryTriggerInteraction.Collide);
+        RaycastHit bestHit = default;
+        float bestDistance = float.MaxValue;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            RaycastHit hit = interactionHits[i];
+            if (TryCollectCoin(hit.collider)) continue;
+            if (!IsObstacleHit(hit)) continue;
+            if (hit.distance >= bestDistance) continue;
+            bestHit = hit;
+            bestDistance = hit.distance;
+        }
+
+        if (bestDistance < float.MaxValue) BounceFrom(bestHit, direction);
+    }
+
+    bool TryCollectCoin(Collider collider)
+    {
+        GameObject coin = GetCoinObject(collider);
+        if (coin == null) return false;
+
+        int id = coin.GetInstanceID();
+        if (collectedCoinIds.Contains(id)) return true;
+
+        collectedCoinIds.Add(id);
+        collectedCoins.Add(coin);
+        int amount = GetCoinAmount(coin);
+        if (puzzleUi != null) puzzleUi.AddGold(amount);
+        if (carTracer != null) carTracer.GetCoin(amount);
+        PlayableSoundEffects.Play(PlayableSfx.Coin);
+        coin.SetActive(false);
+        return true;
+    }
+
+    GameObject GetCoinObject(Collider collider)
+    {
+        if (collider == null || collider.transform.IsChildOf(vehicle)) return null;
+
+        Transform current = collider.transform;
+        while (current != null)
+        {
+            if (current.CompareTag("Coin")) return current.gameObject;
+            current = current.parent;
+        }
+
+        return null;
+    }
+
+    int GetCoinAmount(GameObject coin)
+    {
+        MonoBehaviour[] behaviours = coin.GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour behaviour in behaviours)
+        {
+            if (behaviour == null) continue;
+            FieldInfo field = behaviour.GetType().GetField("_amount", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field != null && field.FieldType == typeof(int)) return Mathf.Max(0, (int)field.GetValue(behaviour));
+        }
+
+        return coinAmountFallback;
+    }
+
+    bool IsObstacleHit(RaycastHit hit)
+    {
+        Collider collider = hit.collider;
+        if (collider == null || collider.isTrigger) return false;
+        if (collider.transform.IsChildOf(vehicle)) return false;
+        if (collider.CompareTag("Coin") || collider.CompareTag("Dash") || collider.CompareTag("Water") || collider.CompareTag("Dirt")) return false;
+        if (LayerMask.LayerToName(collider.gameObject.layer) == "Road") return false;
+        return hit.normal.y < 0.55f;
+    }
+
+    void BounceFrom(RaycastHit hit, Vector3 direction)
+    {
+        Vector3 normal = Vector3.ProjectOnPlane(hit.normal, Vector3.up);
+        if (normal.sqrMagnitude < 0.001f) normal = -direction;
+
+        Vector3 reflected = Vector3.Reflect(direction, normal.normalized);
+        reflected = Vector3.ProjectOnPlane(reflected, Vector3.up);
+        if (reflected.sqrMagnitude > 0.001f) vehicle.rotation = Quaternion.LookRotation(reflected.normalized, vehicle.up);
+
+        vehicle.position += normal.normalized * collisionRadius * 0.5f;
+        speed *= Mathf.Clamp01(collisionSpeedMultiplier);
+        collisionTilt = -Mathf.Sign(Vector3.Dot(vehicle.right, normal)) * collisionTiltAngle;
+        PlayableSoundEffects.Play(PlayableSfx.Collision);
+    }
+
+    void UpdateCollisionTilt()
+    {
+        if (carView == null) return;
+        collisionTilt = Mathf.MoveTowards(collisionTilt, 0f, collisionTiltReturnSpeed * Time.deltaTime);
+        carView.SetTiltBody(collisionTilt);
+    }
+
+    void RestoreCoins()
+    {
+        foreach (GameObject coin in collectedCoins)
+        {
+            if (coin != null) coin.SetActive(true);
+        }
+
+        collectedCoins.Clear();
+        collectedCoinIds.Clear();
     }
 
     static bool PointerDown(out Vector2 position)

@@ -9,10 +9,8 @@ namespace Gre.pjcode.Scenes.InGame
 #endif
 
         [SerializeField] private PartAttachType _attachType;
-        [SerializeField] private Color _viewColor = Color.white;
 
         private float _activateTime;
-        private MaterialPropertyBlock _propertyBlock;
         protected PartAttachSideType _sideType;
 
         public Transform T => transform;
@@ -51,16 +49,8 @@ namespace Gre.pjcode.Scenes.InGame
                 meshRenderer.receiveShadows = false;
             }
 
-            ApplyViewColor();
             enabled = false;
         }
-
-#if UNITY_EDITOR
-        void OnValidate()
-        {
-            ApplyViewColor();
-        }
-#endif
 
         public void Activate(float time)
         {
@@ -83,17 +73,5 @@ namespace Gre.pjcode.Scenes.InGame
         protected virtual void ActivateInternal(float time) { }
         protected virtual void UpdateInternal(float deltaTime) { }
         protected virtual void InactivateInternal() { }
-
-        void ApplyViewColor()
-        {
-            if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
-            foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
-            {
-                renderer.GetPropertyBlock(_propertyBlock);
-                _propertyBlock.SetColor("_BaseColor", _viewColor);
-                _propertyBlock.SetColor("_Color", _viewColor);
-                renderer.SetPropertyBlock(_propertyBlock);
-            }
-        }
     }
 }

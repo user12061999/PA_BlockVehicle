@@ -199,7 +199,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         AttachInfo[] GetAttachInfos(PartAttachType attachType)
         {
-            if (_attachInfos == null) return Array.Empty<AttachInfo>();
+            if (_attachInfos == null) return new AttachInfo[0];
             return Array.FindAll(_attachInfos, info => info != null && info.PartType == attachType);
         }
 
