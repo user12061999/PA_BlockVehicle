@@ -33,6 +33,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float collisionSpeedMultiplier = 0.55f;
     [SerializeField] private float collisionTiltAngle = 18f;
     [SerializeField] private float collisionTiltReturnSpeed = 90f;
+    [SerializeField] private float dashSpeedBonus = 12f;
+    [SerializeField] private float dashMaxSpeed = 45f;
+    [SerializeField] private LayerMask dashInteractionMask = ~0;
+    [SerializeField] private float dashDetectionRadius = 2f;
+    [SerializeField] private float dashDetectionHeight = 0f;
     [SerializeField] private int coinAmountFallback = 100;
     [SerializeField] private float gameEndedDelay = 0.25f;
     [Header("Camera")]
@@ -59,6 +64,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private AudioClip sfxPull;
     [SerializeField] private AudioClip sfxLaunch;
     [SerializeField] private AudioClip sfxCoin;
+    [SerializeField] private AudioClip sfxDash;
     [SerializeField] private AudioClip sfxCollision;
     [SerializeField] private AudioClip sfxFinish;
     [SerializeField] private AudioClip sfxClaim;
@@ -97,6 +103,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
     readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
+    readonly HashSet<int> triggeredDashIds = new HashSet<int>();
     readonly List<GameObject> collectedCoins = new List<GameObject>();
 
     void Awake()
@@ -117,7 +124,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (carView == null) carView = FindObjectOfType<CarView>();
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
-        buildUi = GameObject.Find("PuzzleUi");
+        //buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
         followCamera = Camera.main;
@@ -236,6 +243,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         PlayableSoundEffects.Register(PlayableSfx.Pull, sfxPull);
         PlayableSoundEffects.Register(PlayableSfx.Launch, sfxLaunch);
         PlayableSoundEffects.Register(PlayableSfx.Coin, sfxCoin);
+        PlayableSoundEffects.Register(PlayableSfx.Dash, sfxDash);
         PlayableSoundEffects.Register(PlayableSfx.Collision, sfxCollision);
         PlayableSoundEffects.Register(PlayableSfx.Finish, sfxFinish);
         PlayableSoundEffects.Register(PlayableSfx.Claim, sfxClaim);
@@ -539,11 +547,14 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (move.sqrMagnitude <= 0f) return;
 
+        HandleDashInteractions(previousPosition, move);
+
         Vector3 center = vehicle.position + Vector3.up * collisionCenterHeight;
         int overlapCount = Physics.OverlapSphereNonAlloc(center, collisionRadius, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
         for (int i = 0; i < overlapCount; i++)
         {
             TryCollectCoin(interactionOverlaps[i]);
+            TryTriggerDash(interactionOverlaps[i]);
         }
 
         Vector3 direction = move.normalized;
@@ -556,6 +567,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             RaycastHit hit = interactionHits[i];
             if (TryCollectCoin(hit.collider)) continue;
+            if (TryTriggerDash(hit.collider)) continue;
             if (!IsObstacleHit(hit)) continue;
             if (hit.distance >= bestDistance) continue;
             bestHit = hit;
@@ -565,9 +577,28 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (bestDistance < float.MaxValue) BounceFrom(bestHit, direction);
     }
 
+    void HandleDashInteractions(Vector3 previousPosition, Vector3 move)
+    {
+        float radius = Mathf.Max(0.1f, dashDetectionRadius);
+        Vector3 center = vehicle.position + Vector3.up * dashDetectionHeight;
+        int overlapCount = Physics.OverlapSphereNonAlloc(center, radius, interactionOverlaps, dashInteractionMask, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < overlapCount; i++)
+        {
+            TryTriggerDash(interactionOverlaps[i]);
+        }
+
+        Vector3 direction = move.normalized;
+        Vector3 origin = previousPosition + Vector3.up * dashDetectionHeight;
+        int hitCount = Physics.SphereCastNonAlloc(origin, radius, direction, interactionHits, move.magnitude + radius, dashInteractionMask, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < hitCount; i++)
+        {
+            TryTriggerDash(interactionHits[i].collider);
+        }
+    }
+
     bool TryCollectCoin(Collider collider)
     {
-        GameObject coin = GetCoinObject(collider);
+        GameObject coin = GetTaggedObject(collider, "Coin");
         if (coin == null) return false;
 
         int id = coin.GetInstanceID();
@@ -583,14 +614,48 @@ public sealed class PlayableBootstrap : MonoBehaviour
         return true;
     }
 
-    GameObject GetCoinObject(Collider collider)
+    bool TryTriggerDash(Collider collider)
+    {
+        GameObject dash = GetDashObject(collider);
+        if (dash == null) return false;
+
+        int id = dash.GetInstanceID();
+        if (triggeredDashIds.Contains(id)) return true;
+
+        triggeredDashIds.Add(id);
+        speed = Mathf.Min(Mathf.Max(speed + dashSpeedBonus, minSpeed), Mathf.Max(dashMaxSpeed, minSpeed));
+        if (carTracer != null)
+        {
+            carTracer.PlayDashEffect();
+            carTracer.SustainDash(1f, 0.5f);
+        }
+
+        PlayableSoundEffects.Play(PlayableSfx.Dash);
+        return true;
+    }
+
+    GameObject GetDashObject(Collider collider)
     {
         if (collider == null || collider.transform.IsChildOf(vehicle)) return null;
 
         Transform current = collider.transform;
         while (current != null)
         {
-            if (current.CompareTag("Coin")) return current.gameObject;
+            if (current.CompareTag("Dash") || current.name.ToLowerInvariant().Contains("dash")) return current.gameObject;
+            current = current.parent;
+        }
+
+        return null;
+    }
+
+    GameObject GetTaggedObject(Collider collider, string tagName)
+    {
+        if (collider == null || collider.transform.IsChildOf(vehicle)) return null;
+
+        Transform current = collider.transform;
+        while (current != null)
+        {
+            if (current.CompareTag(tagName)) return current.gameObject;
             current = current.parent;
         }
 
@@ -651,6 +716,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         collectedCoins.Clear();
         collectedCoinIds.Clear();
+        triggeredDashIds.Clear();
     }
 
     static bool PointerDown(out Vector2 position)

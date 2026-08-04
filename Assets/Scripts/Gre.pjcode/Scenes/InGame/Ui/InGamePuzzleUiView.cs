@@ -518,13 +518,13 @@ namespace Gre.pjcode.Scenes.InGame
 
             ParticleSystem.EmissionModule emission = particles.emission;
             emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 16) });
 
             ParticleSystem.ShapeModule shape = particles.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
             shape.radius = 0.25f;
 
             particles.Play();
-            particles.Emit(16);
             return effect;
         }
 
@@ -925,6 +925,7 @@ namespace Gre.pjcode.Scenes.InGame
         Pull,
         Launch,
         Coin,
+        Dash,
         Collision,
         Finish,
         Claim,
