@@ -1,4 +1,5 @@
 using Gre.pjcode.Scenes.InGame;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -33,6 +34,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float collisionTiltAngle = 18f;
     [SerializeField] private float collisionTiltReturnSpeed = 90f;
     [SerializeField] private int coinAmountFallback = 100;
+    [SerializeField] private float gameEndedDelay = 0.25f;
+    [Header("Camera")]
+    [SerializeField] private Transform puzzleCameraPoint;
     [Header("Slingshot")]
     [SerializeField] private string slingshotName = "Slingshot";
     [SerializeField] private LineRenderer slingshotRope;
@@ -58,16 +62,23 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private AudioClip sfxCollision;
     [SerializeField] private AudioClip sfxFinish;
     [SerializeField] private AudioClip sfxClaim;
+    [Header("Loop Audio")]
+    [SerializeField] private AudioClip sfxMoveLoop;
+    [SerializeField, Range(0f, 1f)] private float moveLoopVolume = 0.75f;
+    [SerializeField] private AudioClip music;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.6f;
 
     Transform vehicle;
     CarView carView;
     CarSphereTracer carTracer;
-    InGamePuzzleUiView puzzleUi;
-    InGameResultUiView resultUi;
+    [SerializeField]private InGamePuzzleUiView puzzleUi;
+    [SerializeField]private InGameResultUiView resultUi;
     GameObject buildUi;
     Camera followCamera;
     Vector3 startPosition;
     Quaternion startRotation;
+    Vector3 gameplayCameraPosition;
+    Quaternion gameplayCameraRotation;
     Vector3 cameraOffset;
     Vector2 dragStart;
     State state;
@@ -80,6 +91,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector3 slingshotStartWorldPosition;
     Vector3 slingshotEndWorldPosition;
     bool slingshotReady;
+    Coroutine gameEndedRoutine;
+    AudioSource moveLoopSource;
+    AudioSource musicSource;
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
     readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
@@ -88,6 +102,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     void Awake()
     {
         RegisterSoundEffects();
+        SetupLoopAudio();
 
         GameObject found = GameObject.Find(vehicleName);
         if (found == null)
@@ -101,14 +116,17 @@ public sealed class PlayableBootstrap : MonoBehaviour
         carView = vehicle.GetComponentInChildren<CarView>();
         if (carView == null) carView = FindObjectOfType<CarView>();
         carTracer = vehicle.GetComponent<CarSphereTracer>();
-        puzzleUi = FindObjectOfType<InGamePuzzleUiView>();
-        resultUi = FindSceneObjectOfType<InGameResultUiView>();
-        if (resultUi != null) resultUi.SetClaimAction(ResetRun);
+        CacheResultUi();
         buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
         followCamera = Camera.main;
-        if (followCamera != null) cameraOffset = followCamera.transform.position - vehicle.position;
+        if (followCamera != null)
+        {
+            gameplayCameraPosition = followCamera.transform.position;
+            gameplayCameraRotation = followCamera.transform.rotation;
+            cameraOffset = followCamera.transform.position - vehicle.position;
+        }
         SnapToGround(startRotation * Vector3.forward, true);
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
@@ -125,8 +143,15 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             if (!button.gameObject.scene.IsValid()) continue;
             if (button.name.Contains("Continue") && (resultUi == null || !button.transform.IsChildOf(resultUi.transform))) button.onClick.AddListener(PlayworksBridge.InstallFullGame);
-            if (button.name.Contains("Start")) button.onClick.AddListener(HideBuildUi);
+            if (button.name.Contains("Start"))
+            {
+                button.onClick.AddListener(PlayMusic);
+                button.onClick.AddListener(HideBuildUi);
+            }
         }
+
+        PlayMusic();
+        if (IsBuildUiVisible()) ApplyPuzzleCameraPose();
     }
 
     void Update()
@@ -152,6 +177,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             dragging = true;
             dragStart = pointer;
+            PlayMusic();
             PlayableSoundEffects.Play(PlayableSfx.Pull);
         }
 
@@ -170,6 +196,8 @@ public sealed class PlayableBootstrap : MonoBehaviour
             speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier;
             state = State.Run;
             PlayableSoundEffects.Play(PlayableSfx.Launch);
+            if (speed > 0.01f) PlayMoveLoop();
+            PlayMusic();
             HideBuildUi();
             SetSlingshotVisible(!hideSlingshotOnLaunch);
         }
@@ -218,13 +246,22 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Done) return;
 
         state = State.Done;
+        StopMoveLoop();
+        StopMusic();
         PlayableSoundEffects.Play(PlayableSfx.Finish);
-        if (resultUi != null) resultUi.Open((int)distance);
-        PlayworksBridge.GameEnded();
+        OpenResultUi();
+        if (gameEndedRoutine != null) StopCoroutine(gameEndedRoutine);
+        gameEndedRoutine = StartCoroutine(NotifyPlayActionAfterResultUi());
     }
 
     void ResetRun()
     {
+        if (gameEndedRoutine != null)
+        {
+            StopCoroutine(gameEndedRoutine);
+            gameEndedRoutine = null;
+        }
+
         pull = 0f;
         speed = 0f;
         distance = 0f;
@@ -239,7 +276,83 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (followCamera != null) followCamera.transform.position = vehicle.position + cameraOffset;
         SetSlingshotVisible(true);
         UpdateSlingshot();
+        StopMoveLoop();
+        PlayMusic();
         ShowBuildUi();
+    }
+
+    void SetupLoopAudio()
+    {
+        moveLoopSource = CreateLoopAudioSource("MoveLoopAudio", sfxMoveLoop, moveLoopVolume);
+        musicSource = CreateLoopAudioSource("MusicAudio", music, musicVolume);
+    }
+
+    AudioSource CreateLoopAudioSource(string sourceName, AudioClip clip, float volume)
+    {
+        GameObject go = new GameObject(sourceName);
+        go.transform.SetParent(transform, false);
+        AudioSource source = go.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.loop = true;
+        source.spatialBlend = 0f;
+        source.volume = volume;
+        source.clip = clip;
+        return source;
+    }
+
+    void PlayMoveLoop()
+    {
+        if (moveLoopSource == null || sfxMoveLoop == null) return;
+        moveLoopSource.clip = sfxMoveLoop;
+        moveLoopSource.volume = moveLoopVolume;
+        if (!moveLoopSource.isPlaying) moveLoopSource.Play();
+    }
+
+    void StopMoveLoop()
+    {
+        if (moveLoopSource != null) moveLoopSource.Stop();
+    }
+
+    void PlayMusic()
+    {
+        if (musicSource == null || music == null) return;
+        musicSource.clip = music;
+        musicSource.volume = musicVolume;
+        if (!musicSource.isPlaying) musicSource.Play();
+    }
+
+    void StopMusic()
+    {
+        if (musicSource != null) musicSource.Stop();
+    }
+
+    void CacheResultUi()
+    {
+        if (resultUi == null) resultUi = FindSceneObjectOfType<InGameResultUiView>();
+        if (resultUi == null)
+        {
+            Debug.LogWarning("PlayableBootstrap could not find InGameResultUiView. Result UI will not open.");
+            return;
+        }
+
+        resultUi.SetClaimAction(ResetRun);
+    }
+
+    void OpenResultUi()
+    {
+        CacheResultUi();
+        if (resultUi == null) return;
+        resultUi.transform.SetAsLastSibling();
+        resultUi.Open((int)distance);
+    }
+
+    IEnumerator NotifyPlayActionAfterResultUi()
+    {
+        yield return null;
+        if (gameEndedDelay > 0f) yield return new WaitForSeconds(gameEndedDelay);
+        if (LunaManager.ins != null) LunaManager.ins.CheckClickShowEndCard();
+        else PlayworksBridge.GameEnded();
+        gameEndedRoutine = null;
     }
 
     void ApplyAim(Vector2 pointer)
@@ -392,6 +505,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void HideBuildUi()
     {
+        RestoreGameplayCameraPose();
         if (puzzleUi != null) puzzleUi.SetOpen(false);
         else if (buildUi != null) buildUi.SetActive(false);
     }
@@ -400,6 +514,25 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (puzzleUi != null) puzzleUi.SetOpen(true, true);
         else if (buildUi != null) buildUi.SetActive(true);
+        ApplyPuzzleCameraPose();
+    }
+
+    bool IsBuildUiVisible()
+    {
+        if (puzzleUi != null) return puzzleUi.gameObject.activeInHierarchy;
+        return buildUi != null && buildUi.activeInHierarchy;
+    }
+
+    void ApplyPuzzleCameraPose()
+    {
+        if (followCamera == null || puzzleCameraPoint == null) return;
+        followCamera.transform.SetPositionAndRotation(puzzleCameraPoint.position, puzzleCameraPoint.rotation);
+    }
+
+    void RestoreGameplayCameraPose()
+    {
+        if (followCamera == null) return;
+        followCamera.transform.SetPositionAndRotation(gameplayCameraPosition, gameplayCameraRotation);
     }
 
     void HandleRunInteractions(Vector3 previousPosition, Vector3 move)

@@ -76,6 +76,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             AttachInfo[] infos = GetAttachInfos(partPrefab.AttachType);
             if (infos.Length == 0) return uniqueId;
+            if (partPrefab.AttachType == PartAttachType.Wheel) return AttachWheelPart(partPrefab, partId, uniqueId, infos);
 
             foreach (AttachInfo info in infos)
             {
@@ -86,6 +87,27 @@ namespace Gre.pjcode.Scenes.InGame
                 PartView part = Instantiate(partPrefab, root);
                 part.Initialize(partId, uniqueId, info.SideType);
                 _attachedParts.Add(part);
+            }
+
+            RefreshDefaultWheel();
+            return uniqueId;
+        }
+
+        string AttachWheelPart(PartView partPrefab, int partId, string uniqueId, AttachInfo[] infos)
+        {
+            DetachParts(PartAttachType.Wheel);
+
+            foreach (AttachInfo info in infos)
+            {
+                if (info == null || info.Roots == null) continue;
+                foreach (Transform root in info.Roots)
+                {
+                    if (root == null) continue;
+
+                    PartView part = Instantiate(partPrefab, root);
+                    part.Initialize(partId, uniqueId, info.SideType);
+                    _attachedParts.Add(part);
+                }
             }
 
             RefreshDefaultWheel();
@@ -111,6 +133,19 @@ namespace Gre.pjcode.Scenes.InGame
             {
                 PartView part = _attachedParts[i];
                 if (part == null || part.PartId != partId) continue;
+                _attachedParts.RemoveAt(i);
+                Destroy(part.gameObject);
+            }
+
+            RefreshDefaultWheel();
+        }
+
+        void DetachParts(PartAttachType attachType)
+        {
+            for (int i = _attachedParts.Count - 1; i >= 0; i--)
+            {
+                PartView part = _attachedParts[i];
+                if (part == null || part.AttachType != attachType) continue;
                 _attachedParts.RemoveAt(i);
                 Destroy(part.gameObject);
             }

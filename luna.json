@@ -1851,15 +1851,7 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.TextCore.LowLevel.FontEngine",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.TextCore.LowLevel.FontEngineUtilities",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.TextCore.LowLevel.GlyphMarshallingStruct",
                 "excluded": true
             },
             {
@@ -1900,10 +1892,6 @@
             },
             {
                 "name": "UnityEngine.TouchScreenKeyboard",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.TrailModule",
                 "excluded": true
             },
             {
@@ -2091,10 +2079,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.WaitForSeconds",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.WaitForSecondsRealtime",
                 "excluded": true
             },
@@ -2184,10 +2168,6 @@
             },
             {
                 "name": "UnityEngine.AssetBundleRequest",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.AudioClip",
                 "excluded": true
             },
             {
@@ -4432,7 +4412,7 @@
             },
             {
                 "name": "UnityEngine.ParticleSystemStopBehavior",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.ParticleSystemSubEmitterProperties",
@@ -5256,7 +5236,7 @@
             },
             {
                 "name": "UnityEngine.TextCore.LowLevel.FontEngineError",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.TextCore.LowLevel.FontFeatureLookupFlags",
@@ -6140,7 +6120,7 @@
             },
             {
                 "name": "Luna.Unity.DTO.UnityEngine.Assets.PhysicMaterial",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "Luna.Unity.DTO.UnityEngine.Assets.PhysicsMaterial2D",
@@ -6399,10 +6379,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.UI.LayoutUtility",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.UI.Misc",
                 "excluded": true
             },
@@ -6420,10 +6396,6 @@
             },
             {
                 "name": "UnityEngine.UI.CoroutineTween.FloatTween",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.UI.LayoutElement",
                 "excluded": true
             },
             {
@@ -6448,10 +6420,6 @@
             },
             {
                 "name": "UnityEngine.UI.Dropdown",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.UI.Scrollbar",
                 "excluded": true
             },
             {
@@ -6552,7 +6520,7 @@
             },
             {
                 "name": "UnityEngine.UI.ILayoutIgnorer",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.Image.FillMethod",
@@ -6600,27 +6568,27 @@
             },
             {
                 "name": "UnityEngine.UI.Scrollbar.Axis",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.Scrollbar.Direction",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.Scrollbar.ScrollEvent",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.ScrollRect.MovementType",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.ScrollRect.ScrollbarVisibility",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.ScrollRect.ScrollRectEvent",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.Selectable.SelectionState",
@@ -8503,15 +8471,79 @@
                 "excluded": false
             },
             {
-                "name": "RoadFrictionZone",
+                "name": "Gre.pjcode.Scenes.InGame.WingPartView",
                 "excluded": true
             },
             {
-                "name": "BlockVehiclePlayable.PlayState",
+                "name": "Gre.pjcode.Common.VirtualStick.VirtualStick",
                 "excluded": false
             },
             {
-                "name": "VehiclePartKind",
+                "name": "Gre.pjcode.Scenes.InGame.InGameBonusBoxUiView",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.InGameGetItemUiView",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.InGameGlobalUiView",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.InGamePuzzleUiView.BuyPriceMode",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.InGameRunUiView",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.InGameUiService",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.MinoShapeType",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.PartAttachSideType",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.PartAttachType",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.PlayableSfx",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.TerrainType",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Ui.ButtonTapSePlayer",
+                "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Ui.TextBenderView",
+                "excluded": false
+            },
+            {
+                "name": "Gre.UI.ButtonState",
+                "excluded": false
+            },
+            {
+                "name": "Gre.UI.CustomImage",
+                "excluded": false
+            },
+            {
+                "name": "Gre.UI.CustomText",
+                "excluded": false
+            },
+            {
+                "name": "PlayableBootstrap.State",
                 "excluded": false
             }
         ],
@@ -8668,7 +8700,7 @@
                     },
                     {
                         "name": "isPunctuation",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isNumber",
@@ -9012,11 +9044,11 @@
                     },
                     {
                         "name": "trunc",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "div",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "mod",
@@ -10948,7 +10980,7 @@
                 "instanceMethods": [
                     {
                         "name": "getDefaultValue",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -12128,7 +12160,7 @@
                     },
                     {
                         "name": "remove",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetEnumerator",
@@ -12196,11 +12228,11 @@
                     },
                     {
                         "name": "IncreaseCapacity",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetCapacity",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddIfNotPresent",
@@ -12358,7 +12390,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -13384,11 +13416,11 @@
                     },
                     {
                         "name": "ToHex$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ToHex",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "op_Equality",
@@ -13444,7 +13476,7 @@
                     },
                     {
                         "name": "toString",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ToString",
@@ -13464,7 +13496,7 @@
                     },
                     {
                         "name": "Format",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FromString",
@@ -15124,7 +15156,7 @@
                     },
                     {
                         "name": "LayerToName",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetMask",
@@ -15228,7 +15260,7 @@
                     },
                     {
                         "name": "SmoothDamp$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SmoothDampAngle$1",
@@ -15416,7 +15448,7 @@
                     },
                     {
                         "name": "center#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "center#set",
@@ -15764,7 +15796,7 @@
                     },
                     {
                         "name": "DontDestroyOnLoad",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FixDontDestroyOnLoad",
@@ -16040,7 +16072,7 @@
                     },
                     {
                         "name": "timeScale#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "smoothDeltaTime#get",
@@ -16404,7 +16436,7 @@
                     },
                     {
                         "name": "RemoveListener",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -16812,7 +16844,7 @@
                     },
                     {
                         "name": "worldToLocalMatrix#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "localToWorldMatrix#get",
@@ -16820,7 +16852,7 @@
                     },
                     {
                         "name": "localPosition#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "localPosition#set",
@@ -16836,7 +16868,7 @@
                     },
                     {
                         "name": "localScale#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "localScale#set",
@@ -16848,11 +16880,11 @@
                     },
                     {
                         "name": "localEulerAngles#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "localEulerAngles#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "eulerAngles#get",
@@ -16864,11 +16896,11 @@
                     },
                     {
                         "name": "localRotation#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "localRotation#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "rotation#get",
@@ -16896,7 +16928,7 @@
                     },
                     {
                         "name": "up#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "up#set",
@@ -16912,7 +16944,7 @@
                     },
                     {
                         "name": "name#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "root#get",
@@ -16964,7 +16996,7 @@
                     },
                     {
                         "name": "cachedLocalToWorldMatrix#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
@@ -16976,7 +17008,7 @@
                     },
                     {
                         "name": "IsChildOf",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InverseTransformPoint",
@@ -17064,7 +17096,7 @@
                     },
                     {
                         "name": "SetAsLastSibling",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetSiblingIndex",
@@ -17076,7 +17108,7 @@
                     },
                     {
                         "name": "SetAsFirstSibling",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetEnumerator",
@@ -17092,7 +17124,7 @@
                     },
                     {
                         "name": "SetPositionAndRotation",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -17578,7 +17610,7 @@
                     },
                     {
                         "name": "color#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "intensity#get",
@@ -17586,7 +17618,7 @@
                     },
                     {
                         "name": "intensity#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "shadowStrength#get",
@@ -17724,7 +17756,7 @@
                     },
                     {
                         "name": "sharedMaterial#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "sharedMaterial#set",
@@ -17890,7 +17922,7 @@
                     },
                     {
                         "name": "anchorMax#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "anchorMax#set",
@@ -17898,7 +17930,7 @@
                     },
                     {
                         "name": "anchorMin#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "anchorMin#set",
@@ -17974,7 +18006,7 @@
                     },
                     {
                         "name": "GetWorldCorners",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetLocalCorners",
@@ -18768,7 +18800,7 @@
                     },
                     {
                         "name": "color#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "color#set",
@@ -18804,7 +18836,7 @@
                     },
                     {
                         "name": "OnPopulateMesh",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetMaterialDirty",
@@ -18820,7 +18852,7 @@
                     },
                     {
                         "name": "GetPixelAdjustedRect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnSelect",
@@ -19654,7 +19686,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -19744,7 +19776,7 @@
                     },
                     {
                         "name": "text#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "textPreprocessor#get",
@@ -19772,7 +19804,7 @@
                     },
                     {
                         "name": "fontSharedMaterial#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontSharedMaterial#set",
@@ -19960,7 +19992,7 @@
                     },
                     {
                         "name": "isUsingBold#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "horizontalAlignment#get",
@@ -20088,7 +20120,7 @@
                     },
                     {
                         "name": "extraPadding#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "extraPadding#set",
@@ -20264,7 +20296,7 @@
                     },
                     {
                         "name": "havePropertiesChanged#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isUsingLegacyAnimationComponent#get",
@@ -20316,11 +20348,11 @@
                     },
                     {
                         "name": "minWidth#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "minHeight#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "maxWidth#get",
@@ -20336,11 +20368,11 @@
                     },
                     {
                         "name": "preferredWidth#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "preferredHeight#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "renderedWidth#get",
@@ -20616,7 +20648,7 @@
                     },
                     {
                         "name": "ResizeInternalArray$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddFloatToInternalTextBackingArray",
@@ -20652,7 +20684,7 @@
                     },
                     {
                         "name": "GetPreferredWidth",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetPreferredWidth$1",
@@ -20660,7 +20692,7 @@
                     },
                     {
                         "name": "GetPreferredHeight",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetPreferredHeight$1",
@@ -20692,7 +20724,7 @@
                     },
                     {
                         "name": "CalculatePreferredValues",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetCompoundBounds",
@@ -21234,7 +21266,7 @@
                     },
                     {
                         "name": "defaultFontAsset#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "defaultFontAssetPath#get",
@@ -21274,11 +21306,11 @@
                     },
                     {
                         "name": "fallbackFontAssets#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "matchMaterialPreset#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "defaultSpriteAsset#get",
@@ -22966,7 +22998,7 @@
                     },
                     {
                         "name": "RaycastAll$2",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RaycastNonAlloc$2",
@@ -23026,7 +23058,7 @@
                     },
                     {
                         "name": "SphereCastNonAlloc$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SphereCastNonAlloc",
@@ -23038,7 +23070,7 @@
                     },
                     {
                         "name": "OverlapSphereNonAlloc",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "CheckSphere",
@@ -23668,7 +23700,7 @@
                     },
                     {
                         "name": "LoadAll$2",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "LoadAll",
@@ -23676,11 +23708,11 @@
                     },
                     {
                         "name": "FindObjectsOfTypeAll$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FindObjectsOfTypeAll",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "LoadAsync",
@@ -24388,7 +24420,7 @@
                     },
                     {
                         "name": "shader#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "shader#set",
@@ -24396,7 +24428,7 @@
                     },
                     {
                         "name": "passCount#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "renderQueue#get",
@@ -24544,11 +24576,11 @@
                     },
                     {
                         "name": "SetTexture$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetTexture",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetTextureScale$1",
@@ -24676,7 +24708,7 @@
                     },
                     {
                         "name": "ComputeCRC",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -25422,7 +25454,7 @@
                     },
                     {
                         "name": "isTrigger#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isTrigger#set",
@@ -25578,7 +25610,7 @@
                 "instanceMethods": [
                     {
                         "name": "materialCount#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "materialCount#set",
@@ -25658,7 +25690,7 @@
                     },
                     {
                         "name": "Clear",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetTexture",
@@ -26072,11 +26104,11 @@
                     },
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetParticles",
@@ -29084,7 +29116,7 @@
                     },
                     {
                         "name": "ForceUpdateCanvases",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "pixelRect#get",
@@ -29298,15 +29330,15 @@
                     },
                     {
                         "name": "alpha#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "interactable#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "interactable#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "blocksRaycasts#get",
@@ -30044,7 +30076,7 @@
                     },
                     {
                         "name": "NotifyStencilStateChanged",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FindRootSortOverrideCanvas",
@@ -30130,15 +30162,15 @@
                     },
                     {
                         "name": "AddTriangle",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddVert",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddVert$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddVert$2",
@@ -30150,7 +30182,7 @@
                     },
                     {
                         "name": "Clear",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddUIVertexQuad",
@@ -30174,11 +30206,11 @@
                     },
                     {
                         "name": "FillMesh",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FromMesh",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -30484,11 +30516,11 @@
                     },
                     {
                         "name": "MaskEnabled",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Awake",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
@@ -30504,11 +30536,11 @@
                     },
                     {
                         "name": "GetModifiedMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "IsRaycastLocationValid",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -30940,7 +30972,7 @@
                     },
                     {
                         "name": "scale#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "scale#set",
@@ -30954,7 +30986,7 @@
                 "instanceMethods": [
                     {
                         "name": "getDefaultValue",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -30974,7 +31006,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -31136,7 +31168,7 @@
                     },
                     {
                         "name": "xAdvance#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "xAdvance#set",
@@ -31284,11 +31316,11 @@
                     },
                     {
                         "name": "GetFallbackMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddFallbackMaterialReference",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RemoveFallbackMaterialReference",
@@ -31296,11 +31328,11 @@
                     },
                     {
                         "name": "CleanupFallbackMaterials",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ReleaseFallbackMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "CopyMaterialPresetProperties",
@@ -31318,7 +31350,7 @@
                     },
                     {
                         "name": "getDefaultValue",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "$ctor1",
@@ -31350,7 +31382,7 @@
                     },
                     {
                         "name": "ClearUnusedVertices",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ClearUnusedVertices$1",
@@ -31382,7 +31414,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -31666,7 +31698,7 @@
                 "instanceMethods": [
                     {
                         "name": "AddSubTextObject",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontAsset#get",
@@ -31674,7 +31706,7 @@
                     },
                     {
                         "name": "fontAsset#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "spriteAsset#get",
@@ -31682,7 +31714,7 @@
                     },
                     {
                         "name": "spriteAsset#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "mainTexture#get",
@@ -31698,11 +31730,11 @@
                     },
                     {
                         "name": "sharedMaterial#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "sharedMaterial#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fallbackMaterial#get",
@@ -31710,7 +31742,7 @@
                     },
                     {
                         "name": "fallbackMaterial#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fallbackSourceMaterial#get",
@@ -31718,11 +31750,11 @@
                     },
                     {
                         "name": "fallbackSourceMaterial#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "materialForRendering#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isDefaultMaterial#get",
@@ -31734,7 +31766,7 @@
                     },
                     {
                         "name": "padding#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "padding#set",
@@ -31742,7 +31774,7 @@
                     },
                     {
                         "name": "mesh#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "mesh#set",
@@ -31750,15 +31782,15 @@
                     },
                     {
                         "name": "textComponent#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDestroy",
@@ -31770,11 +31802,11 @@
                     },
                     {
                         "name": "GetModifiedMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetPaddingForMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetPaddingForMaterial$1",
@@ -31790,7 +31822,7 @@
                     },
                     {
                         "name": "SetVerticesDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetLayoutDirty",
@@ -31798,7 +31830,7 @@
                     },
                     {
                         "name": "SetMaterialDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetPivotDirty",
@@ -31826,11 +31858,11 @@
                     },
                     {
                         "name": "UpdateMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RecalculateClipping",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetMaterial",
@@ -31850,7 +31882,7 @@
                     },
                     {
                         "name": "SetSharedMaterial",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -32008,7 +32040,7 @@
                     },
                     {
                         "name": "Resize$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
@@ -32238,7 +32270,7 @@
                     },
                     {
                         "name": "RegisterTextElementForGraphicRebuild",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RegisterTextElementForCullingUpdate",
@@ -32246,7 +32278,7 @@
                     },
                     {
                         "name": "UnRegisterTextObjectForUpdate",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UnRegisterTextElementForRebuild",
@@ -32270,7 +32302,7 @@
                     },
                     {
                         "name": "InternalRegisterTextElementForGraphicRebuild",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InternalRegisterTextElementForCullingUpdate",
@@ -32294,7 +32326,7 @@
                     },
                     {
                         "name": "InternalUnRegisterTextObjectForUpdate",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -32328,7 +32360,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -32492,19 +32524,19 @@
                     },
                     {
                         "name": "transform$2#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "renderer#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "mesh#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "meshFilter#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "maskType#get",
@@ -32532,27 +32564,27 @@
                     },
                     {
                         "name": "SetVerticesDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetLayoutDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetMaterialDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetAllDirty",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Rebuild",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateMaterial",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateMeshPadding",
@@ -32600,11 +32632,11 @@
                     },
                     {
                         "name": "Awake",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
@@ -32616,7 +32648,7 @@
                     },
                     {
                         "name": "LoadFontAsset",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateEnvMapMatrix",
@@ -32692,11 +32724,11 @@
                     },
                     {
                         "name": "SetArraySizes",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ComputeMarginSize",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDidApplyAnimationProperties",
@@ -32712,19 +32744,19 @@
                     },
                     {
                         "name": "InternalUpdate",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnPreRenderObject",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GenerateTextMesh",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetTextContainerLocalCorners",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetMeshFilters",
@@ -32732,11 +32764,11 @@
                     },
                     {
                         "name": "SetActiveSubMeshes",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetActiveSubTextObjectRenderers",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "DestroySubMeshObjects",
@@ -32832,7 +32864,7 @@
                     },
                     {
                         "name": "sourceFontFile#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "sourceFontFile#set",
@@ -32840,7 +32872,7 @@
                     },
                     {
                         "name": "atlasPopulationMode#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "atlasPopulationMode#set",
@@ -32972,7 +33004,7 @@
                     },
                     {
                         "name": "fallbackFontAssetTable#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fallbackFontAssetTable#set",
@@ -32988,7 +33020,7 @@
                     },
                     {
                         "name": "fontWeightTable#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontWeightTable#set",
@@ -33092,7 +33124,7 @@
                     },
                     {
                         "name": "TryAddCharacterInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "TryGetCharacter_and_QueueRenderToTexture",
@@ -33237,116 +33269,6 @@
                     {
                         "name": "EaseInOutQuad",
                         "excluded": true
-                    }
-                ]
-            },
-            {
-                "className": "BlockVehiclePlayable",
-                "staticMethods": [],
-                "instanceMethods": [
-                    {
-                        "name": "init",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Awake",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Update",
-                        "excluded": false
-                    },
-                    {
-                        "name": "UpdateRun",
-                        "excluded": false
-                    },
-                    {
-                        "name": "SetState",
-                        "excluded": false
-                    },
-                    {
-                        "name": "SafeDirection",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PointerDown",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PointerHeld",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PointerUp",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PointerOverUi",
-                        "excluded": false
-                    },
-                    {
-                        "name": "LateUpdate",
-                        "excluded": false
-                    },
-                    {
-                        "name": "UpdateAim",
-                        "excluded": false
-                    },
-                    {
-                        "name": "VelocityDirection",
-                        "excluded": false
-                    },
-                    {
-                        "name": "VelocityRotation",
-                        "excluded": false
-                    },
-                    {
-                        "name": "SteerLeanRotation",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CurrentFriction",
-                        "excluded": false
-                    },
-                    {
-                        "name": "AddSpeedBonus",
-                        "excluded": true
-                    },
-                    {
-                        "name": "ApplyVehiclePartStats",
-                        "excluded": false
-                    },
-                    {
-                        "name": "RemoveVehiclePartStats",
-                        "excluded": true
-                    },
-                    {
-                        "name": "OnVehicleObstacleHit",
-                        "excluded": true
-                    },
-                    {
-                        "name": "UpdateLaunchLine",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CacheLaunchLineEndpoints",
-                        "excluded": false
-                    },
-                    {
-                        "name": "LaunchLinePoint",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CanStartLaunchDrag",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PointerInsideAimUi",
-                        "excluded": false
-                    },
-                    {
-                        "name": "StickToGround",
-                        "excluded": false
                     }
                 ]
             },
@@ -33644,7 +33566,7 @@
                     },
                     {
                         "name": "RectangleContainsScreenPoint$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RectangleContainsScreenPoint",
@@ -33930,11 +33852,11 @@
                     },
                     {
                         "name": "Min",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Max",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Scale",
@@ -33954,7 +33876,7 @@
                     },
                     {
                         "name": "op_Implicit",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "op_Addition",
@@ -34154,15 +34076,15 @@
                 "instanceMethods": [
                     {
                         "name": "graphic#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDidApplyAnimationProperties",
@@ -34180,7 +34102,7 @@
                 "instanceMethods": [
                     {
                         "name": "horizontalFit#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "horizontalFit#set",
@@ -34188,7 +34110,7 @@
                     },
                     {
                         "name": "verticalFit#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "verticalFit#set",
@@ -34196,7 +34118,7 @@
                     },
                     {
                         "name": "rectTransform#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -34208,31 +34130,31 @@
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnRectTransformDimensionsChange",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "HandleSelfFittingAlongAxis",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetLayoutHorizontal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetLayoutVertical",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetDirty",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -34258,11 +34180,11 @@
                     },
                     {
                         "name": "minWidth#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "preferredWidth#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "flexibleWidth#get",
@@ -34366,7 +34288,7 @@
                     },
                     {
                         "name": "DelayedSetDirty",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -34416,7 +34338,7 @@
                     },
                     {
                         "name": "ModifyMesh$1",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -34616,7 +34538,7 @@
                     },
                     {
                         "name": "ModifyMesh$1",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -34642,250 +34564,6 @@
                     },
                     {
                         "name": "SetLayoutVertical",
-                        "excluded": false
-                    }
-                ]
-            },
-            {
-                "className": "VehicleCollisionRelay",
-                "staticMethods": [],
-                "instanceMethods": [
-                    {
-                        "name": "Initialize",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnCollisionEnter",
-                        "excluded": true
-                    },
-                    {
-                        "name": "OnTriggerEnter",
-                        "excluded": true
-                    }
-                ]
-            },
-            {
-                "className": "VehiclePartDefinition",
-                "staticMethods": [],
-                "instanceMethods": [
-                    {
-                        "name": "init",
-                        "excluded": false
-                    }
-                ]
-            },
-            {
-                "className": "VehiclePartDragItem",
-                "staticMethods": [],
-                "instanceMethods": [
-                    {
-                        "name": "Part#get",
-                        "excluded": false
-                    },
-                    {
-                        "name": "RectTransform#get",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Level#get",
-                        "excluded": false
-                    },
-                    {
-                        "name": "init",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Initialize",
-                        "excluded": false
-                    },
-                    {
-                        "name": "SetLevel",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnBeginDrag",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnDrag",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnEndDrag",
-                        "excluded": false
-                    }
-                ]
-            },
-            {
-                "className": "VehiclePartGridUi",
-                "staticMethods": [],
-                "instanceMethods": [
-                    {
-                        "name": "ShapeMin",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ShapeSize",
-                        "excluded": false
-                    },
-                    {
-                        "name": "EnsureCells",
-                        "excluded": false
-                    },
-                    {
-                        "name": "DefaultCells",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ClearChildren",
-                        "excluded": false
-                    },
-                    {
-                        "name": "DragRoot#get",
-                        "excluded": false
-                    },
-                    {
-                        "name": "init",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Awake",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnDestroy",
-                        "excluded": true
-                    },
-                    {
-                        "name": "BindButtons",
-                        "excluded": false
-                    },
-                    {
-                        "name": "Rebuild",
-                        "excluded": false
-                    },
-                    {
-                        "name": "UseDefaultVehicleParts",
-                        "excluded": true
-                    },
-                    {
-                        "name": "TryPlacePart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ReleasePartCells",
-                        "excluded": true
-                    },
-                    {
-                        "name": "RestorePlacedPart",
-                        "excluded": true
-                    },
-                    {
-                        "name": "IsOverTray",
-                        "excluded": true
-                    },
-                    {
-                        "name": "MoveItemToTray",
-                        "excluded": true
-                    },
-                    {
-                        "name": "MoveDraggedItem",
-                        "excluded": false
-                    },
-                    {
-                        "name": "PreviewPart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "TryMergePart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CanMergePart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ClearPreview",
-                        "excluded": false
-                    },
-                    {
-                        "name": "OnPlayButtonClicked",
-                        "excluded": false
-                    },
-                    {
-                        "name": "AddCoins",
-                        "excluded": true
-                    },
-                    {
-                        "name": "BuyRandomPart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "RefreshCurrencyText",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ShowBuildUi",
-                        "excluded": true
-                    },
-                    {
-                        "name": "BuildBoard",
-                        "excluded": false
-                    },
-                    {
-                        "name": "BuildTray",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CreatePartItem",
-                        "excluded": false
-                    },
-                    {
-                        "name": "MoveItemToBoard",
-                        "excluded": false
-                    },
-                    {
-                        "name": "AddIcon",
-                        "excluded": true
-                    },
-                    {
-                        "name": "GetLevelColor",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ApplyPart",
-                        "excluded": false
-                    },
-                    {
-                        "name": "RemovePart",
-                        "excluded": true
-                    },
-                    {
-                        "name": "ApplyLevelUpgrade",
-                        "excluded": false
-                    },
-                    {
-                        "name": "RemovePartStats",
-                        "excluded": true
-                    },
-                    {
-                        "name": "TryGetOriginFromItem",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CanPlace",
-                        "excluded": false
-                    },
-                    {
-                        "name": "BoardSize",
-                        "excluded": false
-                    },
-                    {
-                        "name": "CellCenter",
-                        "excluded": false
-                    },
-                    {
-                        "name": "ShapeCenter",
                         "excluded": false
                     }
                 ]
@@ -34982,7 +34660,7 @@
                 "instanceMethods": [
                     {
                         "name": "getDefaultValue",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "transform#get",
@@ -35010,7 +34688,7 @@
                     },
                     {
                         "name": "$clone",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -35029,6 +34707,1750 @@
                     {
                         "name": "Invoke",
                         "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.TextCore.LowLevel.FontEngine",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetInstance",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InitializeFontEngine",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DestroyFontEngine",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SendCancellationRequest",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace$2",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace$3",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace$1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace$4",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadFontFace$5",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetFaceSize",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetFaceInfo",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LoadGlyph",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryGetGlyphWithUnicodeValue",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryGetGlyphWithIndexValue",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryPackGlyphInAtlas",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryPackGlyphsInAtlas",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RenderGlyphToTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RenderGlyphsToTexture$1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RenderGlyphsToTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RenderGlyphsToSharedTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryAddGlyphToTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TryAddGlyphsToTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetGlyphPairAdjustmentTable",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetGlyphPairAdjustmentRecords",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetGlyphPairAdjustmentRecords$1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetGlyphIndex",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ResetAtlasTexture",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.TextCore.LowLevel.GlyphMarshallingStruct",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "getDefaultValue",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "$ctor2",
+                        "excluded": true
+                    },
+                    {
+                        "name": "$ctor1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "getHashCode",
+                        "excluded": true
+                    },
+                    {
+                        "name": "equals",
+                        "excluded": true
+                    },
+                    {
+                        "name": "$clone",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.TrailModule",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "enabled#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "enabled#set",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.AudioClip",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "name#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "name#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "length#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.LayoutUtility",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "GetMinSize",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetPreferredSize",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetFlexibleSize",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetMinWidth",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetPreferredWidth",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetFlexibleWidth",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetMinHeight",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetPreferredHeight",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetFlexibleHeight",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetLayoutProperty",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetLayoutProperty$1",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.LayoutElement",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "minWidth#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "minWidth#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "minHeight#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "minHeight#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "preferredWidth#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "preferredWidth#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "preferredHeight#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "preferredHeight#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "flexibleWidth#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "flexibleWidth#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "flexibleHeight#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "flexibleHeight#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "layoutPriority#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ignoreLayout#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ignoreLayout#set",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnEnable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDisable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDidApplyAnimationProperties",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnTransformParentChanged",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CalculateLayoutInputHorizontal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CalculateLayoutInputVertical",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetDirty",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.Scrollbar",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "handleRect#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "handleRect#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "direction#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "direction#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "value#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "value#set",
+                        "excluded": false
+                    },
+                    {
+                        "name": "size#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "size#set",
+                        "excluded": false
+                    },
+                    {
+                        "name": "numberOfSteps#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "numberOfSteps#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "stepSize#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "axis#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "reverseValue#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnEnable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDisable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnRectTransformDimensionsChange",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnBeginDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Rebuild",
+                        "excluded": true
+                    },
+                    {
+                        "name": "LayoutComplete",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GraphicUpdateComplete",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnInitializePotentialDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetValueWithoutNotify",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateCachedReferences",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Set",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateVisuals",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DoUpdateDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "MayDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnPointerDown",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ClickRepeat",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnPointerUp",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnMove",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindSelectableOnLeft",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindSelectableOnRight",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindSelectableOnUp",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindSelectableOnDown",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetDirection",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Coffee.UIExtensions.Unmask",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Common.VirtualStick.DragHandler",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "OnPointerDown",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnBeginDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnEndDrag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnPointerUp",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.Board",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Rect#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CellSize#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Setup",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPositionOnBoard",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.CarSphereTracer",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "AddForceWeight#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CarView#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Setup",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetCustomGravityWeight",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ForceUpdate",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayRunningEffect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "StopRunningEffect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetPart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "HidePartView",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetCoin",
+                        "excluded": true
+                    },
+                    {
+                        "name": "HideCoinView",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayDashEffect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UnlockBooster",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetAttachment",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetBooster",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AppearBooster",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetActivateBooster",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateBooster",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayBoosterAttachEffect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SustainDash",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.CarView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "FirstFreeRoot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "T#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DefaultWheels#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "IdlingTransforms#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Roof#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AttachedParts#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDrawGizmos",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetPartViews",
+                        "excluded": false
+                    },
+                    {
+                        "name": "AttachPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "DetachPart$1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DetachPart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetWheels",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ActivatePart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SwitchActivateParts",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateAllParts",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetTiltBody",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetWheelSteerAngle",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetSink",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetAttachInfos",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ReuseRoot",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RefreshDefaultWheel",
+                        "excluded": false
+                    },
+                    {
+                        "name": "AttachWheelPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "DetachParts",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.CarView.AttachInfo",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "PartType#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SideType#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Roots#get",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "T#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AttachType#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDrawGizmos",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Initialize",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Activate",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Inactivate",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateInternal",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.InGamePuzzleUiView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InstantiatePrefabRect",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateUiRect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetChildrenActive",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ClearChildren",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindChild",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Board#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "BoostIconSprite#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AttachmentIconSprite#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayButton#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "BuyButton#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RunDistanceMultiplier#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Setup",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetOpen",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetBuyPrice",
+                        "excluded": false
+                    },
+                    {
+                        "name": "AddGold",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetPerformance",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetBoostLevel",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetBoostEvolvePrice",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RefreshGridVisible",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RefreshAttachmentButtons",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetAttachmentButton",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayFade",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayAdvertisement",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdatePerformanceFromPlacedParts",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BuildRuntimePuzzle",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BuyRuntimePart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateTrayPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "DropPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "MergePart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CanPlace",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RemovePlacedPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetGold",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateBuyPrice",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetBuyPrice",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetRunPerformanceTotal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPartLevelColor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "AttachCarPart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetMergeTarget",
+                        "excluded": false
+                    },
+                    {
+                        "name": "IsInTray",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPartSprite",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetBlockSprite",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetMinoSpriteScale",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetCellIndex",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCellIndex$1",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCellPosition",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetRuntimeCellSize",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateBoardGrid",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateListItem",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateMinoIcon",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindButton",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindTextIn",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PlayCarAttachEffect",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SpawnCarAttachEffect",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateDefaultCarAttachEffect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetTrayMergeTarget",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetUiCamera",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.InGameResultUiView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetClaimAction",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Open",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetOpen",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CacheViews",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.Mino",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Rect#get",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.MinoListItem",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Rect#get",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.MinoShapeTypeExtensions",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetBlockPattern",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PartData",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "ShapeType#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Rotate#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "MinoSpriteScale#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PerformanceData#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "LevelUpViews#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Prefab#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPrefab",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetMinoSprite",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetBlockSprite",
+                        "excluded": false
+                    },
+                    {
+                        "name": "IsLevelUpViewCountStop",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PartDataAsset",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "PartDataList#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryGetPartData",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPerformanceData",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetId",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PartViewData",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Prefab#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "MinoSprite#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "BlockSprite#get",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PerformanceData",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "TerrainType#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Value#get",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PlayableSoundEffects",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Register",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Play",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Instance",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetClip",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PlayInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "EnsureAudioSource",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.RuntimePuzzlePartIcon",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "IsPlaced#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Setup",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerDown",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerUp",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PlaceOn",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PlaceInTray",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ClearPlaced",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ReturnToStart",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HideTraySlot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowTraySlot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetLevel",
+                        "excluded": true
+                    },
+                    {
+                        "name": "BuildBlocks",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateBlock",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.UI.CustomButton",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "SetText",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetState",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetActive",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "PlayableBootstrap",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "TryGetLocalRendererBounds",
+                        "excluded": true
+                    },
+                    {
+                        "name": "EncapsulateLocalPoint",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AssignNearestPair",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PointerDown",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PointerHeld",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PointerUp",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PointerOverUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindSceneObjectOfType",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": false
+                    },
+                    {
+                        "name": "LateUpdate",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateAim",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateRun",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RegisterSoundEffects",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FinishRun",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ResetRun",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ApplyAim",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetupSlingshot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetSlingshotVisible",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateSlingshot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCarEndPoints",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RopeToWorld",
+                        "excluded": false
+                    },
+                    {
+                        "name": "WorldToRope",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HideBuildUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowBuildUi",
+                        "excluded": true
+                    },
+                    {
+                        "name": "HandleRunInteractions",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryCollectCoin",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCoinObject",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCoinAmount",
+                        "excluded": true
+                    },
+                    {
+                        "name": "IsObstacleHit",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BounceFrom",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateCollisionTilt",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RestoreCoins",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SnapToGround",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CacheResultUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OpenResultUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetupLoopAudio",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CreateLoopAudioSource",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PlayMoveLoop",
+                        "excluded": false
+                    },
+                    {
+                        "name": "StopMoveLoop",
+                        "excluded": false
+                    },
+                    {
+                        "name": "PlayMusic",
+                        "excluded": false
+                    },
+                    {
+                        "name": "StopMusic",
+                        "excluded": false
+                    },
+                    {
+                        "name": "NotifyPlayActionAfterResultUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "IsBuildUiVisible",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ApplyPuzzleCameraPose",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RestoreGameplayCameraPose",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.JetBoosterPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateInternal",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.CaterpillarPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateInternal",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.WaitForSeconds",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Reset",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "LunaManager",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Start",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CheckClickShowEndCard",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowLoseCard",
+                        "excluded": true
+                    },
+                    {
+                        "name": "PauseGameplay",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ResumeGameplay",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnTimeExpired",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowRetryCard",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowEndCard",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowEndCardNodelay",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowWinCard",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnClickEndCard",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDestroy",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowEndCardPanel",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowRetryCardPanel",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowWinCardPanel",
+                        "excluded": true
+                    },
+                    {
+                        "name": "HideAllCards",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.RearWingPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateInternal",
+                        "excluded": true
+                    },
+                    {
+                        "name": "InactivateInternal",
+                        "excluded": true
                     }
                 ]
             }

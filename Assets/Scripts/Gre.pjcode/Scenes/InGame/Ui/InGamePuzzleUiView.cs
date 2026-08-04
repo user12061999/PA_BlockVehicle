@@ -63,6 +63,8 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private Color _rarePartColor = new Color(0.2f, 0.55f, 1f, 1f);
         [SerializeField] private Color _epicPartColor = new Color(0.68f, 0.25f, 1f, 1f);
         [SerializeField] private Color _legendPartColor = new Color(1f, 0.82f, 0.12f, 1f);
+        [SerializeField] private GameObject _carAttachEffectPrefab;
+        [SerializeField] private float _carAttachEffectLifetime = 2f;
 
         static readonly int[] RuntimePartIds = { 9, 0, 2, 1 };
         readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
@@ -316,6 +318,13 @@ namespace Gre.pjcode.Scenes.InGame
                 return;
             }
 
+            RuntimePuzzlePartIcon trayMergeTarget = GetTrayMergeTarget(icon, screenPosition);
+            if (trayMergeTarget != null)
+            {
+                MergePart(icon, trayMergeTarget);
+                return;
+            }
+
             if (IsInTray(screenPosition))
             {
                 RemovePlacedPart(icon);
@@ -329,8 +338,19 @@ namespace Gre.pjcode.Scenes.InGame
             Vector2Int origin = GetCellPosition(cellIndex);
             if (cellIndex < 0 || !CanPlace(icon, origin))
             {
-                PlayableSoundEffects.Play(PlayableSfx.Cancel);
-                icon.ReturnToStart();
+                if (icon.IsPlaced)
+                {
+                    RemovePlacedPart(icon);
+                    icon.PlaceInTray();
+                    PlayableSoundEffects.Play(PlayableSfx.PartSet);
+                    UpdatePerformanceFromPlacedParts();
+                }
+                else
+                {
+                    PlayableSoundEffects.Play(PlayableSfx.Cancel);
+                    icon.ReturnToStart();
+                }
+
                 return;
             }
 
@@ -364,7 +384,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1), GetMinoSpriteScale(target.PartId));
             PlayableSoundEffects.Play(PlayableSfx.Merge);
-            AttachCarPart(target);
+            if (target.IsPlaced) AttachCarPart(target);
             UpdateBuyPrice();
             UpdatePerformanceFromPlacedParts();
         }
@@ -449,6 +469,63 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (_carView == null || !_partDataAsset.TryGetPartData(icon.PartId, out PartData partData)) return;
             icon.LinkedPartUniqueId = _carView.AttachPart(partData.GetPrefab(icon.Level), icon.PartId, icon.LinkedPartUniqueId);
+            PlayCarAttachEffect(icon.LinkedPartUniqueId);
+        }
+
+        void PlayCarAttachEffect(string uniqueId)
+        {
+            if (_carView == null) return;
+
+            List<PartView> parts = string.IsNullOrEmpty(uniqueId) ? null : _carView.GetPartViews(uniqueId);
+            if (parts == null || parts.Count == 0)
+            {
+                SpawnCarAttachEffect(_carView.transform);
+                return;
+            }
+
+            foreach (PartView part in parts)
+            {
+                if (part != null) SpawnCarAttachEffect(part.transform);
+            }
+        }
+
+        void SpawnCarAttachEffect(Transform target)
+        {
+            if (target == null) return;
+
+            GameObject effect = _carAttachEffectPrefab != null
+                ? Instantiate(_carAttachEffectPrefab, target.position, target.rotation, target)
+                : CreateDefaultCarAttachEffect(target);
+            Destroy(effect, Mathf.Max(0.1f, _carAttachEffectLifetime));
+        }
+
+        GameObject CreateDefaultCarAttachEffect(Transform target)
+        {
+            GameObject effect = new GameObject("CarAttachEffect");
+            effect.transform.SetParent(target, false);
+            effect.transform.localPosition = Vector3.zero;
+            effect.transform.localRotation = Quaternion.identity;
+
+            ParticleSystem particles = effect.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule main = particles.main;
+            main.duration = 0.45f;
+            main.loop = false;
+            main.startLifetime = 0.35f;
+            main.startSpeed = 1.8f;
+            main.startSize = 0.18f;
+            main.startColor = new Color(1f, 0.85f, 0.25f, 1f);
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            ParticleSystem.EmissionModule emission = particles.emission;
+            emission.rateOverTime = 0f;
+
+            ParticleSystem.ShapeModule shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.25f;
+
+            particles.Play();
+            particles.Emit(16);
+            return effect;
         }
 
         RuntimePuzzlePartIcon GetMergeTarget(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
@@ -459,13 +536,33 @@ namespace Gre.pjcode.Scenes.InGame
             return target == icon ? null : target;
         }
 
+        RuntimePuzzlePartIcon GetTrayMergeTarget(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
+        {
+            if (!IsInTray(screenPosition)) return null;
+
+            Camera camera = GetUiCamera();
+            foreach (RuntimePuzzlePartIcon target in _runtimeParts)
+            {
+                if (target == null || target == icon || target.IsPlaced) continue;
+                RectTransform rect = target.transform as RectTransform;
+                if (rect == null) continue;
+                if (RectTransformUtility.RectangleContainsScreenPoint(rect, screenPosition, camera)) return target;
+            }
+
+            return null;
+        }
+
         bool IsInTray(Vector2 screenPosition)
         {
             if (_minoListRoot == null) return false;
-            Camera camera = null;
+            return RectTransformUtility.RectangleContainsScreenPoint(_minoListRoot, screenPosition, GetUiCamera());
+        }
+
+        Camera GetUiCamera()
+        {
             Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) camera = canvas.worldCamera;
-            return RectTransformUtility.RectangleContainsScreenPoint(_minoListRoot, screenPosition, camera);
+            if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+            return canvas.worldCamera;
         }
 
         Sprite GetPartSprite(int partId, int level)
