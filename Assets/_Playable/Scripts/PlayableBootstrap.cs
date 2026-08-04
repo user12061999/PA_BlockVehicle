@@ -16,6 +16,8 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     [SerializeField] private string vehicleName = "CarSphere";
     [SerializeField] private float maxPull = 4f;
+    [SerializeField] private float pullScreenScale = 0.015f;
+    [SerializeField, Range(0f, 75f)] private float maxAimAngle = 45f;
     [SerializeField] private float minSpeed = 12f;
     [SerializeField] private float maxSpeed = 30f;
     [SerializeField] private float friction = 8f;
@@ -31,6 +33,18 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float collisionTiltAngle = 18f;
     [SerializeField] private float collisionTiltReturnSpeed = 90f;
     [SerializeField] private int coinAmountFallback = 100;
+    [Header("Slingshot")]
+    [SerializeField] private string slingshotName = "Slingshot";
+    [SerializeField] private LineRenderer slingshotRope;
+    [SerializeField] private Transform slingshotStartPoint;
+    [SerializeField] private Transform slingshotEndPoint;
+    [SerializeField] private Transform slingshotCarPointA;
+    [SerializeField] private Transform slingshotCarPointB;
+    [SerializeField] private bool hideSlingshotOnLaunch = true;
+    [SerializeField, Range(0f, 1f)] private float slingshotCarHeight = 0.55f;
+    [SerializeField] private float slingshotFallbackHalfWidth = 0.9f;
+    [SerializeField] private float slingshotFallbackHeight = 1.2f;
+    [SerializeField] private float slingshotFallbackRearOffset = 0.9f;
     [Header("Sound Effects")]
     [SerializeField] private AudioClip sfxTap;
     [SerializeField] private AudioClip sfxCancel;
@@ -63,6 +77,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
     float steer;
     float collisionTilt;
     bool dragging;
+    Vector3 slingshotStartWorldPosition;
+    Vector3 slingshotEndWorldPosition;
+    bool slingshotReady;
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
     readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
@@ -95,6 +112,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         SnapToGround(startRotation * Vector3.forward, true);
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
+        SetupSlingshot();
 
         Rigidbody body = vehicle.GetComponent<Rigidbody>();
         if (body != null)
@@ -113,7 +131,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void Update()
     {
-        if (state == State.Aim) UpdateAim();
+        if (state == State.Aim)
+        {
+            UpdateAim();
+            UpdateSlingshot();
+        }
         else if (state == State.Run) UpdateRun();
         UpdateCollisionTilt();
     }
@@ -137,19 +159,19 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         if (PointerHeld(out pointer))
         {
-            pull = Mathf.Clamp((dragStart.y - pointer.y) * 0.015f, 0f, maxPull);
-            vehicle.SetPositionAndRotation(startPosition - startRotation * Vector3.forward * pull, startRotation);
-            SnapToGround(startRotation * Vector3.forward, true);
+            ApplyAim(pointer);
         }
 
-        if (PointerUp(out _))
+        if (PointerUp(out pointer))
         {
+            ApplyAim(pointer);
             dragging = false;
             float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
             speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier;
             state = State.Run;
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             HideBuildUi();
+            SetSlingshotVisible(!hideSlingshotOnLaunch);
         }
     }
 
@@ -215,7 +237,157 @@ public sealed class PlayableBootstrap : MonoBehaviour
         SnapToGround(startRotation * Vector3.forward, true);
         if (carView != null) carView.SetTiltBody(0f);
         if (followCamera != null) followCamera.transform.position = vehicle.position + cameraOffset;
+        SetSlingshotVisible(true);
+        UpdateSlingshot();
         ShowBuildUi();
+    }
+
+    void ApplyAim(Vector2 pointer)
+    {
+        Vector3 forward = startRotation * Vector3.forward;
+        Vector3 right = startRotation * Vector3.right;
+        float backwardPull = Mathf.Clamp((dragStart.y - pointer.y) * pullScreenScale, 0f, maxPull);
+        float sidePullLimit = backwardPull * Mathf.Tan(maxAimAngle * Mathf.Deg2Rad);
+        float sidePull = Mathf.Clamp((pointer.x - dragStart.x) * pullScreenScale, -sidePullLimit, sidePullLimit);
+        Vector3 pullOffset = right * sidePull - forward * backwardPull;
+
+        if (pullOffset.magnitude > maxPull) pullOffset = pullOffset.normalized * maxPull;
+        pull = pullOffset.magnitude;
+        Vector3 launchForward = pull > 0.001f ? -pullOffset.normalized : forward;
+        vehicle.SetPositionAndRotation(startPosition + pullOffset, Quaternion.LookRotation(launchForward, startRotation * Vector3.up));
+        SnapToGround(launchForward, true);
+    }
+
+    void SetupSlingshot()
+    {
+        if (slingshotRope == null && !string.IsNullOrEmpty(slingshotName))
+        {
+            GameObject slingshot = GameObject.Find(slingshotName);
+            if (slingshot != null) slingshotRope = slingshot.GetComponentInChildren<LineRenderer>();
+        }
+
+        if (slingshotRope == null) return;
+
+        int pointCount = slingshotRope.positionCount;
+        slingshotStartWorldPosition = pointCount > 0
+            ? RopeToWorld(slingshotRope.GetPosition(0))
+            : slingshotRope.transform.position - slingshotRope.transform.right * 2f;
+        slingshotEndWorldPosition = pointCount > 1
+            ? RopeToWorld(slingshotRope.GetPosition(pointCount - 1))
+            : slingshotRope.transform.position + slingshotRope.transform.right * 2f;
+        slingshotRope.positionCount = 4;
+        slingshotReady = true;
+        SetSlingshotVisible(true);
+        UpdateSlingshot();
+    }
+
+    void SetSlingshotVisible(bool isVisible)
+    {
+        if (slingshotRope != null) slingshotRope.enabled = isVisible;
+    }
+
+    void UpdateSlingshot()
+    {
+        if (!slingshotReady || slingshotRope == null || !slingshotRope.enabled) return;
+
+        Vector3 startPoint = slingshotStartPoint == null ? slingshotStartWorldPosition : slingshotStartPoint.position;
+        Vector3 endPoint = slingshotEndPoint == null ? slingshotEndWorldPosition : slingshotEndPoint.position;
+        GetCarEndPoints(startPoint, endPoint, out Vector3 firstCarPoint, out Vector3 secondCarPoint);
+
+        slingshotRope.SetPosition(0, WorldToRope(startPoint));
+        slingshotRope.SetPosition(1, WorldToRope(firstCarPoint));
+        slingshotRope.SetPosition(2, WorldToRope(secondCarPoint));
+        slingshotRope.SetPosition(3, WorldToRope(endPoint));
+    }
+
+    void GetCarEndPoints(Vector3 startPoint, Vector3 endPoint, out Vector3 firstCarPoint, out Vector3 secondCarPoint)
+    {
+        if (slingshotCarPointA != null && slingshotCarPointB != null)
+        {
+            AssignNearestPair(startPoint, endPoint, slingshotCarPointA.position, slingshotCarPointB.position, out firstCarPoint, out secondCarPoint);
+            return;
+        }
+
+        Transform carRoot = carView == null ? vehicle : carView.transform;
+        if (TryGetLocalRendererBounds(carRoot, out Bounds bounds))
+        {
+            float y = Mathf.Lerp(bounds.min.y, bounds.max.y, slingshotCarHeight);
+            float z = bounds.min.z;
+            Vector3 left = carRoot.TransformPoint(new Vector3(bounds.min.x, y, z));
+            Vector3 right = carRoot.TransformPoint(new Vector3(bounds.max.x, y, z));
+            AssignNearestPair(startPoint, endPoint, left, right, out firstCarPoint, out secondCarPoint);
+            return;
+        }
+
+        Vector3 fallbackCenter = vehicle.position - vehicle.forward * Mathf.Abs(slingshotFallbackRearOffset) + vehicle.up * slingshotFallbackHeight;
+        Vector3 fallbackLeft = fallbackCenter - vehicle.right * Mathf.Abs(slingshotFallbackHalfWidth);
+        Vector3 fallbackRight = fallbackCenter + vehicle.right * Mathf.Abs(slingshotFallbackHalfWidth);
+        AssignNearestPair(startPoint, endPoint, fallbackLeft, fallbackRight, out firstCarPoint, out secondCarPoint);
+    }
+
+    static bool TryGetLocalRendererBounds(Transform root, out Bounds bounds)
+    {
+        bounds = default;
+        if (root == null) return false;
+
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>();
+        bool hasBounds = false;
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer == null || !renderer.enabled) continue;
+
+            Bounds worldBounds = renderer.bounds;
+            Vector3 min = worldBounds.min;
+            Vector3 max = worldBounds.max;
+            EncapsulateLocalPoint(root, new Vector3(min.x, min.y, min.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(min.x, min.y, max.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(min.x, max.y, min.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(min.x, max.y, max.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(max.x, min.y, min.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(max.x, min.y, max.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(max.x, max.y, min.z), ref bounds, ref hasBounds);
+            EncapsulateLocalPoint(root, new Vector3(max.x, max.y, max.z), ref bounds, ref hasBounds);
+        }
+
+        return hasBounds;
+    }
+
+    static void EncapsulateLocalPoint(Transform root, Vector3 worldPoint, ref Bounds bounds, ref bool hasBounds)
+    {
+        Vector3 localPoint = root.InverseTransformPoint(worldPoint);
+        if (!hasBounds)
+        {
+            bounds = new Bounds(localPoint, Vector3.zero);
+            hasBounds = true;
+            return;
+        }
+
+        bounds.Encapsulate(localPoint);
+    }
+
+    static void AssignNearestPair(Vector3 startPoint, Vector3 endPoint, Vector3 first, Vector3 second, out Vector3 nearestStart, out Vector3 nearestEnd)
+    {
+        float directDistance = (startPoint - first).sqrMagnitude + (endPoint - second).sqrMagnitude;
+        float swappedDistance = (startPoint - second).sqrMagnitude + (endPoint - first).sqrMagnitude;
+        if (swappedDistance < directDistance)
+        {
+            nearestStart = second;
+            nearestEnd = first;
+            return;
+        }
+
+        nearestStart = first;
+        nearestEnd = second;
+    }
+
+    Vector3 RopeToWorld(Vector3 position)
+    {
+        return slingshotRope.useWorldSpace ? position : slingshotRope.transform.TransformPoint(position);
+    }
+
+    Vector3 WorldToRope(Vector3 position)
+    {
+        return slingshotRope.useWorldSpace ? position : slingshotRope.transform.InverseTransformPoint(position);
     }
 
     void HideBuildUi()
