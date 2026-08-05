@@ -71,17 +71,18 @@ namespace Gre.pjcode.Scenes.InGame
 
         public string AttachPart(PartView partPrefab, int partId, string uniqueId = "")
         {
-            if (partPrefab == null) return string.Empty;
+            if (partPrefab == null) return uniqueId;
             if (string.IsNullOrEmpty(uniqueId)) uniqueId = Guid.NewGuid().ToString();
 
             AttachInfo[] infos = GetAttachInfos(partPrefab.AttachType);
             if (infos.Length == 0) return uniqueId;
             if (partPrefab.AttachType == PartAttachType.Wheel) return AttachWheelPart(partPrefab, partId, uniqueId, infos);
 
+            List<Transform> reusableRoots = DetachPartAndGetRoots(uniqueId);
             foreach (AttachInfo info in infos)
             {
-                Transform root = FirstFreeRoot(info);
-                if (root == null) root = ReuseRoot(partPrefab.AttachType);
+                Transform root = TakeReusableRoot(reusableRoots, info);
+                if (root == null) root = FirstFreeRoot(info);
                 if (root == null) continue;
 
                 PartView part = Instantiate(partPrefab, root);
@@ -116,14 +117,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void DetachPart(string uniqueId)
         {
-            for (int i = _attachedParts.Count - 1; i >= 0; i--)
-            {
-                PartView part = _attachedParts[i];
-                if (part == null || part.UniqueId != uniqueId) continue;
-                _attachedParts.RemoveAt(i);
-                Destroy(part.gameObject);
-            }
-
+            DetachPartAndGetRoots(uniqueId);
             RefreshDefaultWheel();
         }
 
@@ -249,15 +243,6 @@ namespace Gre.pjcode.Scenes.InGame
             return null;
         }
 
-        Transform ReuseRoot(PartAttachType attachType)
-        {
-            PartView oldPart = _attachedParts.Find(part => part != null && part.AttachType == attachType);
-            if (oldPart == null) return null;
-            Transform root = oldPart.transform.parent;
-            DetachPart(oldPart.UniqueId);
-            return root;
-        }
-
         void RefreshDefaultWheel()
         {
             bool hasWheelPart = _attachedParts.Exists(part => part != null && part.AttachType == PartAttachType.Wheel);
@@ -266,6 +251,40 @@ namespace Gre.pjcode.Scenes.InGame
             {
                 if (wheel != null) wheel.gameObject.SetActive(!hasWheelPart);
             }
+        }
+
+        List<Transform> DetachPartAndGetRoots(string uniqueId)
+        {
+            List<Transform> roots = new List<Transform>();
+            if (string.IsNullOrEmpty(uniqueId)) return roots;
+
+            for (int i = _attachedParts.Count - 1; i >= 0; i--)
+            {
+                PartView part = _attachedParts[i];
+                if (part == null || part.UniqueId != uniqueId) continue;
+                Transform root = part.transform.parent;
+                if (root != null) roots.Add(root);
+                _attachedParts.RemoveAt(i);
+                Destroy(part.gameObject);
+            }
+
+            return roots;
+        }
+
+        static Transform TakeReusableRoot(List<Transform> reusableRoots, AttachInfo info)
+        {
+            if (reusableRoots == null || info == null || info.Roots == null) return null;
+
+            for (int i = 0; i < reusableRoots.Count; i++)
+            {
+                Transform root = reusableRoots[i];
+                if (root == null) continue;
+                if (Array.IndexOf(info.Roots, root) < 0) continue;
+                reusableRoots.RemoveAt(i);
+                return root;
+            }
+
+            return null;
         }
     }
 }

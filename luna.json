@@ -1955,10 +1955,6 @@
                 "excluded": true
             },
             {
-                "name": "LunaUnity.Utils.Delay",
-                "excluded": true
-            },
-            {
                 "name": "LunaUnity.Utils.Interval",
                 "excluded": true
             },
@@ -15032,7 +15028,7 @@
                     },
                     {
                         "name": "RemoveAllListeners",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetPersistentTarget",
@@ -16940,7 +16936,7 @@
                     },
                     {
                         "name": "name#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "name#set",
@@ -28628,7 +28624,7 @@
                     },
                     {
                         "name": "ctor",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -35336,7 +35332,7 @@
                     },
                     {
                         "name": "GetCoin",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "HideCoinView",
@@ -35344,7 +35340,7 @@
                     },
                     {
                         "name": "PlayDashEffect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UnlockBooster",
@@ -35376,7 +35372,7 @@
                     },
                     {
                         "name": "SustainDash",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -35430,7 +35426,7 @@
                     },
                     {
                         "name": "DetachPart$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "DetachPart",
@@ -35470,7 +35466,7 @@
                     },
                     {
                         "name": "ReuseRoot",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RefreshDefaultWheel",
@@ -35628,7 +35624,7 @@
                     },
                     {
                         "name": "AddGold",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetPerformance",
@@ -35684,7 +35680,7 @@
                     },
                     {
                         "name": "MergePart",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "CanPlace",
@@ -35728,15 +35724,15 @@
                     },
                     {
                         "name": "GetPartSprite",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetBlockSprite",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetMinoSpriteScale",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetCellIndex",
@@ -35806,11 +35802,11 @@
                     },
                     {
                         "name": "SetClaimAction",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Open",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetOpen",
@@ -36056,7 +36052,7 @@
                     },
                     {
                         "name": "SetLevel",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "BuildBlocks",
@@ -36156,7 +36152,7 @@
                     },
                     {
                         "name": "ResetRun",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ApplyAim",
@@ -36192,7 +36188,7 @@
                     },
                     {
                         "name": "ShowBuildUi",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "HandleRunInteractions",
@@ -36203,12 +36199,8 @@
                         "excluded": false
                     },
                     {
-                        "name": "GetCoinObject",
-                        "excluded": false
-                    },
-                    {
                         "name": "GetCoinAmount",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "IsObstacleHit",
@@ -36224,7 +36216,7 @@
                     },
                     {
                         "name": "RestoreCoins",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SnapToGround",
@@ -36276,6 +36268,22 @@
                     },
                     {
                         "name": "RestoreGameplayCameraPose",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HandleDashInteractions",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryTriggerDash",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetDashObject",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetTaggedObject",
                         "excluded": false
                     }
                 ]
@@ -36392,7 +36400,7 @@
                     },
                     {
                         "name": "ShowEndCard",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowEndCardNodelay",
@@ -36412,7 +36420,7 @@
                     },
                     {
                         "name": "ShowEndCardPanel",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowRetryCardPanel",
@@ -36451,6 +36459,32 @@
                     {
                         "name": "InactivateInternal",
                         "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "LunaUnity.Utils.Delay",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Stop",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Tick",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Tick\",this)}this.c$-=t;if(this.c$<=0){pc.Application.getApplication().events.off(\"update",
+                        "excluded": false
                     }
                 ]
             }

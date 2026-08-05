@@ -42,6 +42,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float gameEndedDelay = 0.25f;
     [Header("Camera")]
     [SerializeField] private Transform puzzleCameraPoint;
+    [SerializeField] private float buildToDefaultCameraTransitionDuration = 0.45f;
     [Header("Slingshot")]
     [SerializeField] private string slingshotName = "Slingshot";
     [SerializeField] private LineRenderer slingshotRope;
@@ -98,6 +99,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector3 slingshotEndWorldPosition;
     bool slingshotReady;
     Coroutine gameEndedRoutine;
+    Coroutine cameraTransitionRoutine;
     AudioSource moveLoopSource;
     AudioSource musicSource;
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
@@ -174,7 +176,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void LateUpdate()
     {
-        if (followCamera == null || vehicle == null || state == State.Aim) return;
+        if (followCamera == null || vehicle == null || state == State.Aim || cameraTransitionRoutine != null) return;
         followCamera.transform.position = Vector3.Lerp(followCamera.transform.position, vehicle.position + cameraOffset, Time.deltaTime * 5f);
     }
 
@@ -513,7 +515,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void HideBuildUi()
     {
-        RestoreGameplayCameraPose();
+        RestoreGameplayCameraPose(true);
         if (puzzleUi != null) puzzleUi.SetOpen(false);
         else if (buildUi != null) buildUi.SetActive(false);
     }
@@ -522,6 +524,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (puzzleUi != null) puzzleUi.SetOpen(true, true);
         else if (buildUi != null) buildUi.SetActive(true);
+        StopCameraTransition();
         ApplyPuzzleCameraPose();
     }
 
@@ -534,13 +537,56 @@ public sealed class PlayableBootstrap : MonoBehaviour
     void ApplyPuzzleCameraPose()
     {
         if (followCamera == null || puzzleCameraPoint == null) return;
+        StopCameraTransition();
         followCamera.transform.SetPositionAndRotation(puzzleCameraPoint.position, puzzleCameraPoint.rotation);
     }
 
-    void RestoreGameplayCameraPose()
+    void RestoreGameplayCameraPose(bool animated = false)
     {
         if (followCamera == null) return;
+        if (animated && buildToDefaultCameraTransitionDuration > 0f)
+        {
+            StartCameraTransition(gameplayCameraPosition, gameplayCameraRotation);
+            return;
+        }
+
+        StopCameraTransition();
         followCamera.transform.SetPositionAndRotation(gameplayCameraPosition, gameplayCameraRotation);
+    }
+
+    void StartCameraTransition(Vector3 targetPosition, Quaternion targetRotation)
+    {
+        StopCameraTransition();
+        cameraTransitionRoutine = StartCoroutine(AnimateCameraToPose(targetPosition, targetRotation));
+    }
+
+    void StopCameraTransition()
+    {
+        if (cameraTransitionRoutine == null) return;
+        StopCoroutine(cameraTransitionRoutine);
+        cameraTransitionRoutine = null;
+    }
+
+    IEnumerator AnimateCameraToPose(Vector3 targetPosition, Quaternion targetRotation)
+    {
+        Vector3 startCameraPosition = followCamera.transform.position;
+        Quaternion startCameraRotation = followCamera.transform.rotation;
+        float duration = Mathf.Max(0.01f, buildToDefaultCameraTransitionDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            t = t * t * (3f - 2f * t);
+            followCamera.transform.SetPositionAndRotation(
+                Vector3.Lerp(startCameraPosition, targetPosition, t),
+                Quaternion.Slerp(startCameraRotation, targetRotation, t));
+            yield return null;
+        }
+
+        followCamera.transform.SetPositionAndRotation(targetPosition, targetRotation);
+        cameraTransitionRoutine = null;
     }
 
     void HandleRunInteractions(Vector3 previousPosition, Vector3 move)

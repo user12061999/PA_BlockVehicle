@@ -380,7 +380,6 @@ namespace Gre.pjcode.Scenes.InGame
             _runtimeParts.Remove(source);
             source.HideTraySlot();
             Destroy(source.gameObject);
-            if (_carView != null && !string.IsNullOrEmpty(target.LinkedPartUniqueId)) _carView.DetachPart(target.LinkedPartUniqueId);
 
             target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1), GetMinoSpriteScale(target.PartId));
             PlayableSoundEffects.Play(PlayableSfx.Merge);
@@ -518,13 +517,13 @@ namespace Gre.pjcode.Scenes.InGame
 
             ParticleSystem.EmissionModule emission = particles.emission;
             emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 16) });
 
             ParticleSystem.ShapeModule shape = particles.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
             shape.radius = 0.25f;
 
             particles.Play();
+            particles.Emit(16);
             return effect;
         }
 
