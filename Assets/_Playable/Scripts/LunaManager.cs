@@ -11,6 +11,8 @@ public class LunaManager : MonoBehaviour
     
     [LunaPlaygroundField("Time Show EndGame")] public int timeEndCreative = 60;
     [LunaPlaygroundField("Action to EndGame")] public int CountAction = 10;
+    [LunaPlaygroundField("Starting Gold")] public int startingGold = 10000;
+    [LunaPlaygroundField("Car Speed Multiplier")] public float carSpeedMultiplier = 1f;
     public bool isCretiveEnd;
     public Button[] lstBtnInstall;
     public GameObject EndCard;

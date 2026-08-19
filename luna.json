@@ -2,7 +2,7 @@
     "version": "7.2.0",
     "projectId": "a5187565d4abc6846b60cff41def2bd6",
     "applicationID": 32681,
-    "creativeName": "",
+    "creativeName": "V1",
     "pgServer": "EU",
     "window": {
         "‐⁘": true
@@ -26124,7 +26124,7 @@
                     },
                     {
                         "name": "Play",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Play$1",
@@ -26140,7 +26140,7 @@
                     },
                     {
                         "name": "Stop",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Stop$1",
@@ -30426,7 +30426,7 @@
                     },
                     {
                         "name": "ForceRebuildLayoutImmediate",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Allocate",
@@ -35402,7 +35402,7 @@
                     },
                     {
                         "name": "AttachedParts#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -35465,10 +35465,6 @@
                         "excluded": false
                     },
                     {
-                        "name": "ReuseRoot",
-                        "excluded": false
-                    },
-                    {
                         "name": "RefreshDefaultWheel",
                         "excluded": false
                     },
@@ -35478,6 +35474,14 @@
                     },
                     {
                         "name": "DetachParts",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TakeReusableRoot",
+                        "excluded": false
+                    },
+                    {
+                        "name": "DetachPartAndGetRoots",
                         "excluded": false
                     }
                 ]
@@ -35518,7 +35522,7 @@
                     },
                     {
                         "name": "Update",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDrawGizmos",
@@ -35530,11 +35534,11 @@
                     },
                     {
                         "name": "Activate",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Inactivate",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InitializeInternal",
@@ -35788,6 +35792,14 @@
                     },
                     {
                         "name": "GetUiCamera",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetStartingGold",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RefreshTrayLayout",
                         "excluded": false
                     }
                 ]
@@ -36285,6 +36297,30 @@
                     {
                         "name": "GetTaggedObject",
                         "excluded": false
+                    },
+                    {
+                        "name": "GetCarSpeedMultiplier",
+                        "excluded": false
+                    },
+                    {
+                        "name": "StartCameraTransition",
+                        "excluded": false
+                    },
+                    {
+                        "name": "StopCameraTransition",
+                        "excluded": false
+                    },
+                    {
+                        "name": "AnimateCameraToPose",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ClaimResultAndReset",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateJetBoosterEffects",
+                        "excluded": false
                     }
                 ]
             },
@@ -36302,15 +36338,15 @@
                     },
                     {
                         "name": "ActivateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InactivateInternal",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -36481,10 +36517,6 @@
                     {
                         "name": "Tick",
                         "excluded": false
-                    },
-                    {
-                        "name": "Tick\",this)}this.c$-=t;if(this.c$<=0){pc.Application.getApplication().events.off(\"update",
-                        "excluded": false
                     }
                 ]
             }
@@ -36554,6 +36586,36 @@
                         "script": "",
                         "ext": "",
                         "name": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset"
+                    },
+                    {
+                        "maxWidth": 256,
+                        "maxHeight": 256,
+                        "format": "png32",
+                        "compression": "quantSize",
+                        "quality": 65,
+                        "script": "",
+                        "ext": "",
+                        "name": "Assets/ThirdParty/Versatile Studio Assets/Demo City By Versatile Studio/Textures/building_bases_nm.png"
+                    },
+                    {
+                        "maxWidth": 256,
+                        "maxHeight": 256,
+                        "format": "png32",
+                        "compression": "quantSize",
+                        "quality": 65,
+                        "script": "",
+                        "ext": "",
+                        "name": "Assets/ThirdParty/Versatile Studio Assets/Demo City By Versatile Studio/Textures/highrise_facades_nm.png"
+                    },
+                    {
+                        "maxWidth": 256,
+                        "maxHeight": 256,
+                        "format": "png32",
+                        "compression": "quantSize",
+                        "quality": 65,
+                        "script": "",
+                        "ext": "",
+                        "name": "Assets/Data/Model/Part/Muffler/tex_muffler_Normal_OpenGL.png"
                     }
                 ]
             },

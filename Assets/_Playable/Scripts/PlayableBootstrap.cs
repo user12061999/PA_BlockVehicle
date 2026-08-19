@@ -38,6 +38,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private LayerMask dashInteractionMask = ~0;
     [SerializeField] private float dashDetectionRadius = 2f;
     [SerializeField] private float dashDetectionHeight = 0f;
+    [SerializeField] private float dashBoosterEffectDuration = 2f;
     [SerializeField] private int coinAmountFallback = 100;
     [SerializeField] private float gameEndedDelay = 0.25f;
     [Header("Camera")]
@@ -92,6 +93,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     float pull;
     float speed;
     float distance;
+    int pendingResultGold;
     float steer;
     float collisionTilt;
     bool dragging;
@@ -202,7 +204,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             ApplyAim(pointer);
             dragging = false;
             float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
-            speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier;
+            speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier * GetCarSpeedMultiplier();
             state = State.Run;
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             if (speed > 0.01f) PlayMoveLoop();
@@ -210,6 +212,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
             HideBuildUi();
             SetSlingshotVisible(!hideSlingshotOnLaunch);
         }
+    }
+
+    float GetCarSpeedMultiplier()
+    {
+        return LunaManager.ins == null ? 1f : Mathf.Max(0f, LunaManager.ins.carSpeedMultiplier);
     }
 
     void UpdateRun()
@@ -345,15 +352,23 @@ public sealed class PlayableBootstrap : MonoBehaviour
             return;
         }
 
-        resultUi.SetClaimAction(ResetRun);
+        resultUi.SetClaimAction(ClaimResultAndReset);
     }
 
     void OpenResultUi()
     {
         CacheResultUi();
         if (resultUi == null) return;
+        pendingResultGold = Mathf.Max(0, (int)distance);
         resultUi.transform.SetAsLastSibling();
-        resultUi.Open((int)distance);
+        resultUi.Open(pendingResultGold);
+    }
+
+    void ClaimResultAndReset()
+    {
+        if (puzzleUi != null && pendingResultGold > 0) puzzleUi.AddGold(pendingResultGold);
+        pendingResultGold = 0;
+        ResetRun();
     }
 
     IEnumerator NotifyPlayActionAfterResultUi()
@@ -669,7 +684,10 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (triggeredDashIds.Contains(id)) return true;
 
         triggeredDashIds.Add(id);
-        speed = Mathf.Min(Mathf.Max(speed + dashSpeedBonus, minSpeed), Mathf.Max(dashMaxSpeed, minSpeed));
+        float boostedSpeed = speed + dashSpeedBonus;
+        if (dashMaxSpeed > 0f && speed < dashMaxSpeed) boostedSpeed = Mathf.Min(boostedSpeed, dashMaxSpeed);
+        speed = Mathf.Max(speed, boostedSpeed);
+        ActivateJetBoosterEffects();
         if (carTracer != null)
         {
             carTracer.PlayDashEffect();
@@ -678,6 +696,17 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         PlayableSoundEffects.Play(PlayableSfx.Dash);
         return true;
+    }
+
+    void ActivateJetBoosterEffects()
+    {
+        if (carView == null) return;
+
+        float duration = Mathf.Max(0.1f, dashBoosterEffectDuration);
+        foreach (PartView part in carView.AttachedParts)
+        {
+            if (part is JetBoosterPartView) part.Activate(duration);
+        }
     }
 
     GameObject GetDashObject(Collider collider)
