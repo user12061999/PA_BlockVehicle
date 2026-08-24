@@ -1,3 +1,4 @@
+using System;
 using Gre.pjcode.Scenes.InGame;
 using System.Collections.Generic;
 using System.Reflection;
@@ -30,6 +31,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float collisionSpeedMultiplier = 0.55f;
     [SerializeField] private float collisionTiltAngle = 18f;
     [SerializeField] private float collisionTiltReturnSpeed = 90f;
+    [Header("Pushable Block Physics")]
+    [SerializeField] private bool setupPushableBlocksOnAwake = true;
+    [SerializeField] private string pushableNameToken = "Block";
+    [SerializeField] private LayerMask pushableLayerMask = 0;
+    [SerializeField] private float pushedBlockMass = 2f;
+    [SerializeField] private float pushedBlockImpulse = 9f;
+    [SerializeField] private float pushedBlockSpeedMultiplier = 0.85f;
     [SerializeField] private int coinAmountFallback = 100;
     [Header("Sound Effects")]
     [SerializeField] private AudioClip sfxTap;
@@ -101,7 +109,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             body.isKinematic = true;
             body.useGravity = false;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         }
+
+        if (setupPushableBlocksOnAwake) SetupPushableBlocks();
 
         foreach (Button button in Resources.FindObjectsOfTypeAll<Button>())
         {
@@ -251,6 +263,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             RaycastHit hit = interactionHits[i];
             if (TryCollectCoin(hit.collider)) continue;
+            if (TryPushBlock(hit.collider, direction, hit.point)) continue;
             if (!IsObstacleHit(hit)) continue;
             if (hit.distance >= bestDistance) continue;
             bestHit = hit;
@@ -258,6 +271,87 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
 
         if (bestDistance < float.MaxValue) BounceFrom(bestHit, direction);
+    }
+
+    void SetupPushableBlocks()
+    {
+        foreach (Collider collider in FindObjectsByType<Collider>(FindObjectsSortMode.None))
+        {
+            if (HasPushableMarker(collider)) EnsurePushableBody(collider);
+        }
+    }
+
+    bool TryPushBlock(Collider collider, Vector3 direction, Vector3 point)
+    {
+        if (!IsPushableCollider(collider)) return false;
+
+        Rigidbody body = EnsurePushableBody(collider);
+        if (body == null || body.isKinematic) return false;
+
+        Vector3 impulse = Vector3.ProjectOnPlane(direction, Vector3.up);
+        if (impulse.sqrMagnitude < 0.001f) return false;
+
+        body.WakeUp();
+        body.AddForceAtPosition(impulse.normalized * pushedBlockImpulse, point, ForceMode.Impulse);
+        speed *= Mathf.Clamp01(pushedBlockSpeedMultiplier);
+        return true;
+    }
+
+    bool IsPushableCollider(Collider collider)
+    {
+        if (collider == null || collider.isTrigger) return false;
+        if (collider.transform.IsChildOf(vehicle)) return false;
+        if (collider.attachedRigidbody != null && !collider.attachedRigidbody.isKinematic) return true;
+        return HasPushableMarker(collider);
+    }
+
+    bool HasPushableMarker(Collider collider)
+    {
+        if (collider == null || collider.isTrigger) return false;
+        if (collider.transform.IsChildOf(vehicle)) return false;
+        if ((pushableLayerMask.value & (1 << collider.gameObject.layer)) != 0) return true;
+        return FindPushableRoot(collider.transform) != null;
+    }
+
+    Rigidbody EnsurePushableBody(Collider collider)
+    {
+        Rigidbody body = collider.attachedRigidbody;
+        bool createdBody = false;
+        if (body == null)
+        {
+            Transform root = FindPushableRoot(collider.transform);
+            if (root == null) return null;
+            body = root.GetComponent<Rigidbody>();
+            if (body == null)
+            {
+                body = root.gameObject.AddComponent<Rigidbody>();
+                createdBody = true;
+            }
+        }
+
+        if (createdBody) body.mass = Mathf.Max(0.01f, pushedBlockMass);
+        body.useGravity = true;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+        body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        return body;
+    }
+
+    Transform FindPushableRoot(Transform target)
+    {
+        if (target == null) return null;
+
+        for (Transform current = target; current != null; current = current.parent)
+        {
+            if (!string.IsNullOrEmpty(pushableNameToken) &&
+                current.name.IndexOf(pushableNameToken, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return current;
+            }
+
+            if ((pushableLayerMask.value & (1 << current.gameObject.layer)) != 0) return current;
+        }
+
+        return null;
     }
 
     bool TryCollectCoin(Collider collider)
