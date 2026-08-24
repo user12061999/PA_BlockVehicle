@@ -2,6 +2,7 @@ using Gre.pjcode.Scenes.InGame;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -56,6 +57,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private float slingshotFallbackHalfWidth = 0.9f;
     [SerializeField] private float slingshotFallbackHeight = 1.2f;
     [SerializeField] private float slingshotFallbackRearOffset = 0.9f;
+    [Header("Slingshot UI")]
+    [SerializeField] private GameObject slingshotPullUiRoot;
+    [SerializeField] private Image slingshotPullFillImage;
+    [SerializeField] private TMP_Text slingshotPullPercentText;
+    [SerializeField, Range(0f, 1f)] private float slingshotPullMaxFillAmount = 0.4f;
     [Header("Sound Effects")]
     [SerializeField] private AudioClip sfxTap;
     [SerializeField] private AudioClip sfxCancel;
@@ -70,6 +76,10 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private AudioClip sfxCollision;
     [SerializeField] private AudioClip sfxFinish;
     [SerializeField] private AudioClip sfxClaim;
+    [Header("Run Markers")]
+    [SerializeField] private Transform finishFlag;
+    [SerializeField] private Transform recordLine;
+    [SerializeField] private float finishFlagAnimationDuration = 0.35f;
     [Header("Loop Audio")]
     [SerializeField] private AudioClip sfxMoveLoop;
     [SerializeField, Range(0f, 1f)] private float moveLoopVolume = 0.75f;
@@ -102,8 +112,12 @@ public sealed class PlayableBootstrap : MonoBehaviour
     bool slingshotReady;
     Coroutine gameEndedRoutine;
     Coroutine cameraTransitionRoutine;
+    Coroutine finishFlagRoutine;
     AudioSource moveLoopSource;
     AudioSource musicSource;
+    Vector3 finishFlagBasePosition;
+    Vector3 recordLinePosition;
+    bool hasRecordLinePosition;
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
     readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
@@ -142,6 +156,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
         SetupSlingshot();
+        UpdateSlingshotPullUi();
+        SetSlingshotPullUiVisible(false);
+        SetupRunMarkers();
 
         Rigidbody body = vehicle.GetComponent<Rigidbody>();
         if (body != null)
@@ -188,6 +205,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             dragging = true;
             dragStart = pointer;
+            SetSlingshotPullUiVisible(!IsBuildUiVisible());
             PlayMusic();
             PlayableSoundEffects.Play(PlayableSfx.Pull);
         }
@@ -203,6 +221,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             ApplyAim(pointer);
             dragging = false;
+            SetSlingshotPullUiVisible(false);
             float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
             speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier * GetCarSpeedMultiplier();
             state = State.Run;
@@ -217,6 +236,79 @@ public sealed class PlayableBootstrap : MonoBehaviour
     float GetCarSpeedMultiplier()
     {
         return LunaManager.ins == null ? 1f : Mathf.Max(0f, LunaManager.ins.carSpeedMultiplier);
+    }
+
+    void SetupRunMarkers()
+    {
+        if (finishFlag != null)
+        {
+            finishFlagBasePosition = finishFlag.position;
+            finishFlag.gameObject.SetActive(false);
+        }
+
+        if (recordLine != null)
+        {
+            recordLine.gameObject.SetActive(false);
+        }
+    }
+
+    void ShowRunMarkers()
+    {
+        Vector3 stopPosition = vehicle == null ? startPosition : vehicle.position;
+        if (finishFlag == null) return;
+
+        finishFlag.position = GetMarkerPosition(stopPosition, finishFlagBasePosition);
+        finishFlag.gameObject.SetActive(true);
+        recordLinePosition = finishFlag.position;
+        hasRecordLinePosition = true;
+        if (finishFlagRoutine != null) StopCoroutine(finishFlagRoutine);
+        finishFlagRoutine = StartCoroutine(AnimateFinishFlag());
+    }
+
+    void ShowRecordLineForNextTurn()
+    {
+        if (recordLine == null || !hasRecordLinePosition) return;
+        recordLine.position = recordLinePosition;
+        recordLine.gameObject.SetActive(true);
+    }
+
+    void HideFinishFlag()
+    {
+        if (finishFlagRoutine != null)
+        {
+            StopCoroutine(finishFlagRoutine);
+            finishFlagRoutine = null;
+        }
+
+        if (finishFlag != null) finishFlag.gameObject.SetActive(false);
+    }
+
+    Vector3 GetMarkerPosition(Vector3 stopPosition, Vector3 markerBasePosition)
+    {
+        Vector3 forward = startRotation * Vector3.forward;
+        float forwardDistance = Mathf.Max(0f, Vector3.Dot(stopPosition - startPosition, forward));
+        return markerBasePosition + forward * forwardDistance;
+    }
+
+    IEnumerator AnimateFinishFlag()
+    {
+        float duration = Mathf.Max(0.001f, finishFlagAnimationDuration);
+        for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+        {
+            SetFinishFlagZ(Mathf.Lerp(-90f, 0f, elapsed / duration));
+            yield return null;
+        }
+
+        SetFinishFlagZ(0f);
+        finishFlagRoutine = null;
+    }
+
+    void SetFinishFlagZ(float z)
+    {
+        if (finishFlag == null) return;
+        Vector3 euler = finishFlag.localEulerAngles;
+        euler.z = z;
+        finishFlag.localEulerAngles = euler;
     }
 
     void UpdateRun()
@@ -265,6 +357,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         state = State.Done;
         StopMoveLoop();
         StopMusic();
+        ShowRunMarkers();
         PlayableSoundEffects.Play(PlayableSfx.Finish);
         OpenResultUi();
         if (gameEndedRoutine != null) StopCoroutine(gameEndedRoutine);
@@ -280,6 +373,10 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
 
         pull = 0f;
+        UpdateSlingshotPullUi();
+        SetSlingshotPullUiVisible(false);
+        HideFinishFlag();
+        ShowRecordLineForNextTurn();
         speed = 0f;
         distance = 0f;
         steer = 0f;
@@ -391,9 +488,22 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         if (pullOffset.magnitude > maxPull) pullOffset = pullOffset.normalized * maxPull;
         pull = pullOffset.magnitude;
+        UpdateSlingshotPullUi();
         Vector3 launchForward = pull > 0.001f ? -pullOffset.normalized : forward;
         vehicle.SetPositionAndRotation(startPosition + pullOffset, Quaternion.LookRotation(launchForward, startRotation * Vector3.up));
         SnapToGround(launchForward, true);
+    }
+
+    void UpdateSlingshotPullUi()
+    {
+        float ratio = maxPull > 0f ? Mathf.Clamp01(pull / maxPull) : 0f;
+        if (slingshotPullFillImage != null) slingshotPullFillImage.fillAmount = ratio * slingshotPullMaxFillAmount;
+        if (slingshotPullPercentText != null) slingshotPullPercentText.text = Mathf.RoundToInt(ratio * 100f) + "%";
+    }
+
+    void SetSlingshotPullUiVisible(bool isVisible)
+    {
+        if (slingshotPullUiRoot != null) slingshotPullUiRoot.SetActive(isVisible);
     }
 
     void SetupSlingshot()

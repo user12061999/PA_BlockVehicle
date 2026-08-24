@@ -128,7 +128,7 @@ namespace Gre.pjcode.Scenes.InGame
                 PartView part = _attachedParts[i];
                 if (part == null || part.PartId != partId) continue;
                 _attachedParts.RemoveAt(i);
-                Destroy(part.gameObject);
+                DestroyPart(part);
             }
 
             RefreshDefaultWheel();
@@ -141,7 +141,7 @@ namespace Gre.pjcode.Scenes.InGame
                 PartView part = _attachedParts[i];
                 if (part == null || part.AttachType != attachType) continue;
                 _attachedParts.RemoveAt(i);
-                Destroy(part.gameObject);
+                DestroyPart(part);
             }
 
             RefreshDefaultWheel();
@@ -265,10 +265,17 @@ namespace Gre.pjcode.Scenes.InGame
                 Transform root = part.transform.parent;
                 if (root != null) roots.Add(root);
                 _attachedParts.RemoveAt(i);
-                Destroy(part.gameObject);
+                DestroyPart(part);
             }
 
             return roots;
+        }
+
+        static void DestroyPart(PartView part)
+        {
+            if (part == null) return;
+            part.transform.SetParent(null);
+            Destroy(part.gameObject);
         }
 
         static Transform TakeReusableRoot(List<Transform> reusableRoots, AttachInfo info)
