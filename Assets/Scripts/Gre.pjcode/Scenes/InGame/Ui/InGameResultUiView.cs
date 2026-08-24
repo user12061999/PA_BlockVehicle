@@ -12,10 +12,12 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private Text _earnedGoldText;
         [SerializeField] private Button _claimButton;
 
+        bool _isOpening;
+
         void Awake()
         {
             CacheViews();
-            SetOpen(false);
+            if (!_isOpening) SetOpen(false);
         }
 
         public void SetClaimAction(UnityAction action)
@@ -37,7 +39,9 @@ namespace Gre.pjcode.Scenes.InGame
             string value = earnedGold.ToString();
             if (_earnedGoldTmpText != null) _earnedGoldTmpText.text = value;
             if (_earnedGoldText != null) _earnedGoldText.text = value;
+            _isOpening = true;
             SetOpen(true);
+            _isOpening = false;
         }
 
         void SetOpen(bool isOpen)

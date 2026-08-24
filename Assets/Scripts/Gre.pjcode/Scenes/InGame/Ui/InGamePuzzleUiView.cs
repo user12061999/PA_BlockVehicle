@@ -57,12 +57,16 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private int _startingGold = 10000;
         [SerializeField] private Vector2Int _runtimeGridSize = new Vector2Int(4, 4);
         [SerializeField] private float _runtimeCellSize = 96f;
+        [SerializeField] private int _trayColumnCount = 4;
+        [SerializeField] private float _trayItemSpacing = 8f;
         [SerializeField] private Color _runtimeGridColor = new Color(1f, 1f, 1f, 0.25f);
         [SerializeField] private Color _runtimeBlockColor = new Color(1f, 1f, 1f, 0.9f);
         [SerializeField] private Color _commonPartColor = Color.white;
         [SerializeField] private Color _rarePartColor = new Color(0.2f, 0.55f, 1f, 1f);
         [SerializeField] private Color _epicPartColor = new Color(0.68f, 0.25f, 1f, 1f);
         [SerializeField] private Color _legendPartColor = new Color(1f, 0.82f, 0.12f, 1f);
+        [SerializeField] private GameObject _carAttachEffectPrefab;
+        [SerializeField] private float _carAttachEffectLifetime = 2f;
 
         static readonly int[] RuntimePartIds = { 9, 0, 2, 1 };
         readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
@@ -119,7 +123,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
             if (_bonusBoxOpenButton != null) _bonusBoxOpenButton.onClick.AddListener(PlayworksBridge.InstallFullGame);
 
-            SetGold(_startingGold);
+            SetGold(GetStartingGold());
             SetBoostLevel(0, false);
             BuildRuntimePuzzle();
             UpdatePerformanceFromPlacedParts();
@@ -267,12 +271,13 @@ namespace Gre.pjcode.Scenes.InGame
                 }
             }
 
-            foreach (int partId in RuntimePartIds)
-            {
-                CreateTrayPart(partId, cellSize);
-            }
-
             UpdateBuyPrice();
+        }
+
+        int GetStartingGold()
+        {
+            global::LunaManager lunaManager = global::LunaManager.ins != null ? global::LunaManager.ins : FindObjectOfType<global::LunaManager>();
+            return lunaManager == null ? _startingGold : Mathf.Max(0, lunaManager.startingGold);
         }
 
         void BuyRuntimePart()
@@ -305,6 +310,7 @@ namespace Gre.pjcode.Scenes.InGame
             RuntimePuzzlePartIcon drag = icon.gameObject.AddComponent<RuntimePuzzlePartIcon>();
             drag.Setup(this, partId, pattern, cellSize, partData.GetMinoSprite(1), partData.GetBlockSprite(1), _runtimeBlockColor, _minoDragLayer, _boardGuidePrefab, partData.Rotate, partData.MinoSpriteScale);
             _runtimeParts.Add(drag);
+            RefreshTrayLayout();
         }
 
         internal void DropPart(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
@@ -316,10 +322,18 @@ namespace Gre.pjcode.Scenes.InGame
                 return;
             }
 
+            RuntimePuzzlePartIcon trayMergeTarget = GetTrayMergeTarget(icon, screenPosition);
+            if (trayMergeTarget != null)
+            {
+                MergePart(icon, trayMergeTarget);
+                return;
+            }
+
             if (IsInTray(screenPosition))
             {
                 RemovePlacedPart(icon);
                 icon.PlaceInTray();
+                RefreshTrayLayout();
                 PlayableSoundEffects.Play(PlayableSfx.PartSet);
                 UpdatePerformanceFromPlacedParts();
                 return;
@@ -329,8 +343,20 @@ namespace Gre.pjcode.Scenes.InGame
             Vector2Int origin = GetCellPosition(cellIndex);
             if (cellIndex < 0 || !CanPlace(icon, origin))
             {
-                PlayableSoundEffects.Play(PlayableSfx.Cancel);
-                icon.ReturnToStart();
+                if (icon.IsPlaced)
+                {
+                    RemovePlacedPart(icon);
+                    icon.PlaceInTray();
+                    RefreshTrayLayout();
+                    PlayableSoundEffects.Play(PlayableSfx.PartSet);
+                    UpdatePerformanceFromPlacedParts();
+                }
+                else
+                {
+                    PlayableSoundEffects.Play(PlayableSfx.Cancel);
+                    icon.ReturnToStart();
+                }
+
                 return;
             }
 
@@ -342,6 +368,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             if (!_placedParts.Contains(icon)) _placedParts.Add(icon);
             icon.PlaceOn(_gridRoot, _runtimeCells[cellIndex].anchoredPosition, cellIndex);
+            RefreshTrayLayout();
             PlayableSoundEffects.Play(PlayableSfx.PartSet);
             AttachCarPart(icon);
             UpdatePerformanceFromPlacedParts();
@@ -360,11 +387,11 @@ namespace Gre.pjcode.Scenes.InGame
             _runtimeParts.Remove(source);
             source.HideTraySlot();
             Destroy(source.gameObject);
-            if (_carView != null && !string.IsNullOrEmpty(target.LinkedPartUniqueId)) _carView.DetachPart(target.LinkedPartUniqueId);
+            RefreshTrayLayout();
 
             target.SetLevel(target.Level + 1, GetPartSprite(target.PartId, target.Level + 1), GetBlockSprite(target.PartId, target.Level + 1), GetMinoSpriteScale(target.PartId));
             PlayableSoundEffects.Play(PlayableSfx.Merge);
-            AttachCarPart(target);
+            if (target.IsPlaced) AttachCarPart(target);
             UpdateBuyPrice();
             UpdatePerformanceFromPlacedParts();
         }
@@ -449,6 +476,63 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (_carView == null || !_partDataAsset.TryGetPartData(icon.PartId, out PartData partData)) return;
             icon.LinkedPartUniqueId = _carView.AttachPart(partData.GetPrefab(icon.Level), icon.PartId, icon.LinkedPartUniqueId);
+            PlayCarAttachEffect(icon.LinkedPartUniqueId);
+        }
+
+        void PlayCarAttachEffect(string uniqueId)
+        {
+            if (_carView == null) return;
+
+            List<PartView> parts = string.IsNullOrEmpty(uniqueId) ? null : _carView.GetPartViews(uniqueId);
+            if (parts == null || parts.Count == 0)
+            {
+                SpawnCarAttachEffect(_carView.transform);
+                return;
+            }
+
+            foreach (PartView part in parts)
+            {
+                if (part != null) SpawnCarAttachEffect(part.transform);
+            }
+        }
+
+        void SpawnCarAttachEffect(Transform target)
+        {
+            if (target == null) return;
+
+            GameObject effect = _carAttachEffectPrefab != null
+                ? Instantiate(_carAttachEffectPrefab, target.position, target.rotation, target)
+                : CreateDefaultCarAttachEffect(target);
+            Destroy(effect, Mathf.Max(0.1f, _carAttachEffectLifetime));
+        }
+
+        GameObject CreateDefaultCarAttachEffect(Transform target)
+        {
+            GameObject effect = new GameObject("CarAttachEffect");
+            effect.transform.SetParent(target, false);
+            effect.transform.localPosition = Vector3.zero;
+            effect.transform.localRotation = Quaternion.identity;
+
+            ParticleSystem particles = effect.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule main = particles.main;
+            main.duration = 0.45f;
+            main.loop = false;
+            main.startLifetime = 0.35f;
+            main.startSpeed = 1.8f;
+            main.startSize = 0.18f;
+            main.startColor = new Color(1f, 0.85f, 0.25f, 1f);
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            ParticleSystem.EmissionModule emission = particles.emission;
+            emission.rateOverTime = 0f;
+
+            ParticleSystem.ShapeModule shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.25f;
+
+            particles.Play();
+            particles.Emit(16);
+            return effect;
         }
 
         RuntimePuzzlePartIcon GetMergeTarget(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
@@ -459,13 +543,33 @@ namespace Gre.pjcode.Scenes.InGame
             return target == icon ? null : target;
         }
 
+        RuntimePuzzlePartIcon GetTrayMergeTarget(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
+        {
+            if (!IsInTray(screenPosition)) return null;
+
+            Camera camera = GetUiCamera();
+            foreach (RuntimePuzzlePartIcon target in _runtimeParts)
+            {
+                if (target == null || target == icon || target.IsPlaced) continue;
+                RectTransform rect = target.transform as RectTransform;
+                if (rect == null) continue;
+                if (RectTransformUtility.RectangleContainsScreenPoint(rect, screenPosition, camera)) return target;
+            }
+
+            return null;
+        }
+
         bool IsInTray(Vector2 screenPosition)
         {
             if (_minoListRoot == null) return false;
-            Camera camera = null;
+            return RectTransformUtility.RectangleContainsScreenPoint(_minoListRoot, screenPosition, GetUiCamera());
+        }
+
+        Camera GetUiCamera()
+        {
             Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) camera = canvas.worldCamera;
-            return RectTransformUtility.RectangleContainsScreenPoint(_minoListRoot, screenPosition, camera);
+            if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+            return canvas.worldCamera;
         }
 
         Sprite GetPartSprite(int partId, int level)
@@ -552,8 +656,48 @@ namespace Gre.pjcode.Scenes.InGame
             RectTransform item = InstantiatePrefabRect(_minoListItemPrefab, _minoListRoot);
             if (item == null) item = CreateUiRect(objectName, _minoListRoot, cellSize * 2f, cellSize * 2f);
             item.name = objectName;
+            item.anchorMin = item.anchorMax = item.pivot = new Vector2(0.5f, 0.5f);
             item.sizeDelta = Vector2.one * cellSize * 2f;
             return item;
+        }
+
+        void RefreshTrayLayout()
+        {
+            if (_minoListRoot == null) return;
+
+            LayoutGroup layoutGroup = _minoListRoot.GetComponent<LayoutGroup>();
+            if (layoutGroup != null && layoutGroup.enabled)
+            {
+                for (int i = 0; i < _minoListRoot.childCount; i++)
+                {
+                    RectTransform item = _minoListRoot.GetChild(i) as RectTransform;
+                    if (item == null) continue;
+                    item.sizeDelta = Vector2.one * GetRuntimeCellSize() * 2f;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_minoListRoot);
+                return;
+            }
+
+            int visibleIndex = 0;
+            int columns = Mathf.Max(1, _trayColumnCount);
+            float cellSize = GetRuntimeCellSize();
+            float step = cellSize * 2f + Mathf.Max(0f, _trayItemSpacing);
+            float startX = -(columns - 1) * step * 0.5f;
+
+            for (int i = 0; i < _minoListRoot.childCount; i++)
+            {
+                RectTransform item = _minoListRoot.GetChild(i) as RectTransform;
+                if (item == null || !item.gameObject.activeSelf) continue;
+
+                int column = visibleIndex % columns;
+                int row = visibleIndex / columns;
+                item.anchorMin = item.anchorMax = item.pivot = new Vector2(0.5f, 0.5f);
+                item.sizeDelta = Vector2.one * cellSize * 2f;
+                item.anchoredPosition = new Vector2(startX + column * step, -row * step);
+                visibleIndex++;
+            }
         }
 
         RectTransform CreateMinoIcon(string objectName, RectTransform parent, float cellSize)
@@ -828,6 +972,7 @@ namespace Gre.pjcode.Scenes.InGame
         Pull,
         Launch,
         Coin,
+        Dash,
         Collision,
         Finish,
         Claim,
