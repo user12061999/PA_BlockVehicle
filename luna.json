@@ -36616,6 +36616,16 @@
                         "script": "",
                         "ext": "",
                         "name": "Assets/Data/Model/Part/Muffler/tex_muffler_Normal_OpenGL.png"
+                    },
+                    {
+                        "maxWidth": 512,
+                        "maxHeight": 512,
+                        "format": "png32",
+                        "compression": "none",
+                        "quality": 65,
+                        "script": "",
+                        "ext": "",
+                        "name": "Assets/Data/Font/mplus_1c_bold/fnt_mplus-1c-bold SDF.asset"
                     }
                 ]
             },

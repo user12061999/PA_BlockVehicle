@@ -65,14 +65,17 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private Color _rarePartColor = new Color(0.2f, 0.55f, 1f, 1f);
         [SerializeField] private Color _epicPartColor = new Color(0.68f, 0.25f, 1f, 1f);
         [SerializeField] private Color _legendPartColor = new Color(1f, 0.82f, 0.12f, 1f);
+        [SerializeField] private Color _performancePreviewColor = new Color(0.25f, 1f, 0.25f, 1f);
         [SerializeField] private GameObject _carAttachEffectPrefab;
         [SerializeField] private float _carAttachEffectLifetime = 2f;
 
+        const int DefaultBasePerformance = 5;
         static readonly int[] RuntimePartIds = { 9, 0, 2, 1 };
         readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
         readonly List<RuntimePuzzlePartIcon> _runtimeParts = new List<RuntimePuzzlePartIcon>();
         readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
         readonly List<RuntimePuzzlePartIcon> _placedParts = new List<RuntimePuzzlePartIcon>();
+        readonly int[] _performanceValues = new int[(int)TerrainType.Max];
         readonly float[] _runTerrainPerformances = new float[(int)TerrainType.Max];
         CarView _carView;
         int _gold;
@@ -127,6 +130,7 @@ namespace Gre.pjcode.Scenes.InGame
             SetBoostLevel(0, false);
             BuildRuntimePuzzle();
             UpdatePerformanceFromPlacedParts();
+            HidePerformancePreview();
             RefreshAttachmentButtons();
         }
 
@@ -173,9 +177,46 @@ namespace Gre.pjcode.Scenes.InGame
                 CustomText text = _performanceValueTexts[i];
                 if (text == null) continue;
                 int value = performances != null && i < performances.Length ? performances[i] : 0;
+                if (i < _performanceValues.Length) _performanceValues[i] = value;
                 text.text = value.ToString();
                 if (text.transform.parent != null) text.transform.parent.gameObject.SetActive(value > 0);
             }
+        }
+
+        internal void ShowPerformancePreview(RuntimePuzzlePartIcon icon)
+        {
+            if (icon == null || icon.IsPlaced || _partDataAsset == null || !_partDataAsset.TryGetPartData(icon.PartId, out PartData partData))
+            {
+                HidePerformancePreview();
+                return;
+            }
+
+            int terrainIndex = partData == null || partData.PerformanceData == null ? -1 : (int)partData.PerformanceData.TerrainType;
+            int value = GetPerformanceValue(partData, icon.Level);
+            if (terrainIndex < 0 || terrainIndex >= (int)TerrainType.Max || value <= 0)
+            {
+                HidePerformancePreview();
+                return;
+            }
+
+            if (_performanceValueTexts == null || terrainIndex >= _performanceValueTexts.Length) return;
+            CustomText text = _performanceValueTexts[terrainIndex];
+            if (text == null) return;
+
+            int currentValue = terrainIndex < _performanceValues.Length ? _performanceValues[terrainIndex] : 0;
+            string previewColor = ColorUtility.ToHtmlStringRGB(_performancePreviewColor);
+            text.supportRichText = true;
+            text.text = $"{currentValue} <color=#{previewColor}>+{value}</color>";
+            if (text.transform.parent != null) text.transform.parent.gameObject.SetActive(true);
+            if (_performanceDiffRoot != null) _performanceDiffRoot.gameObject.SetActive(false);
+        }
+
+        internal void HidePerformancePreview()
+        {
+            if (_performanceDiffRoot != null) _performanceDiffRoot.gameObject.SetActive(false);
+            if (_performanceDiffUpText != null) _performanceDiffUpText.text = string.Empty;
+            if (_performanceDiffDownText != null) _performanceDiffDownText.text = string.Empty;
+            RefreshPerformanceRows();
         }
 
         public void SetBoostLevel(int level, bool unlockFlag)
@@ -223,25 +264,25 @@ namespace Gre.pjcode.Scenes.InGame
 
         void UpdatePerformanceFromPlacedParts()
         {
+            int[] values = new int[(int)TerrainType.Max];
+            for (int i = 0; i < _runTerrainPerformances.Length; i++) _runTerrainPerformances[i] = 0f;
+            values[(int)TerrainType.Default] = DefaultBasePerformance;
+            _runTerrainPerformances[(int)TerrainType.Default] = DefaultBasePerformance / 100f;
             if (_partDataAsset == null)
             {
-                SetPerformance(new int[(int)TerrainType.Max]);
+                SetPerformance(values);
                 return;
             }
 
-            int[] values = new int[(int)TerrainType.Max];
-            for (int i = 0; i < _runTerrainPerformances.Length; i++) _runTerrainPerformances[i] = 0f;
             foreach (RuntimePuzzlePartIcon icon in _placedParts)
             {
                 if (icon == null || !_partDataAsset.TryGetPartData(icon.PartId, out PartData partData)) continue;
                 if (partData == null || partData.PerformanceData == null) continue;
                 int index = (int)partData.PerformanceData.TerrainType;
-                int count = (int)Mathf.Pow(2, icon.Level - 1);
-                int levelBonus = (icon.Level - 1) * 5;
-                int value = (int)(partData.PerformanceData.Value * count * 100f) + levelBonus;
+                int value = GetPerformanceValue(partData, icon.Level);
                 if (index < 0 || index >= values.Length) continue;
                 values[index] += value;
-                _runTerrainPerformances[index] += partData.PerformanceData.Value * count;
+                _runTerrainPerformances[index] += GetPerformanceWeight(partData, icon.Level);
             }
 
             SetPerformance(values);
@@ -315,6 +356,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         internal void DropPart(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         {
+            HidePerformancePreview();
             RuntimePuzzlePartIcon mergeTarget = GetMergeTarget(icon, screenPosition);
             if (mergeTarget != null)
             {
@@ -470,6 +512,34 @@ namespace Gre.pjcode.Scenes.InGame
             if (level == 2) return _rarePartColor;
             if (level == 3) return _epicPartColor;
             return _legendPartColor;
+        }
+
+        int GetPerformanceValue(PartData partData, int level)
+        {
+            if (partData == null || partData.PerformanceData == null) return 0;
+            int count = (int)Mathf.Pow(2, Mathf.Max(0, level - 1));
+            int levelBonus = Mathf.Max(0, level - 1) * 5;
+            return (int)(partData.PerformanceData.Value * count * 100f) + levelBonus;
+        }
+
+        float GetPerformanceWeight(PartData partData, int level)
+        {
+            if (partData == null || partData.PerformanceData == null) return 0f;
+            int count = (int)Mathf.Pow(2, Mathf.Max(0, level - 1));
+            return partData.PerformanceData.Value * count;
+        }
+
+        void RefreshPerformanceRows()
+        {
+            if (_performanceValueTexts == null) return;
+            for (int i = 0; i < _performanceValueTexts.Length; i++)
+            {
+                CustomText text = _performanceValueTexts[i];
+                if (text == null) continue;
+                int value = i < _performanceValues.Length ? _performanceValues[i] : 0;
+                text.text = value.ToString();
+                if (text.transform.parent != null) text.transform.parent.gameObject.SetActive(value > 0);
+            }
         }
 
         void AttachCarPart(RuntimePuzzlePartIcon icon)
@@ -842,6 +912,7 @@ namespace Gre.pjcode.Scenes.InGame
             _dragScreenOffset = Vector2.up * _cellSize * scale;
             _rect.anchoredPosition += Vector2.up * _cellSize;
             transform.SetAsLastSibling();
+            _owner.ShowPerformancePreview(this);
         }
 
         public void OnDrag(PointerEventData eventData)
