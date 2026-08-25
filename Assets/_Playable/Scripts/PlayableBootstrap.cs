@@ -91,6 +91,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     CarSphereTracer carTracer;
     [SerializeField]private InGamePuzzleUiView puzzleUi;
     [SerializeField]private InGameResultUiView resultUi;
+    [SerializeField]private InGameRunUiView runUi;
     GameObject buildUi;
     Camera followCamera;
     Vector3 startPosition;
@@ -142,6 +143,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (carView == null) carView = FindObjectOfType<CarView>();
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
+        CacheRunUi();
         //buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
@@ -225,6 +227,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
             speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier * GetCarSpeedMultiplier();
             state = State.Run;
+            if (runUi != null) runUi.BeginRun();
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             if (speed > 0.01f) PlayMoveLoop();
             PlayMusic();
@@ -326,6 +329,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         HandleRunInteractions(previousPosition, move);
         SnapToGround(move.sqrMagnitude > 0f ? move : forward, false);
         distance += move.magnitude;
+        if (runUi != null) runUi.UpdateRun(distance, speed);
 
         if (speed <= 0f)
         {
@@ -355,6 +359,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Done) return;
 
         state = State.Done;
+        if (runUi != null) runUi.FinishRun(distance);
         StopMoveLoop();
         StopMusic();
         ShowRunMarkers();
@@ -379,6 +384,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         ShowRecordLineForNextTurn();
         speed = 0f;
         distance = 0f;
+        if (runUi != null) runUi.ResetRun();
         steer = 0f;
         collisionTilt = 0f;
         dragging = false;
@@ -450,6 +456,12 @@ public sealed class PlayableBootstrap : MonoBehaviour
         }
 
         resultUi.SetClaimAction(ClaimResultAndReset);
+    }
+
+    void CacheRunUi()
+    {
+        if (runUi == null) runUi = FindSceneObjectOfType<InGameRunUiView>();
+        if (runUi != null) runUi.ResetRun();
     }
 
     void OpenResultUi()
