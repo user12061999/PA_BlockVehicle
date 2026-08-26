@@ -1595,10 +1595,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.ColorUtility",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.ComputeBuffer",
                 "excluded": true
             },
@@ -4692,7 +4688,7 @@
             },
             {
                 "name": "UnityEngine.Rendering.ColorWriteMask",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.Rendering.CommandBufferExecutionFlags",
@@ -4700,7 +4696,7 @@
             },
             {
                 "name": "UnityEngine.Rendering.CompareFunction",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.Rendering.ComputeQueueType",
@@ -4908,7 +4904,7 @@
             },
             {
                 "name": "UnityEngine.Rendering.StencilOp",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.Rendering.SynchronisationStage",
@@ -8491,10 +8487,6 @@
                 "excluded": false
             },
             {
-                "name": "Gre.pjcode.Scenes.InGame.InGameRunUiView",
-                "excluded": false
-            },
-            {
                 "name": "Gre.pjcode.Scenes.InGame.InGameUiService",
                 "excluded": false
             },
@@ -8584,7 +8576,7 @@
                 "instanceMethods": [
                     {
                         "name": "$is",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -15528,7 +15520,7 @@
                     },
                     {
                         "name": "xMin#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "xMin#set",
@@ -19064,7 +19056,7 @@
                     },
                     {
                         "name": "overrideSprite#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "activeSprite#get",
@@ -19116,7 +19108,7 @@
                     },
                     {
                         "name": "fillAmount#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "preserveAspect#get",
@@ -19468,7 +19460,7 @@
                     },
                     {
                         "name": "supportRichText#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "pixelsPerUnit#get",
@@ -20756,7 +20748,7 @@
                     },
                     {
                         "name": "InsertNewLine",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SaveWordWrappingState",
@@ -20764,7 +20756,7 @@
                     },
                     {
                         "name": "RestoreWordWrappingState",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SaveGlyphVertexInfo",
@@ -24456,7 +24448,7 @@
                     },
                     {
                         "name": "shaderKeywords#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
@@ -24508,7 +24500,7 @@
                     },
                     {
                         "name": "SetInt$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetInt",
@@ -24692,11 +24684,11 @@
                     },
                     {
                         "name": "EnableKeyword",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "DisableKeyword",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "IsKeywordEnabled",
@@ -25642,7 +25634,7 @@
                     },
                     {
                         "name": "popMaterialCount#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "hasPopInstruction#get",
@@ -25718,7 +25710,7 @@
                     },
                     {
                         "name": "SetPopMaterial",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -29996,7 +29988,7 @@
                     },
                     {
                         "name": "richText#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "richText#set",
@@ -30110,11 +30102,11 @@
                     },
                     {
                         "name": "Add$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Add$2",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Remove",
@@ -30132,7 +30124,7 @@
                 "instanceMethods": [
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -30484,7 +30476,7 @@
                 "instanceMethods": [
                     {
                         "name": "graphic#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "rectTransform#get",
@@ -30520,15 +30512,15 @@
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateMaskGraphicSettings",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetModifiedMaterial",
@@ -35483,6 +35475,10 @@
                     {
                         "name": "DetachPartAndGetRoots",
                         "excluded": false
+                    },
+                    {
+                        "name": "DestroyPart",
+                        "excluded": false
                     }
                 ]
             },
@@ -35801,6 +35797,26 @@
                     {
                         "name": "RefreshTrayLayout",
                         "excluded": false
+                    },
+                    {
+                        "name": "ShowPerformancePreview",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HidePerformancePreview",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPerformanceValue",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetPerformanceWeight",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RefreshPerformanceRows",
+                        "excluded": false
                     }
                 ]
             },
@@ -36044,7 +36060,7 @@
                     },
                     {
                         "name": "PlaceInTray",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ClearPlaced",
@@ -36321,6 +36337,46 @@
                     {
                         "name": "ActivateJetBoosterEffects",
                         "excluded": false
+                    },
+                    {
+                        "name": "SetupRunMarkers",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowRunMarkers",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowRecordLineForNextTurn",
+                        "excluded": true
+                    },
+                    {
+                        "name": "HideFinishFlag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetMarkerPosition",
+                        "excluded": true
+                    },
+                    {
+                        "name": "AnimateFinishFlag",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetFinishFlagZ",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CacheRunUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateSlingshotPullUi",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetSlingshotPullUiVisible",
+                        "excluded": false
                     }
                 ]
             },
@@ -36517,6 +36573,82 @@
                     {
                         "name": "Tick",
                         "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.InGameRunUiView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "FindChild",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetCanvasGroup",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BeginRun",
+                        "excluded": true
+                    },
+                    {
+                        "name": "UpdateRun",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FinishRun",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ResetRun",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetRunning",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetPinProgress",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CacheViews",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindComponent",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindComponentInChildren",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindRect",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.ColorUtility",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "ToHtmlStringRGB",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryParseHtmlString",
+                        "excluded": true
                     }
                 ]
             }
