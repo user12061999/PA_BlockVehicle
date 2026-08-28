@@ -258,20 +258,47 @@ public sealed class PlayableBootstrap : MonoBehaviour
     void ShowRunMarkers()
     {
         Vector3 stopPosition = vehicle == null ? startPosition : vehicle.position;
-        if (finishFlag == null) return;
 
-        finishFlag.position = GetMarkerPosition(stopPosition, finishFlagBasePosition);
-        finishFlag.gameObject.SetActive(true);
-        recordLinePosition = finishFlag.position;
-        hasRecordLinePosition = true;
-        if (finishFlagRoutine != null) StopCoroutine(finishFlagRoutine);
-        finishFlagRoutine = StartCoroutine(AnimateFinishFlag());
+        // 1. FinishFlag: Cắm ngay vị trí xe dừng lại và bám sát mặt đất
+        if (finishFlag != null)
+        {
+            Vector3 flagPos = stopPosition;
+        
+            // Raycast từ trên đỉnh vị trí xe xuống để tìm đúng bề mặt đường tại điểm dừng
+            Vector3 rayOrigin = new Vector3(stopPosition.x, stopPosition.y + groundRayHeight, stopPosition.z);
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundRayHeight * 2f, groundMask, QueryTriggerInteraction.Ignore))
+            {
+                flagPos.y = hit.point.y + 0.05f;
+                // Xoay cờ theo hướng xe đang đỗ và độ nghiêng mặt đường
+                finishFlag.rotation = Quaternion.LookRotation(vehicle.forward, hit.normal);
+            }
+            else
+            {
+                flagPos.y = stopPosition.y + 0.05f;
+                finishFlag.rotation = vehicle.rotation;
+            }
+
+            finishFlag.position = flagPos;
+            finishFlag.gameObject.SetActive(true);
+
+            if (finishFlagRoutine != null) StopCoroutine(finishFlagRoutine);
+            finishFlagRoutine = StartCoroutine(AnimateFinishFlag());
+        }
+
+        // 2. RecordLine: Giữ nguyên logic chiếu theo trục dọc giữa đường
+        if (recordLine != null)
+        {
+            recordLinePosition = GetMarkerPosition(stopPosition, recordLine, 0.02f);
+            hasRecordLinePosition = true;
+        }
     }
 
     void ShowRecordLineForNextTurn()
     {
         if (recordLine == null || !hasRecordLinePosition) return;
+    
         recordLine.position = recordLinePosition;
+        recordLine.rotation = Quaternion.LookRotation(startRotation * Vector3.forward, Vector3.up);
         recordLine.gameObject.SetActive(true);
     }
 
@@ -286,23 +313,47 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (finishFlag != null) finishFlag.gameObject.SetActive(false);
     }
 
-    Vector3 GetMarkerPosition(Vector3 stopPosition, Vector3 markerBasePosition)
+    Vector3 GetMarkerPosition(Vector3 stopPosition, Transform markerTransform, float heightOffset = 0.05f)
     {
         Vector3 forward = startRotation * Vector3.forward;
         float forwardDistance = Mathf.Max(0f, Vector3.Dot(stopPosition - startPosition, forward));
-        return markerBasePosition + forward * forwardDistance;
+    
+        // Lấy tọa độ X, Z theo hướng xe chạy
+        Vector3 basePos = markerTransform != null ? markerTransform.position : startPosition;
+        Vector3 targetPos = basePos + forward * forwardDistance;
+    
+        // Raycast bắn từ trên xuống để dán chặt Marker vào mặt đường
+        Vector3 rayOrigin = new Vector3(targetPos.x, stopPosition.y + groundRayHeight, targetPos.z);
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundRayHeight * 2f, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            targetPos.y = hit.point.y + heightOffset;
+        }
+        else
+        {
+            targetPos.y = stopPosition.y + heightOffset;
+        }
+
+        return targetPos;
     }
 
     IEnumerator AnimateFinishFlag()
     {
-        float duration = Mathf.Max(0.001f, finishFlagAnimationDuration);
+        if (finishFlag == null) yield break;
+
+        float duration = Mathf.Max(0.01f, finishFlagAnimationDuration);
+        Vector3 baseScale = finishFlag.localScale;
+        finishFlag.localScale = Vector3.zero;
+
         for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
         {
-            SetFinishFlagZ(Mathf.Lerp(-90f, 0f, elapsed / duration));
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Hiệu ứng nảy nhẹ khi cờ xuất hiện
+            float bounce = Mathf.Sin(t * Mathf.PI * 0.5f);
+            finishFlag.localScale = baseScale * bounce;
             yield return null;
         }
 
-        SetFinishFlagZ(0f);
+        finishFlag.localScale = baseScale;
         finishFlagRoutine = null;
     }
 

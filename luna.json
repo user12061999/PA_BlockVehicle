@@ -2,7 +2,7 @@
     "version": "7.2.0",
     "projectId": "a5187565d4abc6846b60cff41def2bd6",
     "applicationID": 32681,
-    "creativeName": "V1",
+    "creativeName": "Vehicle_V01_2",
     "pgServer": "EU",
     "window": {
         "‐⁘": true
@@ -78,12 +78,12 @@
                 "Stubs/SupersonicWisdom/"
             ],
             "msbuildMac64": "/Library/Frameworks/Mono.framework/Versions/Current/bin/msbuild",
-            "msbuildWin64": "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+            "msbuildWin64": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
             "externalSources": [],
             "externalJSLibraries": [],
             "scriptingDefines": [],
-            "msbuildVersion": "18.7",
-            "monoVersion": "6.0.9",
+            "msbuildVersion": "17.14",
+            "monoVersion": "6.0.5",
             "dotnetVersion": ""
         },
         "assets": {

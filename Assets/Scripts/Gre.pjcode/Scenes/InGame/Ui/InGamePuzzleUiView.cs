@@ -355,66 +355,103 @@ namespace Gre.pjcode.Scenes.InGame
         }
 
         internal void DropPart(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
+{
+    HidePerformancePreview();
+
+    // 1. Kiểm tra Merge trước
+    RuntimePuzzlePartIcon mergeTarget = GetMergeTarget(icon, screenPosition);
+    if (mergeTarget != null)
+    {
+        MergePart(icon, mergeTarget);
+        return;
+    }
+
+    RuntimePuzzlePartIcon trayMergeTarget = GetTrayMergeTarget(icon, screenPosition);
+    if (trayMergeTarget != null)
+    {
+        MergePart(icon, trayMergeTarget);
+        return;
+    }
+
+    // 2. Thả về Tray
+    if (IsInTray(screenPosition))
+    {
+        RemovePlacedPart(icon);
+        icon.PlaceInTray();
+        RefreshTrayLayout();
+        PlayableSoundEffects.Play(PlayableSfx.PartSet);
+        UpdatePerformanceFromPlacedParts();
+        return;
+    }
+
+    // 3. Tìm ô gốc hợp lệ (tự dò tìm các ô lân cận nếu ô thả ban đầu bị cấn)
+    int targetCellIndex = FindBestFitCellIndex(icon, screenPosition);
+
+    if (targetCellIndex < 0)
+    {
+        if (icon.IsPlaced)
         {
-            HidePerformancePreview();
-            RuntimePuzzlePartIcon mergeTarget = GetMergeTarget(icon, screenPosition);
-            if (mergeTarget != null)
-            {
-                MergePart(icon, mergeTarget);
-                return;
-            }
-
-            RuntimePuzzlePartIcon trayMergeTarget = GetTrayMergeTarget(icon, screenPosition);
-            if (trayMergeTarget != null)
-            {
-                MergePart(icon, trayMergeTarget);
-                return;
-            }
-
-            if (IsInTray(screenPosition))
-            {
-                RemovePlacedPart(icon);
-                icon.PlaceInTray();
-                RefreshTrayLayout();
-                PlayableSoundEffects.Play(PlayableSfx.PartSet);
-                UpdatePerformanceFromPlacedParts();
-                return;
-            }
-
-            int cellIndex = GetCellIndex(screenPosition);
-            Vector2Int origin = GetCellPosition(cellIndex);
-            if (cellIndex < 0 || !CanPlace(icon, origin))
-            {
-                if (icon.IsPlaced)
-                {
-                    RemovePlacedPart(icon);
-                    icon.PlaceInTray();
-                    RefreshTrayLayout();
-                    PlayableSoundEffects.Play(PlayableSfx.PartSet);
-                    UpdatePerformanceFromPlacedParts();
-                }
-                else
-                {
-                    PlayableSoundEffects.Play(PlayableSfx.Cancel);
-                    icon.ReturnToStart();
-                }
-
-                return;
-            }
-
             RemovePlacedPart(icon);
-            foreach (Vector2Int offset in icon.Pattern)
-            {
-                _occupiedCells[GetCellIndex(origin + offset)] = icon;
-            }
-
-            if (!_placedParts.Contains(icon)) _placedParts.Add(icon);
-            icon.PlaceOn(_gridRoot, _runtimeCells[cellIndex].anchoredPosition, cellIndex);
+            icon.PlaceInTray();
             RefreshTrayLayout();
             PlayableSoundEffects.Play(PlayableSfx.PartSet);
-            AttachCarPart(icon);
             UpdatePerformanceFromPlacedParts();
         }
+        else
+        {
+            PlayableSoundEffects.Play(PlayableSfx.Cancel);
+            icon.ReturnToStart();
+        }
+        return;
+    }
+
+    // 4. Đặt part vào vị trí thành công
+    Vector2Int origin = GetCellPosition(targetCellIndex);
+    RemovePlacedPart(icon);
+    foreach (Vector2Int offset in icon.Pattern)
+    {
+        _occupiedCells[GetCellIndex(origin + offset)] = icon;
+    }
+
+    if (!_placedParts.Contains(icon)) _placedParts.Add(icon);
+    icon.PlaceOn(_gridRoot, _runtimeCells[targetCellIndex].anchoredPosition, targetCellIndex);
+    RefreshTrayLayout();
+    PlayableSoundEffects.Play(PlayableSfx.PartSet);
+    AttachCarPart(icon);
+    UpdatePerformanceFromPlacedParts();
+}
+
+int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
+{
+    int primaryIndex = GetCellIndex(screenPosition);
+    if (primaryIndex >= 0 && CanPlace(icon, GetCellPosition(primaryIndex)))
+    {
+        return primaryIndex;
+    }
+
+    // Nếu ô chính xác bị cấn, dò các ô lân cận trong bán kính 1 ô
+    if (primaryIndex >= 0)
+    {
+        Vector2Int centerPos = GetCellPosition(primaryIndex);
+        Vector2Int[] neighbors = {
+            centerPos + Vector2Int.left, centerPos + Vector2Int.right,
+            centerPos + Vector2Int.up, centerPos + Vector2Int.down,
+            centerPos + new Vector2Int(-1, -1), centerPos + new Vector2Int(1, 1),
+            centerPos + new Vector2Int(-1, 1), centerPos + new Vector2Int(1, -1)
+        };
+
+        foreach (Vector2Int neighbor in neighbors)
+        {
+            int idx = GetCellIndex(neighbor);
+            if (idx >= 0 && CanPlace(icon, neighbor))
+            {
+                return idx;
+            }
+        }
+    }
+
+    return -1;
+}
 
         void MergePart(RuntimePuzzlePartIcon source, RuntimePuzzlePartIcon target)
         {
@@ -660,19 +697,34 @@ namespace Gre.pjcode.Scenes.InGame
 
         int GetCellIndex(Vector2 screenPosition)
         {
-            Camera camera = null;
+            if (_runtimeCells.Count == 0) return -1;
+    
+            Camera camera = GetUiCamera();
+            int closestIndex = -1;
+            float minDistanceSqr = float.MaxValue;
+
+            // Cho phép bắt dính trong phạm vi 1.25x kích thước ô (trên màn hình)
+            float cellSize = GetRuntimeCellSize();
             Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) camera = canvas.worldCamera;
+            float scale = canvas != null ? canvas.scaleFactor : 1f;
+            float snapRadius = cellSize * scale * 1.25f;
+            float snapRadiusSqr = snapRadius * snapRadius;
 
             for (int i = 0; i < _runtimeCells.Count; i++)
             {
-                if (RectTransformUtility.RectangleContainsScreenPoint(_runtimeCells[i], screenPosition, camera))
+                RectTransform cell = _runtimeCells[i];
+                if (cell == null) continue;
+
+                Vector2 cellScreenPos = RectTransformUtility.WorldToScreenPoint(camera, cell.position);
+                float distSqr = (cellScreenPos - screenPosition).sqrMagnitude;
+                if (distSqr < minDistanceSqr && distSqr <= snapRadiusSqr)
                 {
-                    return i;
+                    minDistanceSqr = distSqr;
+                    closestIndex = i;
                 }
             }
 
-            return -1;
+            return closestIndex;
         }
 
         int GetCellIndex(Vector2Int cell)
@@ -723,17 +775,23 @@ namespace Gre.pjcode.Scenes.InGame
 
         RectTransform CreateListItem(string objectName, float cellSize)
         {
+            float slotSize = cellSize * 3f;
             RectTransform item = InstantiatePrefabRect(_minoListItemPrefab, _minoListRoot);
-            if (item == null) item = CreateUiRect(objectName, _minoListRoot, cellSize * 2f, cellSize * 2f);
+            if (item == null) item = CreateUiRect(objectName, _minoListRoot, slotSize, slotSize);
             item.name = objectName;
             item.anchorMin = item.anchorMax = item.pivot = new Vector2(0.5f, 0.5f);
-            item.sizeDelta = Vector2.one * cellSize * 2f;
+            item.sizeDelta = Vector2.one * slotSize;
             return item;
         }
 
         void RefreshTrayLayout()
         {
             if (_minoListRoot == null) return;
+
+            float cellSize = GetRuntimeCellSize();
+            // Tăng kích thước slot lên 3 ô (hoặc 3.5 ô) để chứa vừa các mảnh ghép dài/rộng
+            float slotSize = cellSize * 3f; 
+            float spacing = Mathf.Max(16f, _trayItemSpacing); // Tăng khoảng cách giữa các slot
 
             LayoutGroup layoutGroup = _minoListRoot.GetComponent<LayoutGroup>();
             if (layoutGroup != null && layoutGroup.enabled)
@@ -742,7 +800,7 @@ namespace Gre.pjcode.Scenes.InGame
                 {
                     RectTransform item = _minoListRoot.GetChild(i) as RectTransform;
                     if (item == null) continue;
-                    item.sizeDelta = Vector2.one * GetRuntimeCellSize() * 2f;
+                    item.sizeDelta = Vector2.one * slotSize;
                 }
 
                 Canvas.ForceUpdateCanvases();
@@ -752,8 +810,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             int visibleIndex = 0;
             int columns = Mathf.Max(1, _trayColumnCount);
-            float cellSize = GetRuntimeCellSize();
-            float step = cellSize * 2f + Mathf.Max(0f, _trayItemSpacing);
+            float step = slotSize + spacing;
             float startX = -(columns - 1) * step * 0.5f;
 
             for (int i = 0; i < _minoListRoot.childCount; i++)
@@ -764,7 +821,7 @@ namespace Gre.pjcode.Scenes.InGame
                 int column = visibleIndex % columns;
                 int row = visibleIndex / columns;
                 item.anchorMin = item.anchorMax = item.pivot = new Vector2(0.5f, 0.5f);
-                item.sizeDelta = Vector2.one * cellSize * 2f;
+                item.sizeDelta = Vector2.one * slotSize;
                 item.anchoredPosition = new Vector2(startX + column * step, -row * step);
                 visibleIndex++;
             }
@@ -907,23 +964,28 @@ namespace Gre.pjcode.Scenes.InGame
             PlayableSoundEffects.Play(PlayableSfx.PartPick);
             _startParent = transform.parent;
             _startPosition = _rect.anchoredPosition;
+    
             if (_dragLayer != null) _rect.SetParent(_dragLayer, true);
+    
             float scale = _canvas == null ? 1f : _canvas.scaleFactor;
-            _dragScreenOffset = Vector2.up * _cellSize * scale;
-            _rect.anchoredPosition += Vector2.up * _cellSize;
+            // Nhấc nhẹ part lên trên ngón tay khoảng 0.5 ô để ngón tay không che mất ô bên dưới
+            _dragScreenOffset = Vector2.up * (_cellSize * 0.5f) * scale;
+            _rect.anchoredPosition += Vector2.up * (_cellSize * 0.5f);
+    
             transform.SetAsLastSibling();
             _owner.ShowPerformancePreview(this);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            // Dùng vị trí thực tế của part hoặc vị trí nhả có bù offset
+            _owner.DropPart(this, eventData.position + _dragScreenOffset);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
             float scale = _canvas == null ? 1f : _canvas.scaleFactor;
             _rect.anchoredPosition += eventData.delta / Mathf.Max(0.01f, scale);
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            _owner.DropPart(this, eventData.position + _dragScreenOffset);
         }
 
         public void PlaceOn(RectTransform parent, Vector2 anchoredPosition, int cellIndex)
