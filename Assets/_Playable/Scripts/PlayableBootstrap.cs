@@ -120,6 +120,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector3 recordLinePosition;
     bool hasRecordLinePosition;
     readonly RaycastHit[] interactionHits = new RaycastHit[16];
+    readonly RaycastHit[] groundHits = new RaycastHit[8];
     readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
     readonly HashSet<int> triggeredDashIds = new HashSet<int>();
@@ -189,7 +190,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Aim)
         {
             UpdateAim();
-            UpdateSlingshot();
+            if (state == State.Aim && dragging) UpdateSlingshot();
         }
         else if (state == State.Run) UpdateRun();
         UpdateCollisionTilt();
@@ -960,7 +961,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void UpdateCollisionTilt()
     {
-        if (carView == null) return;
+        if (carView == null || collisionTilt == 0f) return;
         collisionTilt = Mathf.MoveTowards(collisionTilt, 0f, collisionTiltReturnSpeed * Time.deltaTime);
         carView.SetTiltBody(collisionTilt);
     }
@@ -1036,13 +1037,14 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (vehicle == null) return;
 
         Vector3 origin = vehicle.position + Vector3.up * groundRayHeight;
-        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, groundRayHeight * 2f, groundMask, QueryTriggerInteraction.Ignore);
-        if (hits.Length == 0) return;
+        int hitCount = Physics.RaycastNonAlloc(origin, Vector3.down, groundHits, groundRayHeight * 2f, groundMask, QueryTriggerInteraction.Ignore);
+        if (hitCount == 0) return;
 
         RaycastHit bestHit = default;
         float bestDistance = float.MaxValue;
-        foreach (RaycastHit hit in hits)
+        for (int i = 0; i < hitCount; i++)
         {
+            RaycastHit hit = groundHits[i];
             if (hit.collider == null || hit.collider.transform.IsChildOf(vehicle)) continue;
             if (hit.distance >= bestDistance) continue;
             bestHit = hit;

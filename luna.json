@@ -5020,7 +5020,7 @@
             },
             {
                 "name": "UnityEngine.RuntimePlatform",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.ScaleMode",
@@ -22990,7 +22990,7 @@
                     },
                     {
                         "name": "RaycastNonAlloc$2",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RaycastNonAlloc$1",
