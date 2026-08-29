@@ -78,12 +78,12 @@
                 "Stubs/SupersonicWisdom/"
             ],
             "msbuildMac64": "/Library/Frameworks/Mono.framework/Versions/Current/bin/msbuild",
-            "msbuildWin64": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+            "msbuildWin64": "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
             "externalSources": [],
             "externalJSLibraries": [],
             "scriptingDefines": [],
-            "msbuildVersion": "17.14",
-            "monoVersion": "6.0.5",
+            "msbuildVersion": "18.7",
+            "monoVersion": "6.0.9",
             "dotnetVersion": ""
         },
         "assets": {
@@ -31354,7 +31354,7 @@
                     },
                     {
                         "name": "ResizeMeshInfo",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ResizeMeshInfo$1",
@@ -35817,6 +35817,10 @@
                     {
                         "name": "RefreshPerformanceRows",
                         "excluded": false
+                    },
+                    {
+                        "name": "FindBestFitCellIndex",
+                        "excluded": true
                     }
                 ]
             },
@@ -36344,23 +36348,23 @@
                     },
                     {
                         "name": "ShowRunMarkers",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowRecordLineForNextTurn",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "HideFinishFlag",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetMarkerPosition",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AnimateFinishFlag",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetFinishFlagZ",
@@ -36598,7 +36602,7 @@
                     },
                     {
                         "name": "BeginRun",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateRun",
@@ -36606,7 +36610,7 @@
                     },
                     {
                         "name": "FinishRun",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ResetRun",

@@ -566,7 +566,17 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void SetSlingshotPullUiVisible(bool isVisible)
     {
-        if (slingshotPullUiRoot != null) slingshotPullUiRoot.SetActive(isVisible);
+        if (slingshotPullUiRoot == null) return;
+
+        CanvasGroup canvasGroup = slingshotPullUiRoot.GetComponent<CanvasGroup>();
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = isVisible ? 1f : 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
+
+        slingshotPullUiRoot.SetActive(isVisible);
     }
 
     void SetupSlingshot()
