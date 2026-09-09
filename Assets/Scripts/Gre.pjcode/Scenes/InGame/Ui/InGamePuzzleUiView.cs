@@ -262,7 +262,6 @@ namespace Gre.pjcode.Scenes.InGame
             int[] values = new int[(int)TerrainType.Max];
             for (int i = 0; i < _runTerrainPerformances.Length; i++) _runTerrainPerformances[i] = 0f;
             values[(int)TerrainType.Default] = DefaultBasePerformance;
-            _runTerrainPerformances[(int)TerrainType.Default] = DefaultBasePerformance / 100f;
             if (_partDataAsset == null)
             {
                 SetPerformance(values);

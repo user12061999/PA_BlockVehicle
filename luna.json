@@ -2167,10 +2167,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.Collision",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.Collision2D",
                 "excluded": true
             },
@@ -3656,7 +3652,7 @@
             },
             {
                 "name": "UnityEngine.CollisionDetectionMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.CollisionDetectionMode2D",
@@ -3924,7 +3920,7 @@
             },
             {
                 "name": "UnityEngine.ForceMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.ForceMode2D",
@@ -6347,10 +6343,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.UI.ClipperRegistry",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.UI.Clipping",
                 "excluded": true
             },
@@ -6372,10 +6364,6 @@
             },
             {
                 "name": "UnityEngine.UI.Misc",
-                "excluded": true
-            },
-            {
-                "name": "UnityEngine.UI.RectangularVertexClipper",
                 "excluded": true
             },
             {
@@ -8475,10 +8463,6 @@
                 "excluded": false
             },
             {
-                "name": "Gre.pjcode.Scenes.InGame.InGameGetItemUiView",
-                "excluded": false
-            },
-            {
                 "name": "Gre.pjcode.Scenes.InGame.InGameGlobalUiView",
                 "excluded": false
             },
@@ -8533,6 +8517,10 @@
             {
                 "name": "PlayableBootstrap.State",
                 "excluded": false
+            },
+            {
+                "name": "Gre.pjcode.Scenes.InGame.WaterWheelPartView",
+                "excluded": true
             }
         ],
         "unusedMethods": [
@@ -12088,7 +12076,7 @@
                     },
                     {
                         "name": "Count#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "IsReadOnly#get",
@@ -12152,7 +12140,7 @@
                     },
                     {
                         "name": "GetEnumerator",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "System$Collections$Generic$IEnumerable$1$GetEnumerator",
@@ -12308,7 +12296,7 @@
                     },
                     {
                         "name": "Current#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "System$Collections$IEnumerator$Current#get",
@@ -12316,11 +12304,11 @@
                     },
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "$ctor1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
@@ -12328,11 +12316,11 @@
                     },
                     {
                         "name": "Dispose",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "moveNext",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "System$Collections$IEnumerator$reset",
@@ -15220,7 +15208,7 @@
                     },
                     {
                         "name": "DeltaAngle",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "NextPowerOfTwo",
@@ -16876,7 +16864,7 @@
                     },
                     {
                         "name": "eulerAngles#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "eulerAngles#set",
@@ -17036,7 +17024,7 @@
                     },
                     {
                         "name": "Rotate$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Rotate$2",
@@ -18342,7 +18330,7 @@
                     },
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "getItem",
@@ -18358,11 +18346,11 @@
                     },
                     {
                         "name": "AddUnique",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "remove",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetEnumerator",
@@ -18394,7 +18382,7 @@
                     },
                     {
                         "name": "removeAt",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RemoveAll",
@@ -18998,11 +18986,11 @@
                     },
                     {
                         "name": "UpdateCull",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetClipRect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
@@ -25674,7 +25662,7 @@
                     },
                     {
                         "name": "DisableRectClipping",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Clear",
@@ -26194,19 +26182,19 @@
                     },
                     {
                         "name": "linearVelocity#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "linearVelocity#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "position#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "position#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "rotation#get",
@@ -26214,7 +26202,7 @@
                     },
                     {
                         "name": "rotation#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "angularDrag#get",
@@ -26230,7 +26218,7 @@
                     },
                     {
                         "name": "angularDamping#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "drag#get",
@@ -26246,7 +26234,7 @@
                     },
                     {
                         "name": "linearDamping#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "mass#get",
@@ -26254,7 +26242,7 @@
                     },
                     {
                         "name": "mass#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "centerOfMass#get",
@@ -26274,7 +26262,7 @@
                     },
                     {
                         "name": "angularVelocity#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isKinematic#get",
@@ -26282,7 +26270,7 @@
                     },
                     {
                         "name": "isKinematic#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "detectCollisions#get",
@@ -26298,7 +26286,7 @@
                     },
                     {
                         "name": "collisionDetectionMode#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "useGravity#get",
@@ -26306,7 +26294,7 @@
                     },
                     {
                         "name": "useGravity#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "interpolation#get",
@@ -26342,7 +26330,7 @@
                     },
                     {
                         "name": "ctor",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddForce",
@@ -26350,7 +26338,7 @@
                     },
                     {
                         "name": "AddForce$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddRelativeForce$1",
@@ -26362,7 +26350,7 @@
                     },
                     {
                         "name": "AddTorque$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddTorque",
@@ -28600,7 +28588,7 @@
                 "instanceMethods": [
                     {
                         "name": "radius#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "radius#set",
@@ -30060,7 +30048,7 @@
                 "instanceMethods": [
                     {
                         "name": "Notify2DMaskStateChanged",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "NotifyStencilStateChanged",
@@ -30076,7 +30064,7 @@
                     },
                     {
                         "name": "IsDescendantOrSelf",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetRectMaskForClippable",
@@ -30546,7 +30534,7 @@
                     },
                     {
                         "name": "rectTransform#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "rootCanvasRect#get",
@@ -30554,23 +30542,23 @@
                     },
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "IsRaycastLocationValid",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "PerformClipping",
@@ -30578,11 +30566,11 @@
                     },
                     {
                         "name": "AddClippable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RemoveClippable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnTransformParentChanged",
@@ -33816,19 +33804,19 @@
                     },
                     {
                         "name": "up#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "down#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "left#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "right#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -35308,7 +35296,7 @@
                     },
                     {
                         "name": "PlayRunningEffect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "StopRunningEffect",
@@ -35426,7 +35414,7 @@
                     },
                     {
                         "name": "GetWheels",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ActivatePart",
@@ -35434,11 +35422,11 @@
                     },
                     {
                         "name": "SwitchActivateParts",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InactivateAllParts",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetTiltBody",
@@ -35446,11 +35434,11 @@
                     },
                     {
                         "name": "SetWheelSteerAngle",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetSink",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetAttachInfos",
@@ -35542,15 +35530,15 @@
                     },
                     {
                         "name": "ActivateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InactivateInternal",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -35601,10 +35589,6 @@
                     {
                         "name": "BuyButton#get",
                         "excluded": true
-                    },
-                    {
-                        "name": "RunDistanceMultiplier#get",
-                        "excluded": false
                     },
                     {
                         "name": "Awake",
@@ -35700,10 +35684,6 @@
                     },
                     {
                         "name": "GetBuyPrice",
-                        "excluded": false
-                    },
-                    {
-                        "name": "GetRunPerformanceTotal",
                         "excluded": false
                     },
                     {
@@ -35820,7 +35800,27 @@
                     },
                     {
                         "name": "FindBestFitCellIndex",
-                        "excluded": true
+                        "excluded": false
+                    },
+                    {
+                        "name": "GridSize#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetTerrainPerformance",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateTerrainParts",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ExpandBoard",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RebuildBoardGrid",
+                        "excluded": false
                     }
                 ]
             },
@@ -35940,7 +35940,7 @@
                 "instanceMethods": [
                     {
                         "name": "PartDataList#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
@@ -35952,7 +35952,7 @@
                     },
                     {
                         "name": "GetPerformanceData",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetId",
@@ -36223,27 +36223,11 @@
                         "excluded": false
                     },
                     {
-                        "name": "HandleRunInteractions",
-                        "excluded": false
-                    },
-                    {
                         "name": "TryCollectCoin",
                         "excluded": false
                     },
                     {
                         "name": "GetCoinAmount",
-                        "excluded": false
-                    },
-                    {
-                        "name": "IsObstacleHit",
-                        "excluded": false
-                    },
-                    {
-                        "name": "BounceFrom",
-                        "excluded": false
-                    },
-                    {
-                        "name": "UpdateCollisionTilt",
                         "excluded": false
                     },
                     {
@@ -36300,10 +36284,6 @@
                     },
                     {
                         "name": "RestoreGameplayCameraPose",
-                        "excluded": false
-                    },
-                    {
-                        "name": "HandleDashInteractions",
                         "excluded": false
                     },
                     {
@@ -36381,6 +36361,46 @@
                     {
                         "name": "SetSlingshotPullUiVisible",
                         "excluded": false
+                    },
+                    {
+                        "name": "GetForceWeight",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ApplyDash",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetupPhysics",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ControlSphere",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FixedUpdate",
+                        "excluded": false
+                    },
+                    {
+                        "name": "StepPhysics",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HandlePhysicsTrigger",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HandlePhysicsTriggerExit",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryCollectBoardUpgrade",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateCarSteeringView",
+                        "excluded": false
                     }
                 ]
             },
@@ -36424,15 +36444,15 @@
                     },
                     {
                         "name": "ActivateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InactivateInternal",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -36546,15 +36566,15 @@
                     },
                     {
                         "name": "ActivateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdateInternal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "InactivateInternal",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -36653,6 +36673,220 @@
                     {
                         "name": "TryParseHtmlString",
                         "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.ClipperRegistry",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "instance#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Register",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Unregister",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Cull",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.RectangularVertexClipper",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetCanvasRect",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.CarTerrainCollider",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "IsGrounded#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Terrain#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnCollisionEnter",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnCollisionStay",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnCollisionExit",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnTriggerEnter",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnTriggerExit",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ResetContacts",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDisable",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.InGameGetItemUiView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Fit",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Show",
+                        "excluded": true
+                    },
+                    {
+                        "name": "BuildView",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Ui.NotificationBadge",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.Collision",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "ColliderComponent#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RigidbodyComponent#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OurRigidbodyComponent#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "other#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "rigidbody#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "gameObject#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "transform#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "collider#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "contacts#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "contactCount#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "relativeVelocity#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "impulse#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ourRigidbody#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    },
+                    {
+                        "name": "GetContact",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ConfigureFor",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.PropellerPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateInternal",
+                        "excluded": false
                     }
                 ]
             }

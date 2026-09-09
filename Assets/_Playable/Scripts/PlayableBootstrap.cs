@@ -18,27 +18,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     [SerializeField] private string vehicleName = "CarSphere";
     [SerializeField] private float maxPull = 4f;
-    [SerializeField] private float pullScreenScale = 0.015f;
-    [SerializeField, Range(0f, 75f)] private float maxAimAngle = 45f;
-    [SerializeField] private float minSpeed = 12f;
-    [SerializeField] private float maxSpeed = 30f;
-    [SerializeField] private float friction = 8f;
+    [SerializeField] private Rigidbody sphereBody;
+    [SerializeField] private float linearDamping = 0.6f;
     [SerializeField] private float steerSpeed = 14f;
-    [SerializeField] private float turnSpeed = 110f;
     [SerializeField] private LayerMask groundMask = ~0;
     [SerializeField] private float groundRayHeight = 8f;
     [SerializeField] private float groundOffset = 0.08f;
-    [SerializeField] private LayerMask interactionMask = ~0;
-    [SerializeField] private float collisionRadius = 1.35f;
-    [SerializeField] private float collisionCenterHeight = 1f;
-    [SerializeField] private float collisionSpeedMultiplier = 0.55f;
-    [SerializeField] private float collisionTiltAngle = 18f;
-    [SerializeField] private float collisionTiltReturnSpeed = 90f;
-    [SerializeField] private float dashSpeedBonus = 12f;
-    [SerializeField] private float dashMaxSpeed = 45f;
-    [SerializeField] private LayerMask dashInteractionMask = ~0;
-    [SerializeField] private float dashDetectionRadius = 2f;
-    [SerializeField] private float dashDetectionHeight = 0f;
+    [SerializeField] private float dashForceMultiplier = 0.35f;
     [SerializeField] private float dashBoosterEffectDuration = 2f;
     [SerializeField] private int coinAmountFallback = 100;
     [SerializeField] private float gameEndedDelay = 0.25f;
@@ -102,9 +88,10 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector2 dragStart;
     State state;
     float pull;
+    Vector3 launchForce;
     float speed;
-    bool grounded;
-    float verticalSpeed;
+    float stopTime;
+    CarTerrainCollider terrainCollider;
     TerrainType runningTerrain = TerrainType.Max;
     float distance;
     int pendingResultGold;
@@ -112,7 +99,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
     InGameGetItemUiView getItemUi;
     readonly List<GameObject> collectedBoardUpgrades = new List<GameObject>();
     float steer;
-    float collisionTilt;
     bool dragging;
     Vector3 slingshotStartWorldPosition;
     Vector3 slingshotEndWorldPosition;
@@ -125,9 +111,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector3 finishFlagBasePosition;
     Vector3 recordLinePosition;
     bool hasRecordLinePosition;
-    readonly RaycastHit[] interactionHits = new RaycastHit[16];
     readonly RaycastHit[] groundHits = new RaycastHit[8];
-    readonly Collider[] interactionOverlaps = new Collider[16];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
     readonly HashSet<int> triggeredDashIds = new HashSet<int>();
     readonly List<GameObject> collectedCoins = new List<GameObject>();
@@ -170,12 +154,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         SetSlingshotPullUiVisible(false);
         SetupRunMarkers();
 
-        Rigidbody body = vehicle.GetComponent<Rigidbody>();
-        if (body != null)
-        {
-            body.isKinematic = true;
-            body.useGravity = false;
-        }
+        SetupPhysics();
 
         foreach (Button button in Resources.FindObjectsOfTypeAll<Button>())
         {
@@ -200,7 +179,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             if (state == State.Aim && dragging) UpdateSlingshot();
         }
         else if (state == State.Run) UpdateRun();
-        UpdateCollisionTilt();
+        UpdateCarSteeringView();
     }
 
     void LateUpdate()
@@ -232,15 +211,62 @@ public sealed class PlayableBootstrap : MonoBehaviour
             ApplyAim(pointer);
             dragging = false;
             SetSlingshotPullUiVisible(false);
-            speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * GetCarSpeedMultiplier();
+            if (pull < maxPull / 12f) return;
+            sphereBody.position = vehicle.position;
+            sphereBody.isKinematic = false;
+            sphereBody.linearVelocity = Vector3.zero;
+            sphereBody.angularVelocity = Vector3.zero;
+            foreach (Collider c in vehicle.GetComponentsInChildren<Collider>()) c.enabled = false;
+            ApplyDash(launchForce, 1.2f);
+            stopTime = 0f;
             state = State.Run;
             if (runUi != null) runUi.BeginRun();
             PlayableSoundEffects.Play(PlayableSfx.Launch);
-            if (speed > 0.01f) PlayMoveLoop();
+            if (GetCarSpeedMultiplier() > 0f) PlayMoveLoop();
             PlayMusic();
             HideBuildUi();
             SetSlingshotVisible(!hideSlingshotOnLaunch);
         }
+    }
+
+    float GetForceWeight(float multiplier)
+    {
+        // Original Dash: force weight 0.45 * 1.2, plus equipped-part contributions.
+        float force = 0.45f * multiplier;
+        float total = 0f;
+        for (int i = (int)TerrainType.Default; i < (int)TerrainType.Max; i++)
+        {
+            float performance = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance((TerrainType)i);
+            total += performance;
+            force += performance * (i == (int)TerrainType.Default ? 0.075f : 0.065f);
+        }
+        if (total == 0f) force *= 0.7f;
+        return force * GetCarSpeedMultiplier();
+    }
+
+    void ApplyDash(Vector3 forward, float multiplier)
+    {
+        float weight = GetForceWeight(multiplier);
+        sphereBody.AddForce(new Vector3(forward.x, 0f, forward.z) * weight, ForceMode.Impulse);
+        sphereBody.AddTorque(new Vector3(forward.z, -forward.x, 0f) * weight, ForceMode.Impulse);
+    }
+
+    void SetupPhysics()
+    {
+        if (sphereBody == null) { Debug.LogError("PlayableBootstrap needs the original CarSphere Rigidbody."); enabled = false; return; }
+        sphereBody.gameObject.SetActive(true);
+        sphereBody.isKinematic = true;
+        sphereBody.useGravity = true;
+        sphereBody.mass = 5f;
+        sphereBody.linearDamping = linearDamping;
+        sphereBody.angularDamping = 0.01f;
+        sphereBody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        sphereBody.position = vehicle.position;
+        terrainCollider = sphereBody.GetComponent<CarTerrainCollider>();
+        if (terrainCollider == null) terrainCollider = sphereBody.gameObject.AddComponent<CarTerrainCollider>();
+        terrainCollider.TriggerEntered = HandlePhysicsTrigger;
+        terrainCollider.TriggerExited = HandlePhysicsTriggerExit;
+        foreach (Collider c in vehicle.GetComponentsInChildren<Collider>()) c.enabled = false;
     }
 
     float GetCarSpeedMultiplier()
@@ -374,99 +400,72 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void UpdateRun()
     {
-        float targetSteer = 0f;
-        if (PointerHeld(out Vector2 pointer)) targetSteer = Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f);
-        steer = Mathf.MoveTowards(steer, targetSteer, Time.deltaTime * 4f);
-
-        MoveRun(Time.deltaTime);
-        if ((speed <= 0f && grounded) || vehicle.position.y < startPosition.y - 200f) FinishRun();
+        steer = PointerHeld(out Vector2 pointer) ? Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f) : 0f;
+        ControlSphere(Time.deltaTime);
+        vehicle.position = sphereBody.position;
+        speed = sphereBody.linearVelocity.magnitude;
+        distance = Mathf.Max(distance, vehicle.position.z);
+        if (runUi != null) runUi.UpdateRun(distance, speed);
+        stopTime = sphereBody.linearVelocity.z > 0f && speed > 3f ? stopTime : stopTime + Time.deltaTime;
+        if (stopTime >= 0.5f || vehicle.position.y < startPosition.y - 200f) FinishRun();
     }
 
-    void MoveRun(float deltaTime)
+    void ControlSphere(float deltaTime)
     {
-        TerrainType terrain = GetRunningTerrain();
+        Vector3 velocity = sphereBody.linearVelocity;
+        float currentSpeed = velocity.magnitude;
+        if (Mathf.Abs(steer) <= 0.1f || currentSpeed <= 0.1f) return;
+        Vector3 forward = new Vector3(0f, velocity.y, velocity.z).normalized;
+        Vector3 target = new Vector3(steer, 0f, 1f).normalized;
+        if (Vector3.Angle(forward, target) > 15f) target = Vector3.RotateTowards(forward, target, Mathf.Deg2Rad * 15f, 0f);
+        Vector3 newVelocity = Vector3.Lerp(velocity.normalized, target, 1.5f * deltaTime).normalized * currentSpeed;
+        sphereBody.linearVelocity = newVelocity;
+        float radius = sphereBody.GetComponent<SphereCollider>().radius * sphereBody.transform.localScale.x;
+        sphereBody.angularVelocity = Vector3.Cross(Vector3.up, newVelocity) / radius;
+    }
+
+    void FixedUpdate()
+    {
+        if (state != State.Run || sphereBody == null) return;
+        StepPhysics(Time.fixedDeltaTime);
+        vehicle.position = sphereBody.position;
+    }
+
+    void StepPhysics(float deltaTime)
+    {
+        TerrainType terrain = terrainCollider.IsGrounded ? terrainCollider.Terrain : TerrainType.Air;
         if (terrain != runningTerrain)
         {
             runningTerrain = terrain;
             if (puzzleUi != null) puzzleUi.ActivateTerrainParts(terrain);
+            if (carView != null) carView.SetSink(terrain == TerrainType.Water);
             if (carTracer != null) carTracer.PlayRunningEffect(terrain);
         }
-        float bonus = 1f + 2f * (puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(terrain));
-        float resistance = terrain == TerrainType.Dirt ? 1.5f : terrain == TerrainType.Water ? 2f : terrain == TerrainType.Air ? 0.3f : 1f;
-        speed = Mathf.MoveTowards(speed, 0f, friction * resistance / bonus * deltaTime);
-        float terrainSpeed = terrain == TerrainType.Dirt ? 0.6f : terrain == TerrainType.Water ? 0.45f : 1f;
-        float moveSpeed = speed * terrainSpeed * Mathf.Min(bonus, 3f);
-        Vector3 forward = vehicle.forward;
-        if (Mathf.Abs(steer) > 0.001f) forward = Quaternion.AngleAxis(steer * turnSpeed * deltaTime, Vector3.up) * forward;
-        Vector3 move = forward.normalized * moveSpeed * deltaTime;
-        if (grounded) verticalSpeed = forward.normalized.y * moveSpeed;
+        float performance = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(terrain);
+        float damping = terrain == TerrainType.Air ? 0.01f : linearDamping;
+        if (terrain == TerrainType.Dirt) { damping += 0.05f; performance *= 1.5f; }
+        if (terrain == TerrainType.Water) { damping += 0.075f; performance *= 2.5f; }
+        sphereBody.linearDamping = Mathf.Max(0.01f, damping - performance);
+        float air = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(TerrainType.Air);
+        float gravityWeight = terrainCollider.IsGrounded ? 3f : 3f - air * 2f;
+        sphereBody.AddForce(Physics.gravity * (1.5f * gravityWeight), ForceMode.Acceleration);
+        bool braking = sphereBody.linearVelocity.sqrMagnitude < 49f;
+        if (braking) sphereBody.linearVelocity = Vector3.MoveTowards(sphereBody.linearVelocity, Vector3.zero, 10f * deltaTime);
         else
         {
-            float air = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(TerrainType.Air);
-            verticalSpeed -= 25f / (1f + 4f * air) * deltaTime;
-            move = Vector3.ProjectOnPlane(forward, Vector3.up).normalized * moveSpeed * deltaTime;
-            move.y = verticalSpeed * deltaTime;
+            Vector3 direction = sphereBody.linearVelocity.normalized;
+            float slope = Vector3.Angle(Vector3.up, direction) - 90f;
+            if (slope > 0f) sphereBody.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
         }
-        Vector3 previousPosition = vehicle.position;
-        vehicle.position += move;
-        Quaternion previousRotation = vehicle.rotation;
-        HandleRunInteractions(previousPosition, move);
-        if (vehicle.rotation != previousRotation) forward = vehicle.forward;
-        ResolveRunGround(previousPosition, forward, deltaTime);
-        distance += Vector3.Distance(previousPosition, vehicle.position);
-        if (runUi != null) runUi.UpdateRun(distance, moveSpeed);
-    }
-
-    TerrainType GetRunningTerrain()
-    {
-        if (!grounded) return TerrainType.Air;
-        Vector3 foot = vehicle.position - Vector3.up * groundOffset;
-        int count = Physics.OverlapSphereNonAlloc(foot, 0.2f, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
-        TerrainType terrain = TerrainType.Default;
-        for (int i = 0; i < count; i++)
+        if (sphereBody.linearVelocity.sqrMagnitude > 0.0001f)
         {
-            if (GetTaggedObject(interactionOverlaps[i], "Water") != null) return TerrainType.Water;
-            if (GetTaggedObject(interactionOverlaps[i], "Dirt") != null) terrain = TerrainType.Dirt;
-        }
-        return terrain;
-    }
-
-    void ResolveRunGround(Vector3 previousPosition, Vector3 forward, float deltaTime)
-    {
-        Vector3 origin = vehicle.position;
-        origin.y = Mathf.Max(previousPosition.y, origin.y) + groundRayHeight;
-        float length = origin.y - vehicle.position.y + groundRayHeight;
-        int count = Physics.RaycastNonAlloc(origin, Vector3.down, groundHits, length, groundMask, QueryTriggerInteraction.Ignore);
-        RaycastHit best = default;
-        float nearest = float.MaxValue;
-        for (int i = 0; i < count; i++)
-        {
-            var hit = groundHits[i];
-            if (hit.collider.transform.IsChildOf(vehicle) || hit.normal.y < 0.55f || hit.distance >= nearest) continue;
-            float surfaceY = hit.point.y + groundOffset;
-            // Only catch nearby ground or a surface crossed while falling; never pull the car down a drop.
-            float stepUp = grounded ? Vector3.ProjectOnPlane(vehicle.position - previousPosition, Vector3.up).magnitude * 1.5f : 0f;
-            if (surfaceY < vehicle.position.y - 0.15f || surfaceY > Mathf.Max(previousPosition.y, vehicle.position.y) + stepUp + 0.15f) continue;
-            if (!grounded && verticalSpeed > 0f) continue;
-            best = hit;
-            nearest = hit.distance;
-        }
-        grounded = nearest < float.MaxValue;
-        if (grounded)
-        {
-            vehicle.position = new Vector3(vehicle.position.x, best.point.y + groundOffset, vehicle.position.z);
-            forward = Vector3.ProjectOnPlane(forward, best.normal);
-            if (forward.sqrMagnitude > 0.001f) vehicle.rotation = Quaternion.LookRotation(forward.normalized, best.normal);
-            verticalSpeed = 0f;
-        }
-        else
-        {
-            Vector3 horizontal = Vector3.ProjectOnPlane(forward, Vector3.up);
-            if (horizontal.sqrMagnitude > 0.001f)
-                vehicle.rotation = Quaternion.Slerp(vehicle.rotation, Quaternion.LookRotation(horizontal), deltaTime * steerSpeed);
+            Vector3 direction = Vector3.RotateTowards(vehicle.forward, sphereBody.linearVelocity, Mathf.Deg2Rad * deltaTime * 360f, 0f);
+            Vector3 angles = Quaternion.LookRotation(direction).eulerAngles;
+            angles.y = Mathf.Clamp(Mathf.DeltaAngle(0f, angles.y), -30f, 30f);
+            angles.x = braking ? vehicle.eulerAngles.x : Mathf.Min(Mathf.DeltaAngle(0f, angles.x), 35f);
+            vehicle.rotation = Quaternion.Euler(angles);
         }
     }
-
     void RegisterSoundEffects()
     {
         PlayableSoundEffects.Register(PlayableSfx.Tap, sfxTap);
@@ -489,6 +488,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Done) return;
 
         state = State.Done;
+        sphereBody.isKinematic = true;
         if (carView != null) carView.InactivateAllParts();
         if (runUi != null) runUi.FinishRun(distance);
         StopMoveLoop();
@@ -514,19 +514,22 @@ public sealed class PlayableBootstrap : MonoBehaviour
         HideFinishFlag();
         ShowRecordLineForNextTurn();
         speed = 0f;
-        verticalSpeed = 0f;
+        sphereBody.isKinematic = true;
+        terrainCollider.ResetContacts();
         runningTerrain = TerrainType.Max;
         if (carView != null) carView.InactivateAllParts();
         distance = 0f;
         if (runUi != null) runUi.ResetRun();
         steer = 0f;
-        collisionTilt = 0f;
         dragging = false;
         state = State.Aim;
         RestoreCoins();
         vehicle.SetPositionAndRotation(startPosition, startRotation);
         SnapToGround(startRotation * Vector3.forward, true);
         if (carView != null) carView.SetTiltBody(0f);
+        if (carView != null) carView.SetSink(false, true);
+        sphereBody.position = vehicle.position;
+        sphereBody.rotation = Quaternion.identity;
         if (followCamera != null) followCamera.transform.position = vehicle.position + cameraOffset;
         SetSlingshotVisible(true);
         UpdateSlingshot();
@@ -636,15 +639,15 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         Vector3 forward = startRotation * Vector3.forward;
         Vector3 right = startRotation * Vector3.right;
-        float backwardPull = Mathf.Clamp((dragStart.y - pointer.y) * pullScreenScale, 0f, maxPull);
-        float sidePullLimit = backwardPull * Mathf.Tan(maxAimAngle * Mathf.Deg2Rad);
-        float sidePull = Mathf.Clamp((pointer.x - dragStart.x) * pullScreenScale, -sidePullLimit, sidePullLimit);
-        Vector3 pullOffset = right * sidePull - forward * backwardPull;
-
-        if (pullOffset.magnitude > maxPull) pullOffset = pullOffset.normalized * maxPull;
-        pull = pullOffset.magnitude;
+        Vector2 drag = pointer - dragStart;
+        drag.x = Mathf.Clamp(drag.x, -350f, 350f);
+        drag.y = Mathf.Clamp(drag.y, -600f, 0f);
+        drag = Vector2.ClampMagnitude(drag, 600f);
+        Vector3 pullOffset = right * (drag.x * 0.007f) + forward * (drag.y * 0.0125f);
+        launchForce = right * (-drag.x * 0.7f) + forward * -drag.y;
+        pull = maxPull * drag.magnitude / 600f;
         UpdateSlingshotPullUi();
-        Vector3 launchForward = pull > 0.001f ? -pullOffset.normalized : forward;
+        Vector3 launchForward = launchForce.sqrMagnitude > 0.001f ? launchForce.normalized : forward;
         vehicle.SetPositionAndRotation(startPosition + pullOffset, Quaternion.LookRotation(launchForward, startRotation * Vector3.up));
         SnapToGround(launchForward, true);
     }
@@ -879,61 +882,19 @@ public sealed class PlayableBootstrap : MonoBehaviour
         cameraTransitionRoutine = null;
     }
 
-    void HandleRunInteractions(Vector3 previousPosition, Vector3 move)
+    void HandlePhysicsTrigger(Collider other)
     {
-        if (move.sqrMagnitude <= 0f) return;
-
-        HandleDashInteractions(previousPosition, move);
-
-        Vector3 center = vehicle.position + Vector3.up * collisionCenterHeight;
-        int overlapCount = Physics.OverlapSphereNonAlloc(center, collisionRadius, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
-        for (int i = 0; i < overlapCount; i++)
-        {
-            TryCollectBoardUpgrade(interactionOverlaps[i]);
-            TryCollectCoin(interactionOverlaps[i]);
-            TryTriggerDash(interactionOverlaps[i]);
-        }
-
-        Vector3 direction = move.normalized;
-        Vector3 origin = previousPosition + Vector3.up * collisionCenterHeight;
-        int hitCount = Physics.SphereCastNonAlloc(origin, collisionRadius, direction, interactionHits, move.magnitude + collisionRadius, interactionMask, QueryTriggerInteraction.Collide);
-        RaycastHit bestHit = default;
-        float bestDistance = float.MaxValue;
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            RaycastHit hit = interactionHits[i];
-            if (TryCollectBoardUpgrade(hit.collider)) continue;
-            if (TryCollectCoin(hit.collider)) continue;
-            if (TryTriggerDash(hit.collider)) continue;
-            if (!IsObstacleHit(hit)) continue;
-            if (hit.distance >= bestDistance) continue;
-            bestHit = hit;
-            bestDistance = hit.distance;
-        }
-
-        if (bestDistance < float.MaxValue) BounceFrom(bestHit, direction);
+        if (state != State.Run) return;
+        TryCollectBoardUpgrade(other);
+        TryCollectCoin(other);
+        TryTriggerDash(other);
     }
 
-    void HandleDashInteractions(Vector3 previousPosition, Vector3 move)
+    void HandlePhysicsTriggerExit(Collider other)
     {
-        float radius = Mathf.Max(0.1f, dashDetectionRadius);
-        Vector3 center = vehicle.position + Vector3.up * dashDetectionHeight;
-        int overlapCount = Physics.OverlapSphereNonAlloc(center, radius, interactionOverlaps, dashInteractionMask, QueryTriggerInteraction.Collide);
-        for (int i = 0; i < overlapCount; i++)
-        {
-            TryTriggerDash(interactionOverlaps[i]);
-        }
-
-        Vector3 direction = move.normalized;
-        Vector3 origin = previousPosition + Vector3.up * dashDetectionHeight;
-        int hitCount = Physics.SphereCastNonAlloc(origin, radius, direction, interactionHits, move.magnitude + radius, dashInteractionMask, QueryTriggerInteraction.Collide);
-        for (int i = 0; i < hitCount; i++)
-        {
-            TryTriggerDash(interactionHits[i].collider);
-        }
+        GameObject dash = GetDashObject(other);
+        if (dash != null) triggeredDashIds.Remove(dash.GetInstanceID());
     }
-
     bool TryCollectBoardUpgrade(Collider collider)
     {
         GameObject item = GetTaggedObject(collider, "Attachment");
@@ -977,9 +938,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (triggeredDashIds.Contains(id)) return true;
 
         triggeredDashIds.Add(id);
-        float boostedSpeed = speed + dashSpeedBonus;
-        if (dashMaxSpeed > 0f && speed < dashMaxSpeed) boostedSpeed = Mathf.Min(boostedSpeed, dashMaxSpeed);
-        speed = Mathf.Max(speed, boostedSpeed);
+        ApplyDash(dash.transform.forward * (600f * dashForceMultiplier), 1f);
         ActivateJetBoosterEffects();
         if (carTracer != null)
         {
@@ -1043,36 +1002,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
         return coinAmountFallback;
     }
 
-    bool IsObstacleHit(RaycastHit hit)
+    void UpdateCarSteeringView()
     {
-        Collider collider = hit.collider;
-        if (collider == null || collider.isTrigger) return false;
-        if (collider.transform.IsChildOf(vehicle)) return false;
-        if (GetTaggedObject(collider, "Coin") != null || GetTaggedObject(collider, "Dash") != null || GetTaggedObject(collider, "Water") != null || GetTaggedObject(collider, "Dirt") != null) return false;
-        if (LayerMask.LayerToName(collider.gameObject.layer) == "Road") return false;
-        return hit.normal.y < 0.55f;
-    }
-
-    void BounceFrom(RaycastHit hit, Vector3 direction)
-    {
-        Vector3 normal = Vector3.ProjectOnPlane(hit.normal, Vector3.up);
-        if (normal.sqrMagnitude < 0.001f) normal = -direction;
-
-        Vector3 reflected = Vector3.Reflect(direction, normal.normalized);
-        reflected = Vector3.ProjectOnPlane(reflected, Vector3.up);
-        if (reflected.sqrMagnitude > 0.001f) vehicle.rotation = Quaternion.LookRotation(reflected.normalized, vehicle.up);
-
-        vehicle.position += normal.normalized * collisionRadius * 0.5f;
-        speed *= Mathf.Clamp01(collisionSpeedMultiplier);
-        collisionTilt = -Mathf.Sign(Vector3.Dot(vehicle.right, normal)) * collisionTiltAngle;
-        PlayableSoundEffects.Play(PlayableSfx.Collision);
-    }
-
-    void UpdateCollisionTilt()
-    {
-        if (carView == null || collisionTilt == 0f) return;
-        collisionTilt = Mathf.MoveTowards(collisionTilt, 0f, collisionTiltReturnSpeed * Time.deltaTime);
-        carView.SetTiltBody(collisionTilt);
+        if (carView == null || state != State.Run) return;
+        carView.SetTiltBody(Mathf.Lerp(carView.BodyTiltAngle, steer * 8f, Time.deltaTime * 10f));
+        carView.SetWheelSteerAngle(Mathf.Lerp(carView.WheelSteerAngle, steer * 20f, Time.deltaTime * 5f));
     }
 
     void RestoreCoins()
@@ -1167,8 +1101,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         if (bestDistance == float.MaxValue) return;
 
-        grounded = true;
-        verticalSpeed = 0f;
         Vector3 position = vehicle.position;
         position.y = bestHit.point.y + groundOffset;
         vehicle.position = position;
