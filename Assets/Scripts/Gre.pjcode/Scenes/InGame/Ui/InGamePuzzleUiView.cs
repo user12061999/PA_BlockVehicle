@@ -70,7 +70,6 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private float _carAttachEffectLifetime = 2f;
 
         const int DefaultBasePerformance = 5;
-        static readonly int[] RuntimePartIds = { 9, 0, 2, 1 };
         readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
         readonly List<RuntimePuzzlePartIcon> _runtimeParts = new List<RuntimePuzzlePartIcon>();
         readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
@@ -83,23 +82,19 @@ namespace Gre.pjcode.Scenes.InGame
         int _buyCursor;
         int _buyCount;
 
+        public const int MaxBoardWidth = 8;
+        public Vector2Int GridSize => _runtimeGridSize;
         public Board Board => _board;
         public Sprite BoostIconSprite => _boostIcon == null ? null : _boostIcon.sprite;
         public Sprite AttachmentIconSprite => _attachmentIconSprite;
         public CustomButton PlayButton => _playButton;
         public CustomButton BuyButton => _buyButton;
-        public float RunDistanceMultiplier
+        public float GetTerrainPerformance(TerrainType terrain) =>
+            terrain >= TerrainType.Default && terrain < TerrainType.Max ? _runTerrainPerformances[(int)terrain] : 0f;
+
+        public void ActivateTerrainParts(TerrainType terrain)
         {
-            get
-            {
-                float addForceWeight = 1f;
-                addForceWeight += _runTerrainPerformances[(int)TerrainType.Default] * 0.075f;
-                addForceWeight += _runTerrainPerformances[(int)TerrainType.Dirt] * 0.065f;
-                addForceWeight += _runTerrainPerformances[(int)TerrainType.Water] * 0.065f;
-                addForceWeight += _runTerrainPerformances[(int)TerrainType.Air] * 0.065f;
-                addForceWeight *= GetRunPerformanceTotal() == 0f ? 0.5f : 0.8f;
-                return Mathf.Clamp(addForceWeight / 0.5f + GetRunPerformanceTotal() * 2f, 1f, 3f);
-            }
+            if (_carView != null && _partDataAsset != null) _carView.SwitchActivateParts(terrain, _partDataAsset);
         }
 
         void Awake()
@@ -300,19 +295,48 @@ namespace Gre.pjcode.Scenes.InGame
             _placedParts.Clear();
             _buyCursor = 0;
             _buyCount = 0;
+            RebuildBoardGrid();
+            UpdateBuyPrice();
+        }
+
+        public int ExpandBoard(int columns)
+        {
+            int added = Mathf.Clamp(columns, 0, Mathf.Max(0, MaxBoardWidth - _runtimeGridSize.x));
+            if (added == 0) return 0;
+            int oldWidth = _runtimeGridSize.x;
+            _runtimeGridSize.x += added;
+            int shift = (_runtimeGridSize.x + 1) / 2 - (oldWidth + 1) / 2;
+            RebuildBoardGrid();
+            _occupiedCells.Clear();
+            foreach (RuntimePuzzlePartIcon icon in _placedParts)
+            {
+                Vector2Int origin = new Vector2Int(icon.CellIndex % oldWidth + shift, icon.CellIndex / oldWidth);
+                int index = GetCellIndex(origin);
+                icon.PlaceOn(_gridRoot, _runtimeCells[index].anchoredPosition, index);
+                foreach (Vector2Int offset in icon.Pattern) _occupiedCells[GetCellIndex(origin + offset)] = icon;
+            }
+            return added;
+        }
+
+        void RebuildBoardGrid()
+        {
+            foreach (RectTransform cell in _runtimeCells)
+            {
+                cell.gameObject.SetActive(false);
+                Destroy(cell.gameObject);
+            }
+            _runtimeCells.Clear();
             float cellSize = GetRuntimeCellSize();
             if (_board != null) _board.Setup(_runtimeGridSize, cellSize);
-
             for (int y = 0; y < _runtimeGridSize.y; y++)
             {
                 for (int x = 0; x < _runtimeGridSize.x; x++)
                 {
                     RectTransform cell = CreateBoardGrid(new Vector2Int(x, y), cellSize);
+                    cell.SetAsFirstSibling();
                     _runtimeCells.Add(cell);
                 }
             }
-
-            UpdateBuyPrice();
         }
 
         int GetStartingGold()
@@ -323,7 +347,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         void BuyRuntimePart()
         {
-            if (_partDataAsset == null || _minoListRoot == null) return;
+            if (_partDataAsset == null || _minoListRoot == null || _partDataAsset.PartDataList.Count == 0) return;
             UpdateBuyPrice();
             if (_gold < _buyPrice)
             {
@@ -334,7 +358,7 @@ namespace Gre.pjcode.Scenes.InGame
             _gold -= _buyPrice;
             SetGold(_gold);
             PlayableSoundEffects.Play(PlayableSfx.Buy);
-            CreateTrayPart(RuntimePartIds[_buyCursor % RuntimePartIds.Length], GetRuntimeCellSize());
+            CreateTrayPart(_buyCursor % _partDataAsset.PartDataList.Count, GetRuntimeCellSize());
             _buyCursor++;
             _buyCount++;
             UpdateBuyPrice();
@@ -536,13 +560,6 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             return Mathf.Max(0, Mathf.RoundToInt(_buyPriceBase * Mathf.Pow(multiplier, index)));
         }
 
-        float GetRunPerformanceTotal()
-        {
-            float total = 0f;
-            foreach (float performance in _runTerrainPerformances) total += performance;
-            return total;
-        }
-
         internal Color GetPartLevelColor(int level)
         {
             if (level <= 1) return _commonPartColor;
@@ -556,7 +573,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (partData == null || partData.PerformanceData == null) return 0;
             int count = (int)Mathf.Pow(2, Mathf.Max(0, level - 1));
             int levelBonus = Mathf.Max(0, level - 1) * 5;
-            return (int)(partData.PerformanceData.Value * count * 100f) + levelBonus;
+            return Mathf.FloorToInt(partData.PerformanceData.Value * count * 100f) + levelBonus;
         }
 
         float GetPerformanceWeight(PartData partData, int level)
@@ -766,7 +783,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             cell.sizeDelta = Vector2.one * cellSize;
             cell.anchoredPosition = _board == null
                 ? new Vector2(
-                    (cellPos.x - (_runtimeGridSize.x - 1) * 0.5f) * cellSize,
+                    (cellPos.x - ((_runtimeGridSize.x + 1) / 2 - 0.5f)) * cellSize,
                     (cellPos.y - (_runtimeGridSize.y - 1) * 0.5f) * cellSize
                 )
                 : _board.GetPositionOnBoard(cellPos);

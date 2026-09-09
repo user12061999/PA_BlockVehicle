@@ -8345,9 +8345,9 @@ GameObject:
   - component: {fileID: 9138361779558822847}
   - component: {fileID: 3119236858240085419}
   - component: {fileID: 1785868575500363628}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Water_1
-  m_TagString: Untagged
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9156,9 +9156,9 @@ GameObject:
   - component: {fileID: 9100121183865318559}
   - component: {fileID: 360529906871317558}
   - component: {fileID: 7682391825868465969}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Water
-  m_TagString: Untagged
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

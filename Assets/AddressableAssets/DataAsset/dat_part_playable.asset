@@ -10,9 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc5323a385f84567a3a17b7af00a6eae, type: 3}
-  m_Name: dat_part
+  m_Name: dat_part_playable
   m_EditorClassIdentifier: 
   _partDataList:
+  - _shapeType: 9
+    _prefab: {fileID: 976578358023324669, guid: 581597490a8e148bc87c0956fd4d4b7b, type: 3}
+    _minoSprite: {fileID: 21300000, guid: b9ab0feb7b5e449b584a81499724ff10, type: 3}
+    _minoSpriteScale: 3
+    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
+    _rotate: 3
+    _performanceData:
+      _terrainType: 1
+      _value: 0.11
+    _levelUpViews: []
   - _shapeType: 7
     _prefab: {fileID: 7604150650207607836, guid: 42a177700a827438283033755eccc475, type: 3}
     _minoSprite: {fileID: 21300000, guid: c3ccb9d085de1481b98969fdff27d6c4, type: 3}
@@ -22,16 +32,6 @@ MonoBehaviour:
     _performanceData:
       _terrainType: 0
       _value: 0.035
-    _levelUpViews: []
-  - _shapeType: 6
-    _prefab: {fileID: 7036997328533792374, guid: 9ab7678e026f645e588cb27aa55ea93d, type: 3}
-    _minoSprite: {fileID: 21300000, guid: 4d4d6af761d4548d9a538707c813872b, type: 3}
-    _minoSpriteScale: 3
-    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
-    _rotate: 2
-    _performanceData:
-      _terrainType: 0
-      _value: 0.15
     _levelUpViews: []
   - _shapeType: 10
     _prefab: {fileID: 2612320899335753469, guid: 33797e85c42cb4ece960e5397f7843e6, type: 3}
@@ -43,41 +43,41 @@ MonoBehaviour:
       _terrainType: 0
       _value: 0.11
     _levelUpViews: []
-  - _shapeType: 9
-    _prefab: {fileID: 3708906992055630437, guid: e7ef901188b034d1fb59630128dbb8a1, type: 3}
-    _minoSprite: {fileID: 21300000, guid: 3956481c09af24d288de3e174f591594, type: 3}
-    _minoSpriteScale: 1
-    _blockSprite: {fileID: 0}
-    _rotate: 0
-    _performanceData:
-      _terrainType: 2
-      _value: 0.11
-    _levelUpViews: []
-  - _shapeType: 9
-    _prefab: {fileID: 976578358023324669, guid: 581597490a8e148bc87c0956fd4d4b7b, type: 3}
-    _minoSprite: {fileID: 21300000, guid: b9ab0feb7b5e449b584a81499724ff10, type: 3}
+  - _shapeType: 6
+    _prefab: {fileID: 7036997328533792374, guid: 9ab7678e026f645e588cb27aa55ea93d, type: 3}
+    _minoSprite: {fileID: 21300000, guid: 4d4d6af761d4548d9a538707c813872b, type: 3}
     _minoSpriteScale: 3
     _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
-    _rotate: 3
+    _rotate: 2
     _performanceData:
-      _terrainType: 1
-      _value: 0.11
+      _terrainType: 0
+      _value: 0.15
     _levelUpViews: []
   - _shapeType: 9
     _prefab: {fileID: 6792754634826708830, guid: cf183df3035384088a78caa70053d8f3, type: 3}
     _minoSprite: {fileID: 21300000, guid: 0ea5556cd8c714735af74715aaaddece, type: 3}
-    _minoSpriteScale: 1
-    _blockSprite: {fileID: 0}
+    _minoSpriteScale: 3
+    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
     _rotate: 1
     _performanceData:
       _terrainType: 3
       _value: 0.11
     _levelUpViews: []
+  - _shapeType: 9
+    _prefab: {fileID: 3708906992055630437, guid: e7ef901188b034d1fb59630128dbb8a1, type: 3}
+    _minoSprite: {fileID: 21300000, guid: 3956481c09af24d288de3e174f591594, type: 3}
+    _minoSpriteScale: 3
+    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
+    _rotate: 0
+    _performanceData:
+      _terrainType: 2
+      _value: 0.11
+    _levelUpViews: []
   - _shapeType: 3
     _prefab: {fileID: 5942034495418784590, guid: d3b49259d54de419fa6137206d173b38, type: 3}
     _minoSprite: {fileID: 21300000, guid: b0c086fbe10f5413a9b2a6903d06b7d6, type: 3}
-    _minoSpriteScale: 1
-    _blockSprite: {fileID: 0}
+    _minoSpriteScale: 3
+    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
     _rotate: 0
     _performanceData:
       _terrainType: 3

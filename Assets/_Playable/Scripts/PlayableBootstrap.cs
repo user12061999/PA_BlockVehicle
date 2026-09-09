@@ -103,8 +103,14 @@ public sealed class PlayableBootstrap : MonoBehaviour
     State state;
     float pull;
     float speed;
+    bool grounded;
+    float verticalSpeed;
+    TerrainType runningTerrain = TerrainType.Max;
     float distance;
     int pendingResultGold;
+    int pendingBoardColumns;
+    InGameGetItemUiView getItemUi;
+    readonly List<GameObject> collectedBoardUpgrades = new List<GameObject>();
     float steer;
     float collisionTilt;
     bool dragging;
@@ -145,6 +151,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
         CacheRunUi();
+        getItemUi = FindSceneObjectOfType<InGameGetItemUiView>();
         //buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
         startRotation = vehicle.rotation;
@@ -225,8 +232,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             ApplyAim(pointer);
             dragging = false;
             SetSlingshotPullUiVisible(false);
-            float partMultiplier = puzzleUi == null ? 1f : puzzleUi.RunDistanceMultiplier;
-            speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * partMultiplier * GetCarSpeedMultiplier();
+            speed = Mathf.Lerp(minSpeed, maxSpeed, maxPull > 0f ? pull / maxPull : 0f) * GetCarSpeedMultiplier();
             state = State.Run;
             if (runUi != null) runUi.BeginRun();
             PlayableSoundEffects.Play(PlayableSfx.Launch);
@@ -372,20 +378,92 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (PointerHeld(out Vector2 pointer)) targetSteer = Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f);
         steer = Mathf.MoveTowards(steer, targetSteer, Time.deltaTime * 4f);
 
-        speed = Mathf.MoveTowards(speed, 0f, friction * Time.deltaTime);
+        MoveRun(Time.deltaTime);
+        if ((speed <= 0f && grounded) || vehicle.position.y < startPosition.y - 200f) FinishRun();
+    }
+
+    void MoveRun(float deltaTime)
+    {
+        TerrainType terrain = GetRunningTerrain();
+        if (terrain != runningTerrain)
+        {
+            runningTerrain = terrain;
+            if (puzzleUi != null) puzzleUi.ActivateTerrainParts(terrain);
+            if (carTracer != null) carTracer.PlayRunningEffect(terrain);
+        }
+        float bonus = 1f + 2f * (puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(terrain));
+        float resistance = terrain == TerrainType.Dirt ? 1.5f : terrain == TerrainType.Water ? 2f : terrain == TerrainType.Air ? 0.3f : 1f;
+        speed = Mathf.MoveTowards(speed, 0f, friction * resistance / bonus * deltaTime);
+        float terrainSpeed = terrain == TerrainType.Dirt ? 0.6f : terrain == TerrainType.Water ? 0.45f : 1f;
+        float moveSpeed = speed * terrainSpeed * Mathf.Min(bonus, 3f);
         Vector3 forward = vehicle.forward;
-        if (Mathf.Abs(steer) > 0.001f) forward = Quaternion.AngleAxis(steer * turnSpeed * Time.deltaTime, vehicle.up) * forward;
-        Vector3 move = forward.normalized * speed * Time.deltaTime;
+        if (Mathf.Abs(steer) > 0.001f) forward = Quaternion.AngleAxis(steer * turnSpeed * deltaTime, Vector3.up) * forward;
+        Vector3 move = forward.normalized * moveSpeed * deltaTime;
+        if (grounded) verticalSpeed = forward.normalized.y * moveSpeed;
+        else
+        {
+            float air = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(TerrainType.Air);
+            verticalSpeed -= 25f / (1f + 4f * air) * deltaTime;
+            move = Vector3.ProjectOnPlane(forward, Vector3.up).normalized * moveSpeed * deltaTime;
+            move.y = verticalSpeed * deltaTime;
+        }
         Vector3 previousPosition = vehicle.position;
         vehicle.position += move;
+        Quaternion previousRotation = vehicle.rotation;
         HandleRunInteractions(previousPosition, move);
-        SnapToGround(move.sqrMagnitude > 0f ? move : forward, false);
-        distance += move.magnitude;
-        if (runUi != null) runUi.UpdateRun(distance, speed);
+        if (vehicle.rotation != previousRotation) forward = vehicle.forward;
+        ResolveRunGround(previousPosition, forward, deltaTime);
+        distance += Vector3.Distance(previousPosition, vehicle.position);
+        if (runUi != null) runUi.UpdateRun(distance, moveSpeed);
+    }
 
-        if (speed <= 0f)
+    TerrainType GetRunningTerrain()
+    {
+        if (!grounded) return TerrainType.Air;
+        Vector3 foot = vehicle.position - Vector3.up * groundOffset;
+        int count = Physics.OverlapSphereNonAlloc(foot, 0.2f, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
+        TerrainType terrain = TerrainType.Default;
+        for (int i = 0; i < count; i++)
         {
-            FinishRun();
+            if (GetTaggedObject(interactionOverlaps[i], "Water") != null) return TerrainType.Water;
+            if (GetTaggedObject(interactionOverlaps[i], "Dirt") != null) terrain = TerrainType.Dirt;
+        }
+        return terrain;
+    }
+
+    void ResolveRunGround(Vector3 previousPosition, Vector3 forward, float deltaTime)
+    {
+        Vector3 origin = vehicle.position;
+        origin.y = Mathf.Max(previousPosition.y, origin.y) + groundRayHeight;
+        float length = origin.y - vehicle.position.y + groundRayHeight;
+        int count = Physics.RaycastNonAlloc(origin, Vector3.down, groundHits, length, groundMask, QueryTriggerInteraction.Ignore);
+        RaycastHit best = default;
+        float nearest = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            var hit = groundHits[i];
+            if (hit.collider.transform.IsChildOf(vehicle) || hit.normal.y < 0.55f || hit.distance >= nearest) continue;
+            float surfaceY = hit.point.y + groundOffset;
+            // Only catch nearby ground or a surface crossed while falling; never pull the car down a drop.
+            float stepUp = grounded ? Vector3.ProjectOnPlane(vehicle.position - previousPosition, Vector3.up).magnitude * 1.5f : 0f;
+            if (surfaceY < vehicle.position.y - 0.15f || surfaceY > Mathf.Max(previousPosition.y, vehicle.position.y) + stepUp + 0.15f) continue;
+            if (!grounded && verticalSpeed > 0f) continue;
+            best = hit;
+            nearest = hit.distance;
+        }
+        grounded = nearest < float.MaxValue;
+        if (grounded)
+        {
+            vehicle.position = new Vector3(vehicle.position.x, best.point.y + groundOffset, vehicle.position.z);
+            forward = Vector3.ProjectOnPlane(forward, best.normal);
+            if (forward.sqrMagnitude > 0.001f) vehicle.rotation = Quaternion.LookRotation(forward.normalized, best.normal);
+            verticalSpeed = 0f;
+        }
+        else
+        {
+            Vector3 horizontal = Vector3.ProjectOnPlane(forward, Vector3.up);
+            if (horizontal.sqrMagnitude > 0.001f)
+                vehicle.rotation = Quaternion.Slerp(vehicle.rotation, Quaternion.LookRotation(horizontal), deltaTime * steerSpeed);
         }
     }
 
@@ -411,6 +489,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Done) return;
 
         state = State.Done;
+        if (carView != null) carView.InactivateAllParts();
         if (runUi != null) runUi.FinishRun(distance);
         StopMoveLoop();
         StopMusic();
@@ -435,6 +514,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
         HideFinishFlag();
         ShowRecordLineForNextTurn();
         speed = 0f;
+        verticalSpeed = 0f;
+        runningTerrain = TerrainType.Max;
+        if (carView != null) carView.InactivateAllParts();
         distance = 0f;
         if (runUi != null) runUi.ResetRun();
         steer = 0f;
@@ -527,9 +609,18 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void ClaimResultAndReset()
     {
+        if (state != State.Done) return;
         if (puzzleUi != null && pendingResultGold > 0) puzzleUi.AddGold(pendingResultGold);
         pendingResultGold = 0;
+        Vector2Int before = puzzleUi == null ? Vector2Int.zero : puzzleUi.GridSize;
+        int received = puzzleUi == null ? 0 : puzzleUi.ExpandBoard(pendingBoardColumns);
+        pendingBoardColumns = 0;
         ResetRun();
+        if (received > 0 && getItemUi != null)
+        {
+            getItemUi.Show(puzzleUi.AttachmentIconSprite, "BOARD EXPANSION", "+" + received + " COLUMN" + (received > 1 ? "S" : "") + "\n" +
+                before.x + " x " + before.y + "  >  " + puzzleUi.GridSize.x + " x " + puzzleUi.GridSize.y);
+        }
     }
 
     IEnumerator NotifyPlayActionAfterResultUi()
@@ -798,6 +889,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         int overlapCount = Physics.OverlapSphereNonAlloc(center, collisionRadius, interactionOverlaps, interactionMask, QueryTriggerInteraction.Collide);
         for (int i = 0; i < overlapCount; i++)
         {
+            TryCollectBoardUpgrade(interactionOverlaps[i]);
             TryCollectCoin(interactionOverlaps[i]);
             TryTriggerDash(interactionOverlaps[i]);
         }
@@ -811,6 +903,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         for (int i = 0; i < hitCount; i++)
         {
             RaycastHit hit = interactionHits[i];
+            if (TryCollectBoardUpgrade(hit.collider)) continue;
             if (TryCollectCoin(hit.collider)) continue;
             if (TryTriggerDash(hit.collider)) continue;
             if (!IsObstacleHit(hit)) continue;
@@ -839,6 +932,22 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             TryTriggerDash(interactionHits[i].collider);
         }
+    }
+
+    bool TryCollectBoardUpgrade(Collider collider)
+    {
+        GameObject item = GetTaggedObject(collider, "Attachment");
+        if (item == null) return false;
+        if (state != State.Run || puzzleUi == null || collectedBoardUpgrades.Contains(item)) return true;
+        collectedBoardUpgrades.Add(item);
+        if (puzzleUi.GridSize.x + pendingBoardColumns < InGamePuzzleUiView.MaxBoardWidth)
+        {
+            pendingBoardColumns++;
+            if (carTracer != null) carTracer.GetAttachment();
+            PlayableSoundEffects.Play(PlayableSfx.Coin);
+        }
+        item.SetActive(false);
+        return true;
     }
 
     bool TryCollectCoin(Collider collider)
@@ -939,7 +1048,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         Collider collider = hit.collider;
         if (collider == null || collider.isTrigger) return false;
         if (collider.transform.IsChildOf(vehicle)) return false;
-        if (collider.CompareTag("Coin") || collider.CompareTag("Dash") || collider.CompareTag("Water") || collider.CompareTag("Dirt")) return false;
+        if (GetTaggedObject(collider, "Coin") != null || GetTaggedObject(collider, "Dash") != null || GetTaggedObject(collider, "Water") != null || GetTaggedObject(collider, "Dirt") != null) return false;
         if (LayerMask.LayerToName(collider.gameObject.layer) == "Road") return false;
         return hit.normal.y < 0.55f;
     }
@@ -973,6 +1082,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
             if (coin != null) coin.SetActive(true);
         }
 
+        foreach (GameObject item in collectedBoardUpgrades)
+        {
+            if (item != null) item.SetActive(true);
+        }
+        collectedBoardUpgrades.Clear();
         collectedCoins.Clear();
         collectedCoinIds.Clear();
         triggeredDashIds.Clear();
@@ -1053,6 +1167,8 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         if (bestDistance == float.MaxValue) return;
 
+        grounded = true;
+        verticalSpeed = 0f;
         Vector3 position = vehicle.position;
         position.y = bestHit.point.y + groundOffset;
         vehicle.position = position;

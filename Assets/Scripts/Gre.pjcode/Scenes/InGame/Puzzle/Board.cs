@@ -24,6 +24,8 @@ namespace Gre.pjcode.Scenes.InGame
             Vector2 boardSize = _boardSize;
             Vector2 cell = cellPos;
             Vector2 leftBottomPos = -_cellSize * boardSize / 2f + Vector2.one * (_cellSize * 0.5f);
+            // Odd widths add the extra column on the left without moving the original cells.
+            leftBottomPos.x -= (_boardSize.x % 2) * _cellSize * 0.5f;
             return leftBottomPos + cell * _cellSize;
         }
     }
