@@ -184,8 +184,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void LateUpdate()
     {
+        if (state == State.Run && sphereBody != null) UpdateVehiclePresentation(Time.deltaTime);
         if (followCamera == null || vehicle == null || state == State.Aim || cameraTransitionRoutine != null) return;
-        followCamera.transform.position = Vector3.Lerp(followCamera.transform.position, vehicle.position + cameraOffset, Time.deltaTime * 5f);
+        followCamera.transform.position = Vector3.Lerp(followCamera.transform.position, vehicle.position + cameraOffset, 1f - Mathf.Exp(-5f * Time.deltaTime));
     }
 
     void UpdateAim()
@@ -261,6 +262,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         sphereBody.linearDamping = linearDamping;
         sphereBody.angularDamping = 0.01f;
         sphereBody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        sphereBody.interpolation = RigidbodyInterpolation.Interpolate;
         sphereBody.position = vehicle.position;
         terrainCollider = sphereBody.GetComponent<CarTerrainCollider>();
         if (terrainCollider == null) terrainCollider = sphereBody.gameObject.AddComponent<CarTerrainCollider>();
@@ -402,12 +404,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         steer = PointerHeld(out Vector2 pointer) ? Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f) : 0f;
         ControlSphere(Time.deltaTime);
-        vehicle.position = sphereBody.position;
         speed = sphereBody.linearVelocity.magnitude;
-        distance = Mathf.Max(distance, vehicle.position.z);
+        distance = Mathf.Max(distance, sphereBody.position.z);
         if (runUi != null) runUi.UpdateRun(distance, speed);
         stopTime = sphereBody.linearVelocity.z > 0f && speed > 3f ? stopTime : stopTime + Time.deltaTime;
-        if (stopTime >= 0.5f || vehicle.position.y < startPosition.y - 200f) FinishRun();
+        if (stopTime >= 0.5f || sphereBody.position.y < startPosition.y - 200f) FinishRun();
     }
 
     void ControlSphere(float deltaTime)
@@ -428,7 +429,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         if (state != State.Run || sphereBody == null) return;
         StepPhysics(Time.fixedDeltaTime);
-        vehicle.position = sphereBody.position;
     }
 
     void StepPhysics(float deltaTime)
@@ -457,12 +457,18 @@ public sealed class PlayableBootstrap : MonoBehaviour
             float slope = Vector3.Angle(Vector3.up, direction) - 90f;
             if (slope > 0f) sphereBody.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
         }
+    }
+
+    void UpdateVehiclePresentation(float deltaTime)
+    {
+        // Transform contains the interpolated render pose; Rigidbody.position is the raw physics pose.
+        vehicle.position = sphereBody.transform.position;
         if (sphereBody.linearVelocity.sqrMagnitude > 0.0001f)
         {
             Vector3 direction = Vector3.RotateTowards(vehicle.forward, sphereBody.linearVelocity, Mathf.Deg2Rad * deltaTime * 360f, 0f);
             Vector3 angles = Quaternion.LookRotation(direction).eulerAngles;
             angles.y = Mathf.Clamp(Mathf.DeltaAngle(0f, angles.y), -30f, 30f);
-            angles.x = braking ? vehicle.eulerAngles.x : Mathf.Min(Mathf.DeltaAngle(0f, angles.x), 35f);
+            angles.x = sphereBody.linearVelocity.sqrMagnitude < 49f ? vehicle.eulerAngles.x : Mathf.Min(Mathf.DeltaAngle(0f, angles.x), 35f);
             vehicle.rotation = Quaternion.Euler(angles);
         }
     }

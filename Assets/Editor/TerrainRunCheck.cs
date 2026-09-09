@@ -128,6 +128,12 @@ public static class TerrainRunCheck
             Set(driver, "steer", 1f);
             Call(driver, "ControlSphere", 0.02f);
             Require(Mathf.Abs(actual.linearVelocity.magnitude - 30f) < 0.0001f && Vector3.Angle(Vector3.forward, actual.linearVelocity) <= 15f, "Steering preserves speed and original angle limit");
+            Vector3 physicalPosition = actual.position;
+            Vector3 physicalVelocity = actual.linearVelocity;
+            visual.transform.position = Vector3.one * -100f;
+            Call(driver, "UpdateVehiclePresentation", 1f / 120f);
+            Require(Vector3.Distance(visual.transform.position, actual.transform.position) < 0.0001f, "Visual must follow the rendered Rigidbody transform");
+            Require(actual.position == physicalPosition && actual.linearVelocity == physicalVelocity, "Render updates must not change physics");
             var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
             SceneManager.MoveGameObjectToScene(wall, scene);
             wall.transform.localScale = new Vector3(10f, 10f, 1f);

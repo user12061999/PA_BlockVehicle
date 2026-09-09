@@ -17,7 +17,7 @@ MonoBehaviour:
     _prefab: {fileID: 7604150650207607836, guid: 42a177700a827438283033755eccc475, type: 3}
     _minoSprite: {fileID: 21300000, guid: c3ccb9d085de1481b98969fdff27d6c4, type: 3}
     _minoSpriteScale: 3
-    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
+    _blockSprite: {fileID: 21300000, guid: bd6ee6ffc6e7132448135f4748e12b88, type: 3}
     _rotate: 0
     _performanceData:
       _terrainType: 0
@@ -27,7 +27,7 @@ MonoBehaviour:
     _prefab: {fileID: 7036997328533792374, guid: 9ab7678e026f645e588cb27aa55ea93d, type: 3}
     _minoSprite: {fileID: 21300000, guid: 4d4d6af761d4548d9a538707c813872b, type: 3}
     _minoSpriteScale: 3
-    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
+    _blockSprite: {fileID: 21300000, guid: bd6ee6ffc6e7132448135f4748e12b88, type: 3}
     _rotate: 2
     _performanceData:
       _terrainType: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
     _prefab: {fileID: 2612320899335753469, guid: 33797e85c42cb4ece960e5397f7843e6, type: 3}
     _minoSprite: {fileID: 21300000, guid: 296bb50af44eb471aace13adf32fffc6, type: 3}
     _minoSpriteScale: 3
-    _blockSprite: {fileID: 21300000, guid: a2372b9ef9e05ef4caef09de41bd0022, type: 3}
+    _blockSprite: {fileID: 21300000, guid: bd6ee6ffc6e7132448135f4748e12b88, type: 3}
     _rotate: 0
     _performanceData:
       _terrainType: 0
