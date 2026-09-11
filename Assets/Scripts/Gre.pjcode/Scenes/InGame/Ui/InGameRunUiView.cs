@@ -7,6 +7,16 @@ namespace Gre.pjcode.Scenes.InGame
     public sealed class InGameRunUiView : MonoBehaviour
     {
         [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField] private Button _boostButton;
+        public Button BoostButton { get { CacheViews(); return _boostButton; } }
+
+        public void SetBoosterAvailable(bool unlocked, bool used)
+        {
+            CacheViews();
+            if (_boostButton == null) return;
+            _boostButton.gameObject.SetActive(unlocked);
+            _boostButton.interactable = !used;
+        }
         [SerializeField] private CanvasGroup _runningGroup;
         [SerializeField] private TMP_Text _forwardDistanceText;
         [SerializeField] private CanvasGroup _speedGaugeGroup;
@@ -84,6 +94,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         void SetRunning(bool isRunning)
         {
+            if (!isRunning) SetBoosterAvailable(false, false);
             SetCanvasGroup(_runningGroup, isRunning);
             SetCanvasGroup(_speedGaugeGroup, isRunning);
             if (_runningGroup == null && _speedGaugeGroup == null) SetCanvasGroup(_canvasGroup, isRunning);
@@ -102,6 +113,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         void CacheViews()
         {
+            if (_boostButton == null) _boostButton = FindComponent<Button>("BoostButton");
             if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
             if (_runningGroup == null) _runningGroup = FindComponent<CanvasGroup>("RunningGroup");
             if (_forwardDistanceText == null) _forwardDistanceText = FindComponentInChildren<TMP_Text>("RunningGroup", "CustomText");

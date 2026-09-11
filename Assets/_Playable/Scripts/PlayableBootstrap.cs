@@ -114,6 +114,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     readonly RaycastHit[] groundHits = new RaycastHit[8];
     readonly HashSet<int> collectedCoinIds = new HashSet<int>();
     readonly HashSet<int> triggeredDashIds = new HashSet<int>();
+    bool boosterUsed;
     readonly List<GameObject> collectedCoins = new List<GameObject>();
 
     void Awake()
@@ -135,6 +136,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
         CacheRunUi();
+        if (runUi != null && runUi.BoostButton != null) runUi.BoostButton.onClick.AddListener(UseBooster);
         getItemUi = FindSceneObjectOfType<InGameGetItemUiView>();
         //buildUi = GameObject.Find("PuzzleUi");
         startPosition = vehicle.position;
@@ -221,7 +223,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
             ApplyDash(launchForce, 1.2f);
             stopTime = 0f;
             state = State.Run;
+            boosterUsed = false;
             if (runUi != null) runUi.BeginRun();
+            if (runUi != null) runUi.SetBoosterAvailable(puzzleUi != null && puzzleUi.BoostLevel > 0, boosterUsed);
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             if (GetCarSpeedMultiplier() > 0f) PlayMoveLoop();
             PlayMusic();
@@ -268,6 +272,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (terrainCollider == null) terrainCollider = sphereBody.gameObject.AddComponent<CarTerrainCollider>();
         terrainCollider.TriggerEntered = HandlePhysicsTrigger;
         terrainCollider.TriggerExited = HandlePhysicsTriggerExit;
+
         foreach (Collider c in vehicle.GetComponentsInChildren<Collider>()) c.enabled = false;
     }
 
@@ -893,14 +898,16 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state != State.Run) return;
         TryCollectBoardUpgrade(other);
         TryCollectCoin(other);
+        TryCollectBoost(other);
         TryTriggerDash(other);
     }
 
     void HandlePhysicsTriggerExit(Collider other)
     {
-        GameObject dash = GetDashObject(other);
+        GameObject dash = GetTaggedObject(other, "Dash");
         if (dash != null) triggeredDashIds.Remove(dash.GetInstanceID());
     }
+
     bool TryCollectBoardUpgrade(Collider collider)
     {
         GameObject item = GetTaggedObject(collider, "Attachment");
@@ -935,9 +942,22 @@ public sealed class PlayableBootstrap : MonoBehaviour
         return true;
     }
 
+    bool TryCollectBoost(Collider collider)
+    {
+        GameObject item = GetTaggedObject(collider, "BoostUnlock");
+        if (item == null) return false;
+        if (puzzleUi == null) return true;
+        item.SetActive(false);
+        if (puzzleUi.BoosterUnlocked) return true;
+        puzzleUi.SetBoostLevel(puzzleUi.BoostLevel, true);
+        if (carTracer != null) carTracer.UnlockBooster();
+        PlayableSoundEffects.Play(PlayableSfx.Coin);
+        return true;
+    }
+
     bool TryTriggerDash(Collider collider)
     {
-        GameObject dash = GetDashObject(collider);
+        GameObject dash = GetTaggedObject(collider, "Dash");
         if (dash == null) return false;
 
         int id = dash.GetInstanceID();
@@ -956,6 +976,18 @@ public sealed class PlayableBootstrap : MonoBehaviour
         return true;
     }
 
+    void UseBooster()
+    {
+        if (state != State.Run || boosterUsed || puzzleUi == null || puzzleUi.BoostLevel <= 0 || sphereBody == null || sphereBody.isKinematic) return;
+        boosterUsed = true;
+        if (runUi != null) runUi.SetBoosterAvailable(true, true);
+        float multiplier = 0.5f + (puzzleUi.BoostLevel - 1) * 0.1f;
+        ApplyDash(vehicle.forward * (600f * multiplier), 1f);
+        ActivateJetBoosterEffects();
+        if (carTracer != null) carTracer.PlayDashEffect();
+        PlayableSoundEffects.Play(PlayableSfx.Dash);
+    }
+
     void ActivateJetBoosterEffects()
     {
         if (carView == null) return;
@@ -965,20 +997,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             if (part is JetBoosterPartView) part.Activate(duration);
         }
-    }
-
-    GameObject GetDashObject(Collider collider)
-    {
-        if (collider == null || collider.transform.IsChildOf(vehicle)) return null;
-
-        Transform current = collider.transform;
-        while (current != null)
-        {
-            if (current.CompareTag("Dash") || current.name.ToLowerInvariant().Contains("dash")) return current.gameObject;
-            current = current.parent;
-        }
-
-        return null;
     }
 
     GameObject GetTaggedObject(Collider collider, string tagName)

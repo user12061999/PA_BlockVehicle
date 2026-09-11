@@ -57,6 +57,7 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private int _startingGold = 10000;
         [SerializeField] private Vector2Int _runtimeGridSize = new Vector2Int(4, 4);
         [SerializeField] private float _runtimeCellSize = 96f;
+        [SerializeField, Min(0f)] private float _gridCellGap = 6f;
         [SerializeField] private int _trayColumnCount = 4;
         [SerializeField] private float _trayItemSpacing = 8f;
         [SerializeField] private Color _runtimeGridColor = new Color(1f, 1f, 1f, 0.25f);
@@ -71,6 +72,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         const int DefaultBasePerformance = 5;
         readonly List<RectTransform> _runtimeCells = new List<RectTransform>();
+        readonly List<Image> _placementPreview = new List<Image>();
         readonly List<RuntimePuzzlePartIcon> _runtimeParts = new List<RuntimePuzzlePartIcon>();
         readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
         readonly List<RuntimePuzzlePartIcon> _placedParts = new List<RuntimePuzzlePartIcon>();
@@ -78,6 +80,9 @@ namespace Gre.pjcode.Scenes.InGame
         readonly float[] _runTerrainPerformances = new float[(int)TerrainType.Max];
         CarView _carView;
         int _gold;
+        public int BoostLevel { get; private set; }
+        public bool BoosterUnlocked { get; private set; }
+        int BoostUpgradePrice => BoostLevel == 0 ? 0 : BoostLevel == 1 ? 2000 : BoostLevel == 2 ? 3500 : BoostLevel == 3 ? 5000 : BoostLevel == 4 ? 7000 : 10000;
         int _buyPrice = 30;
         int _buyCursor;
         int _buyCount;
@@ -119,6 +124,7 @@ namespace Gre.pjcode.Scenes.InGame
 
             if (_playButton != null) _playButton.onClick.AddListener(() => SetOpen(false));
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
+            if (_boostEvolveButton != null) _boostEvolveButton.onClick.AddListener(UpgradeBooster);
             if (_bonusBoxOpenButton != null) _bonusBoxOpenButton.onClick.AddListener(PlayworksBridge.InstallFullGame);
 
             SetGold(GetStartingGold());
@@ -216,16 +222,33 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void SetBoostLevel(int level, bool unlockFlag)
         {
+            BoostLevel = Mathf.Clamp(level, 0, 6);
+            BoosterUnlocked = unlockFlag || BoostLevel > 0;
             bool show = level > 0 || unlockFlag;
             if (_boostEvolveRoot != null) _boostEvolveRoot.SetActive(show);
             if (_boostLevelText != null) _boostLevelText.text = level <= 0 ? string.Empty : level >= 6 ? "MAX" : $"Lv.{level}";
             if (_boostEvolveButtonMax != null) _boostEvolveButtonMax.SetActive(level >= 6);
+            SetBoostEvolvePrice(BoostUpgradePrice);
+        }
+
+        void UpgradeBooster()
+        {
+            if (!BoosterUnlocked || BoostLevel >= 6 || _gold < BoostUpgradePrice) return;
+            int price = BoostUpgradePrice;
+            SetBoostLevel(BoostLevel + 1, true);
+            SetGold(_gold - price);
+            UpdateBuyPrice();
+            PlayableSoundEffects.Play(PlayableSfx.Buy);
         }
 
         public void SetBoostEvolvePrice(int price)
         {
             if (_boostEvolvePriceText != null) _boostEvolvePriceText.text = price > 0 ? price.ToString() : "FREE";
-            if (_boostEvolveButton != null) _boostEvolveButton.SetState(ButtonState.Enable);
+            if (_boostEvolveButton != null)
+            {
+                _boostEvolveButton.gameObject.SetActive(BoostLevel < 6);
+                _boostEvolveButton.SetState(BoosterUnlocked && BoostLevel < 6 && _gold >= price ? ButtonState.Enable : ButtonState.Disable);
+            }
         }
 
         public void RefreshGridVisible()
@@ -235,7 +258,22 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void RefreshAttachmentButtons()
         {
-            SetChildrenActive(_attachmentRoot, false);
+            if (_attachmentRoot != null && _attachmentButtonPrefab != null)
+            {
+                while (_attachmentRoot.childCount < MaxBoardWidth - 4)
+                    Instantiate(_attachmentButtonPrefab, _attachmentRoot).name = "pfb_attachment_button_" + (_attachmentRoot.childCount - 1);
+                float pitch = GetRuntimeCellSize();
+                for (int i = 0; i < _attachmentRoot.childCount; i++)
+                {
+                    RectTransform button = _attachmentRoot.GetChild(i) as RectTransform;
+                    if (button == null) continue;
+                    bool locked = i < MaxBoardWidth - 4 && i >= _runtimeGridSize.x - 4;
+                    button.gameObject.SetActive(locked);
+                    button.anchorMin = button.anchorMax = button.pivot = new Vector2(0.5f, 0.5f);
+                    button.anchoredPosition = new Vector2((i % 2 == 0 ? -1f : 1f) * (2.5f + i / 2) * pitch, 0f);
+                    button.sizeDelta = new Vector2(CellVisualSize(pitch), _runtimeGridSize.y * pitch - _gridCellGap);
+                }
+            }
             if (_autoMergeButton != null) _autoMergeButton.SetActive(false);
             if (_bonusBoxViewRoot != null) _bonusBoxViewRoot.SetActive(false);
         }
@@ -287,6 +325,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_gridRoot == null || _minoListRoot == null || _partDataAsset == null) return;
 
             ClearChildren(_gridRoot);
+            _placementPreview.Clear();
             ClearChildren(_minoListRoot);
             _runtimeCells.Clear();
             _runtimeParts.Clear();
@@ -336,6 +375,7 @@ namespace Gre.pjcode.Scenes.InGame
                     _runtimeCells.Add(cell);
                 }
             }
+            RefreshAttachmentButtons();
         }
 
         int GetStartingGold()
@@ -373,12 +413,34 @@ namespace Gre.pjcode.Scenes.InGame
             RectTransform icon = CreateMinoIcon($"Part_{partId}", listItem, cellSize);
             RuntimePuzzlePartIcon drag = icon.gameObject.AddComponent<RuntimePuzzlePartIcon>();
             drag.Setup(this, partId, pattern, cellSize, partData.GetMinoSprite(1), partData.GetBlockSprite(1), _runtimeBlockColor, _minoDragLayer, _boardGuidePrefab, partData.Rotate, partData.MinoSpriteScale);
+            Image hitArea = listItem.GetComponent<Image>();
+            if (hitArea == null) { hitArea = listItem.gameObject.AddComponent<Image>(); hitArea.color = Color.clear; }
+            hitArea.raycastTarget = true;
+            EventTrigger events = listItem.gameObject.AddComponent<EventTrigger>();
+            foreach (EventTriggerType type in new[] { EventTriggerType.PointerDown, EventTriggerType.InitializePotentialDrag, EventTriggerType.BeginDrag, EventTriggerType.Drag, EventTriggerType.PointerUp, EventTriggerType.EndDrag })
+            {
+                var entry = new EventTrigger.Entry { eventID = type };
+                entry.callback.AddListener(data => {
+                    var pointer = (PointerEventData)data;
+                    switch (type)
+                    {
+                        case EventTriggerType.PointerDown: drag.OnPointerDown(pointer); break;
+                        case EventTriggerType.InitializePotentialDrag: drag.OnInitializePotentialDrag(pointer); break;
+                        case EventTriggerType.BeginDrag: drag.OnBeginDrag(pointer); break;
+                        case EventTriggerType.Drag: drag.OnDrag(pointer); break;
+                        case EventTriggerType.PointerUp: drag.OnPointerUp(pointer); break;
+                        case EventTriggerType.EndDrag: drag.OnEndDrag(pointer); break;
+                    }
+                });
+                events.triggers.Add(entry);
+            }
             _runtimeParts.Add(drag);
             RefreshTrayLayout();
         }
 
         internal void DropPart(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 {
+    HidePlacementPreview();
     HidePerformancePreview();
 
     // 1. Kiểm tra Merge trước
@@ -443,6 +505,41 @@ namespace Gre.pjcode.Scenes.InGame
     AttachCarPart(icon);
     UpdatePerformanceFromPlacedParts();
 }
+
+        internal float CellVisualSize(float pitch) => Mathf.Max(1f, pitch - Mathf.Clamp(_gridCellGap, 0f, pitch - 1f));
+
+        internal void HidePlacementPreview()
+        {
+            foreach (Image image in _placementPreview) if (image != null) image.gameObject.SetActive(false);
+        }
+
+        void OnDisable() { HidePlacementPreview(); }
+
+        internal void ShowPlacementPreview(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
+        {
+            HidePlacementPreview();
+            if (IsInTray(screenPosition) || GetMergeTarget(icon, screenPosition) != null) return;
+            int index = FindBestFitCellIndex(icon, screenPosition);
+            if (index < 0) return;
+            while (_placementPreview.Count < icon.Pattern.Count)
+            {
+                RectTransform rect = CreateUiRect("PlacementShadow", _gridRoot, 1f, 1f);
+                Image image = rect.gameObject.AddComponent<Image>();
+                image.sprite = _boardGuidePrefab == null ? null : _boardGuidePrefab.sprite;
+                image.color = new Color(1f, 1f, 1f, 0.7f);
+                image.raycastTarget = false;
+                _placementPreview.Add(image);
+            }
+            for (int i = 0; i < icon.Pattern.Count; i++)
+            {
+                Image image = _placementPreview[i];
+                RectTransform cell = _runtimeCells[GetCellIndex(GetCellPosition(index) + icon.Pattern[i])];
+                image.rectTransform.anchoredPosition = cell.anchoredPosition;
+                image.rectTransform.sizeDelta = cell.sizeDelta;
+                image.transform.SetAsLastSibling();
+                image.gameObject.SetActive(true);
+            }
+        }
 
 int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 {
@@ -532,6 +629,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         void SetGold(int value)
         {
             _gold = value;
+            SetBoostEvolvePrice(BoostUpgradePrice);
             if (_currentGoldText != null) _currentGoldText.text = _gold.ToString();
             Canvas canvas = GetComponentInParent<Canvas>();
             CustomText[] texts = canvas == null ? GetComponentsInChildren<CustomText>(true) : canvas.GetComponentsInChildren<CustomText>(true);
@@ -685,7 +783,9 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         bool IsInTray(Vector2 screenPosition)
         {
             if (_minoListRoot == null) return false;
-            return RectTransformUtility.RectangleContainsScreenPoint(_minoListRoot, screenPosition, GetUiCamera());
+            ScrollRect scroll = _minoListRoot.GetComponentInParent<ScrollRect>();
+            RectTransform viewport = scroll != null && scroll.viewport != null ? scroll.viewport : _minoListRoot;
+            return RectTransformUtility.RectangleContainsScreenPoint(viewport, screenPosition, GetUiCamera());
         }
 
         Camera GetUiCamera()
@@ -779,7 +879,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
                 image.raycastTarget = true;
             }
 
-            cell.sizeDelta = Vector2.one * cellSize;
+            cell.sizeDelta = Vector2.one * CellVisualSize(cellSize);
             cell.anchoredPosition = _board == null
                 ? new Vector2(
                     (cellPos.x - ((_runtimeGridSize.x + 1) / 2 - 0.5f)) * cellSize,
@@ -821,6 +921,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
                 Canvas.ForceUpdateCanvases();
                 LayoutRebuilder.ForceRebuildLayoutImmediate(_minoListRoot);
+                foreach (RuntimePuzzlePartIcon icon in _runtimeParts) if (icon != null) icon.FitInTray();
                 return;
             }
 
@@ -841,6 +942,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
                 item.anchoredPosition = new Vector2(startX + column * step, -row * step);
                 visibleIndex++;
             }
+            foreach (RuntimePuzzlePartIcon icon in _runtimeParts) if (icon != null) icon.FitInTray();
         }
 
         RectTransform CreateMinoIcon(string objectName, RectTransform parent, float cellSize)
@@ -920,7 +1022,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         }
     }
 
-    public sealed class RuntimePuzzlePartIcon : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+    public sealed class RuntimePuzzlePartIcon : MonoBehaviour, IPointerDownHandler, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
     {
         InGamePuzzleUiView _owner;
         RectTransform _rect;
@@ -930,6 +1032,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         Vector2 _homePosition;
         Transform _startParent;
         Vector2 _startPosition;
+        Vector3 _startScale;
         Vector2 _dragScreenOffset;
         float _cellSize;
         int _spriteRotate;
@@ -937,6 +1040,10 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         Sprite _blockSprite;
         Color _color;
         CustomImage _blockPrefab;
+        ScrollRect _scroll;
+        bool _scrolling;
+        bool _dragging;
+        float _pointerDownTime;
 
         public int PartId { get; private set; }
         public int Level { get; private set; } = 1;
@@ -971,42 +1078,76 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             _canvas = GetComponentInParent<Canvas>();
             _dragLayer = dragLayer;
             _homeParent = transform.parent as RectTransform;
+            _scroll = GetComponentInParent<ScrollRect>();
             _homePosition = _rect.anchoredPosition;
             BuildBlocks(pattern, cellSize, sprite, blockSprite, color, blockPrefab);
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            _scrolling = false;
+            _dragging = false;
+            _pointerDownTime = Time.unscaledTime;
+        }
+
+        public void OnInitializePotentialDrag(PointerEventData eventData)
+        {
+            if (!IsPlaced && _scroll != null) _scroll.OnInitializePotentialDrag(eventData);
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            Vector2 delta = eventData.position - eventData.pressPosition;
+            _scrolling = !IsPlaced && _scroll != null && Time.unscaledTime - _pointerDownTime < 0.2f && Mathf.Abs(delta.x) > 2f * Mathf.Abs(delta.y);
+            if (_scrolling) { _scroll.OnBeginDrag(eventData); return; }
+            _dragging = true;
+            if (_scroll != null) _scroll.StopMovement();
             PlayableSoundEffects.Play(PlayableSfx.PartPick);
             _startParent = transform.parent;
             _startPosition = _rect.anchoredPosition;
+            _startScale = _rect.localScale;
     
             if (_dragLayer != null) _rect.SetParent(_dragLayer, true);
+            _rect.localScale = Vector3.one;
     
             float scale = _canvas == null ? 1f : _canvas.scaleFactor;
             // Nhấc nhẹ part lên trên ngón tay khoảng 0.5 ô để ngón tay không che mất ô bên dưới
             _dragScreenOffset = Vector2.up * (_cellSize * 0.5f) * scale;
-            _rect.anchoredPosition += Vector2.up * (_cellSize * 0.5f);
     
             transform.SetAsLastSibling();
             _owner.ShowPerformancePreview(this);
+            OnDrag(eventData);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (!_dragging) return;
+            _dragging = false;
             // Dùng vị trí thực tế của part hoặc vị trí nhả có bù offset
             _owner.DropPart(this, eventData.position + _dragScreenOffset);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            float scale = _canvas == null ? 1f : _canvas.scaleFactor;
-            _rect.anchoredPosition += eventData.delta / Mathf.Max(0.01f, scale);
+            if (_scrolling) { _scroll.OnDrag(eventData); return; }
+            if (!_dragging) return;
+            Vector2 localPoint;
+            RectTransform parent = _rect.parent as RectTransform;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, eventData.position + _dragScreenOffset, eventData.pressEventCamera, out localPoint))
+                _rect.position = parent.TransformPoint(localPoint);
+            _owner.ShowPlacementPreview(this, eventData.position + _dragScreenOffset);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (_scrolling) { _scroll.OnEndDrag(eventData); _scrolling = false; }
+            else OnPointerUp(eventData);
         }
 
         public void PlaceOn(RectTransform parent, Vector2 anchoredPosition, int cellIndex)
         {
             _rect.SetParent(parent, false);
+            _rect.localScale = Vector3.one;
             _rect.anchorMin = _rect.anchorMax = _rect.pivot = new Vector2(0.5f, 0.5f);
             _rect.anchoredPosition = anchoredPosition;
             CellIndex = cellIndex;
@@ -1020,6 +1161,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             _rect.SetParent(_homeParent, false);
             _rect.anchorMin = _rect.anchorMax = _rect.pivot = new Vector2(0.5f, 0.5f);
             _rect.anchoredPosition = _homePosition;
+            FitInTray();
         }
 
         public void ClearPlaced()
@@ -1032,6 +1174,21 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (_startParent == _homeParent) ShowTraySlot();
             _rect.SetParent(_startParent, false);
             _rect.anchoredPosition = _startPosition;
+            _rect.localScale = _startScale;
+        }
+
+        public void FitInTray()
+        {
+            if (IsPlaced || _homeParent == null || _rect.parent != _homeParent) return;
+            RectTransform viewport = _scroll == null ? _homeParent : _scroll.viewport;
+            if (viewport == null) viewport = _homeParent;
+            Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(_rect);
+            float width = Mathf.Max(1f, _homeParent.rect.width - 24f);
+            float height = Mathf.Max(1f, Mathf.Min(_homeParent.rect.height, viewport.rect.height) - 24f);
+            float scale = Mathf.Min(1f, width / Mathf.Max(1f, bounds.size.x), height / Mathf.Max(1f, bounds.size.y));
+            _rect.localScale = Vector3.one * scale;
+            _homePosition = -(Vector2)bounds.center * scale;
+            _rect.anchoredPosition = _homePosition;
         }
 
         public void HideTraySlot()
@@ -1069,11 +1226,13 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             foreach (Vector2Int offset in pattern)
             {
                 RectTransform block = CreateBlock(offset, cellSize, blockPrefab);
+                block.sizeDelta = Vector2.one * _owner.CellVisualSize(cellSize);
                 Image image = block.GetComponent<Image>();
                 if (image == null) image = block.gameObject.AddComponent<Image>();
                 if (blockSprite != null) image.sprite = blockSprite;
                 image.color = _owner.GetPartLevelColor(Level);
                 image.raycastTarget = true;
+                image.maskable = true;
             }
 
             RectTransform partRect = CreateBlock(Vector2Int.zero, cellSize * 1.25f * Mathf.Max(0.01f, _spriteScale), null);
@@ -1084,6 +1243,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             partImage.raycastTarget = false;
             partRect.anchoredPosition = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
             partRect.localEulerAngles = new Vector3(0f, 0f, _spriteRotate * 90f);
+            FitInTray();
         }
 
         RectTransform CreateBlock(Vector2Int offset, float cellSize, CustomImage prefab)

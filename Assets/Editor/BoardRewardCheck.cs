@@ -17,6 +17,7 @@ public static class BoardRewardCheck
         var bootstrap = UnityEngine.Object.FindObjectOfType<PlayableBootstrap>();
         var reward = UnityEngine.Object.FindObjectOfType<InGameGetItemUiView>(true);
         Require(ui.GridSize == new Vector2Int(4, 4), "Fresh 4x4 board");
+        Require(Enumerable.Range(0, 4).All(i => ui.GetAttachmentButton(i) != null && ui.GetAttachmentButton(i).gameObject.activeSelf), "Four locked-column buttons beside the 4x4 board");
         var flags = BindingFlags.Instance | BindingFlags.NonPublic;
         var state = typeof(PlayableBootstrap).GetField("state", flags);
         var collect = typeof(PlayableBootstrap).GetMethod("TryCollectBoardUpgrade", flags);
@@ -46,6 +47,7 @@ public static class BoardRewardCheck
             state.SetValue(bootstrap, Enum.Parse(state.FieldType, "Done"));
             claim.Invoke(bootstrap, null);
             Require(ui.GridSize == new Vector2Int(width, 4) && cells.Count == width * 4, "One new column");
+            Require(Enumerable.Range(0, 4).All(i => ui.GetAttachmentButton(i).gameObject.activeSelf == (i >= width - 4)), "Only the corresponding column button disappears");
             int addedLeft = (width - 4 + 1) / 2;
             for (int y = 0; y < 4; y++)
                 for (int x = 0; x < 4; x++)
@@ -108,6 +110,65 @@ public static class BoardRewardCheck
             UnityEngine.Object.Destroy(first);
             UnityEngine.Object.Destroy(second);
         }
+    }
+
+    [MenuItem("Tools/Playable/Check Grid Drag And Scroll (Play Mode)")]
+    public static void CheckGridDragAndScroll()
+    {
+        Require(Application.isPlaying, "Start Play Mode first");
+        var ui = UnityEngine.Object.FindObjectOfType<InGamePuzzleUiView>(true);
+        var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var cells = (List<RectTransform>)typeof(InGamePuzzleUiView).GetField("_runtimeCells", flags).GetValue(ui);
+        float pitch = Vector2.Distance(cells[0].anchoredPosition, cells[1].anchoredPosition);
+        Require(cells[0].rect.width < pitch, "Grid cells have a visible gap");
+        typeof(InGamePuzzleUiView).GetMethod("CreateTrayPart", flags).Invoke(ui, new object[] { 0, pitch });
+        var parts = (List<RuntimePuzzlePartIcon>)typeof(InGamePuzzleUiView).GetField("_runtimeParts", flags).GetValue(ui);
+        var part = parts.Last();
+        var home = part.transform.parent;
+        var scroll = home.GetComponentInParent<ScrollRect>();
+        Require(scroll != null && scroll.viewport.GetComponent<RectMask2D>() != null, "Tray has a clipping viewport");
+        Require(home.GetComponent<Image>().raycastTarget && home.GetComponent<UnityEngine.EventSystems.EventTrigger>().triggers.Count == 6, "Whole tray slot forwards selection and drag events");
+        Require(part.GetComponentsInChildren<Image>().All(i => i.maskable), "Part graphics respect tray mask");
+        for (int i = 1; i <= 5; i++) typeof(InGamePuzzleUiView).GetMethod("CreateTrayPart", flags).Invoke(ui, new object[] { i, pitch });
+        Canvas.ForceUpdateCanvases();
+        foreach (var icon in parts.Where(p => !p.IsPlaced))
+        {
+            Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(scroll.viewport, icon.transform);
+            Require(bounds.min.y >= scroll.viewport.rect.yMin + 10f && bounds.max.y <= scroll.viewport.rect.yMax - 10f, "Entire tray part fits above Buy and below grid: " + icon.PartId);
+        }
+        var camera = (Camera)typeof(InGamePuzzleUiView).GetMethod("GetUiCamera", flags).Invoke(ui, null);
+        var start = RectTransformUtility.WorldToScreenPoint(camera, part.transform.position);
+        var e = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { pressPosition = start, position = start };
+        part.OnPointerDown(e);
+        Require(part.transform.parent == home, "Touch alone must not escape viewport");
+        e.position = start + Vector2.right * 40f;
+        part.OnInitializePotentialDrag(e);
+        part.OnBeginDrag(e);
+        part.OnDrag(e);
+        part.OnPointerUp(e);
+        part.OnEndDrag(e);
+        Require(part.transform.parent == home && !part.IsPlaced, "Horizontal swipe scrolls instead of picking up part");
+        e.pressPosition = e.position = start;
+        part.OnPointerDown(e);
+        e.position = start + new Vector2(30f, 40f);
+        part.OnBeginDrag(e);
+        Require(part.transform.parent != home, "Vertical drag uses drag layer");
+        Require(part.transform.localScale == Vector3.one, "Dragging restores full grid size");
+        int target = -1;
+        var fit = typeof(InGamePuzzleUiView).GetMethod("CanPlace", flags);
+        for (int i = 0; i < cells.Count; i++)
+            if ((bool)fit.Invoke(ui, new object[] { part, new Vector2Int(i % ui.GridSize.x, i / ui.GridSize.x) })) { target = i; break; }
+        Require(target >= 0, "Space exists for test part");
+        var offset = (Vector2)typeof(RuntimePuzzlePartIcon).GetField("_dragScreenOffset", flags).GetValue(part);
+        e.position = RectTransformUtility.WorldToScreenPoint(camera, cells[target].position) - offset;
+        part.OnDrag(e);
+        var preview = (List<Image>)typeof(InGamePuzzleUiView).GetField("_placementPreview", flags).GetValue(ui);
+        Require(preview.Count(i => i.gameObject.activeSelf) == part.Pattern.Count, "White shadow matches part shape");
+        Require(preview.Where(i => i.gameObject.activeSelf).All(i => i.color.r == 1f && i.color.g == 1f && i.color.b == 1f && !i.raycastTarget), "Shadow is white and does not block input");
+        part.OnPointerUp(e);
+        part.OnEndDrag(e);
+        Require(part.IsPlaced && part.CellIndex == target && preview.All(i => !i.gameObject.activeSelf), "Drop uses preview target and clears shadow");
+        Debug.Log("GridDragAndScroll PASS: spacing, masked scroll, drag routing, white preview and drop alignment.");
     }
 
     static void Require(bool condition, string description)
