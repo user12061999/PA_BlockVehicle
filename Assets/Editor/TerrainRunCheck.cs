@@ -98,6 +98,19 @@ public static class TerrainRunCheck
                     Require(Vector3.Distance(actual.position + Vector3.right * 20f, reference.position) < 0.003f, "Trajectory diverged from original rules: " + terrain);
                 }
             }
+            // Large Air builds must never turn gravity into lift.
+            ground.SetActive(false);
+            contacts.ResetContacts();
+            Array.Clear(values, 0, values.Length);
+            values[(int)TerrainType.Air] = 2f;
+            actual.position = new Vector3(-10f, 100f, 0f);
+            actual.linearVelocity = new Vector3(0f, 10f, 30f);
+            for (int frame = 0; frame < 20; frame++)
+            {
+                Call(driver, "StepPhysics", 0.02f);
+                physics.Simulate(0.02f);
+            }
+            Require(actual.linearVelocity.y < 1f, "Air upgrades preserve downward gravity");
             // Crossing a zone changes drag only. Leaving must never restore lost speed.
             ground.SetActive(true);
             Array.Clear(values, 0, values.Length);
@@ -189,7 +202,7 @@ public static class TerrainRunCheck
             Call(driver, "TryCollectBoardUpgrade", attachmentCollider);
             Require((int)typeof(PlayableBootstrap).GetField("pendingBoardColumns", Flags).GetValue(driver) == 1 && !attachment.activeSelf, "Only attachment awards one grid column");
             Call(driver, "RestoreCoins");
-            Require(attachment.activeSelf && pad.activeSelf && !boost.activeSelf && evolve.activeSelf, "Reset preserves booster unlock and restores attachment");
+            Require(!attachment.activeSelf && pad.activeSelf && !boost.activeSelf && evolve.activeSelf, "Reset preserves booster unlock and collected attachment");
             ui.SetBoostLevel(0, false);
             Call(ui, "SetGold", 1000);
             Call(ui, "UpgradeBooster");

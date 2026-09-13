@@ -122,6 +122,50 @@ namespace Gre.pjcode.Scenes.InGame
                 };
             }
 
+            for (int i = 0; i < _performanceValueTexts.Length; i++)
+            {
+                CustomText value = _performanceValueTexts[i];
+                if (value == null) continue;
+                RectTransform row = (RectTransform)value.transform.parent;
+                RectTransform layout = (RectTransform)row.parent;
+                RectTransform spec = (RectTransform)layout.parent;
+                spec.anchorMin = new Vector2(0f, 1f);
+                spec.anchorMax = Vector2.one;
+                spec.pivot = new Vector2(.5f, 0f);
+                spec.anchoredPosition = new Vector2(0f, 12f);
+                var group = layout.GetComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+                if (group != null) group.enabled = false;
+                var fitter = layout.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+                if (fitter != null) fitter.enabled = false;
+                layout.anchorMin = Vector2.zero;
+                layout.anchorMax = Vector2.one;
+                layout.offsetMin = layout.offsetMax = Vector2.zero;
+                row.anchorMin = new Vector2((float)i / _performanceValueTexts.Length, 0f);
+                row.anchorMax = new Vector2((float)(i + 1) / _performanceValueTexts.Length, 1f);
+                row.offsetMin = new Vector2(8f, 0f);
+                row.offsetMax = new Vector2(-8f, 0f);
+                var icon = row.GetComponentInChildren<UnityEngine.UI.Image>(true);
+                if (icon != null)
+                {
+                    icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(.22f, .5f);
+                    icon.rectTransform.anchoredPosition = Vector2.zero;
+                    var caption = icon.GetComponentInChildren<UnityEngine.UI.Text>(true);
+                    if (caption != null)
+                    {
+                        caption.rectTransform.sizeDelta = new Vector2(96f, 50f);
+                        caption.fontSize = 28;
+                    }
+                }
+                value.rectTransform.anchorMin = new Vector2(.4f, 0f);
+                value.rectTransform.anchorMax = Vector2.one;
+                value.rectTransform.offsetMin = value.rectTransform.offsetMax = Vector2.zero;
+                value.alignment = TextAnchor.MiddleCenter;
+                value.resizeTextForBestFit = true;
+                value.resizeTextMinSize = 24;
+                value.resizeTextMaxSize = 48;
+                value.horizontalOverflow = HorizontalWrapMode.Wrap;
+                value.verticalOverflow = VerticalWrapMode.Truncate;
+            }
             if (_playButton != null) _playButton.onClick.AddListener(() => SetOpen(false));
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
             if (_boostEvolveButton != null) _boostEvolveButton.onClick.AddListener(UpgradeBooster);
@@ -342,7 +386,8 @@ namespace Gre.pjcode.Scenes.InGame
             int added = Mathf.Clamp(columns, 0, Mathf.Max(0, MaxBoardWidth - _runtimeGridSize.x));
             if (added == 0) return 0;
             int oldWidth = _runtimeGridSize.x;
-            _runtimeGridSize.x += added;
+            // Luna mutates a temporary clone when assigning a member of this struct field.
+            _runtimeGridSize = new Vector2Int(oldWidth + added, _runtimeGridSize.y);
             int shift = (_runtimeGridSize.x + 1) / 2 - (oldWidth + 1) / 2;
             RebuildBoardGrid();
             _occupiedCells.Clear();
@@ -970,6 +1015,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             GameObject go = new GameObject(objectName, typeof(RectTransform));
             RectTransform rect = go.GetComponent<RectTransform>();
             rect.SetParent(parent, false);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
             rect.sizeDelta = new Vector2(width, height);
             rect.localScale = Vector3.one;
             return rect;
@@ -1182,7 +1228,21 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (IsPlaced || _homeParent == null || _rect.parent != _homeParent) return;
             RectTransform viewport = _scroll == null ? _homeParent : _scroll.viewport;
             if (viewport == null) viewport = _homeParent;
-            Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(_rect);
+            // Luna does not implement CalculateRelativeRectTransformBounds.
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            var corners = new Vector3[4];
+            foreach (RectTransform child in _rect.GetComponentsInChildren<RectTransform>())
+            {
+                child.GetWorldCorners(corners);
+                foreach (Vector3 corner in corners)
+                {
+                    Vector3 local = _rect.InverseTransformPoint(corner);
+                    min = Vector3.Min(min, local);
+                    max = Vector3.Max(max, local);
+                }
+            }
+            Bounds bounds = new Bounds((min + max) * 0.5f, max - min);
             float width = Mathf.Max(1f, _homeParent.rect.width - 24f);
             float height = Mathf.Max(1f, Mathf.Min(_homeParent.rect.height, viewport.rect.height) - 24f);
             float scale = Mathf.Min(1f, width / Mathf.Max(1f, bounds.size.x), height / Mathf.Max(1f, bounds.size.y));

@@ -1,4 +1,5 @@
 using Gre.pjcode.Scenes.InGame;
+using Gre.pjcode.Common.VirtualStick;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -99,6 +100,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     InGameGetItemUiView getItemUi;
     readonly List<GameObject> collectedBoardUpgrades = new List<GameObject>();
     float steer;
+    VirtualStick virtualStick;
     bool dragging;
     Vector3 slingshotStartWorldPosition;
     Vector3 slingshotEndWorldPosition;
@@ -136,6 +138,8 @@ public sealed class PlayableBootstrap : MonoBehaviour
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
         CacheRunUi();
+        virtualStick = FindSceneObjectOfType<VirtualStick>();
+        if (virtualStick != null) virtualStick.SetRunning(false);
         if (runUi != null && runUi.BoostButton != null) runUi.BoostButton.onClick.AddListener(UseBooster);
         getItemUi = FindSceneObjectOfType<InGameGetItemUiView>();
         //buildUi = GameObject.Find("PuzzleUi");
@@ -223,6 +227,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             ApplyDash(launchForce, 1.2f);
             stopTime = 0f;
             state = State.Run;
+            if (virtualStick != null) virtualStick.SetRunning(true);
             boosterUsed = false;
             if (runUi != null) runUi.BeginRun();
             if (runUi != null) runUi.SetBoosterAvailable(puzzleUi != null && puzzleUi.BoostLevel > 0, boosterUsed);
@@ -407,7 +412,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void UpdateRun()
     {
-        steer = PointerHeld(out Vector2 pointer) ? Mathf.Clamp((pointer.x / Mathf.Max(1f, Screen.width) - 0.5f) * 2f, -1f, 1f) : 0f;
+        steer = virtualStick != null ? virtualStick.Direction.x : 0f;
         ControlSphere(Time.deltaTime);
         speed = sphereBody.linearVelocity.magnitude;
         distance = Mathf.Max(distance, sphereBody.position.z);
@@ -452,7 +457,12 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (terrain == TerrainType.Water) { damping += 0.075f; performance *= 2.5f; }
         sphereBody.linearDamping = Mathf.Max(0.01f, damping - performance);
         float air = puzzleUi == null ? 0f : puzzleUi.GetTerrainPerformance(TerrainType.Air);
-        float gravityWeight = terrainCollider.IsGrounded ? 3f : 3f - air * 2f;
+        // On web, Air extends the descent without amplifying a launch off a bump.
+        if (!Application.isEditor && sphereBody.linearVelocity.y > 0f) air = 0f;
+        float gravityWeight = terrainCollider.IsGrounded ? 3f : Mathf.Max(1f, 3f - air * 2f);
+        // Calibrate Goblin's airborne response separately from the Editor's PhysX simulation.
+        if (!Application.isEditor && !terrainCollider.IsGrounded)
+            gravityWeight *= LunaManager.ins == null ? 2f : Mathf.Max(1f, LunaManager.ins.airborneGravityMultiplier);
         sphereBody.AddForce(Physics.gravity * (1.5f * gravityWeight), ForceMode.Acceleration);
         bool braking = sphereBody.linearVelocity.sqrMagnitude < 49f;
         if (braking) sphereBody.linearVelocity = Vector3.MoveTowards(sphereBody.linearVelocity, Vector3.zero, 10f * deltaTime);
@@ -499,6 +509,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state == State.Done) return;
 
         state = State.Done;
+        if (virtualStick != null) virtualStick.SetRunning(false);
         sphereBody.isKinematic = true;
         if (carView != null) carView.InactivateAllParts();
         if (runUi != null) runUi.FinishRun(distance);
@@ -534,6 +545,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         steer = 0f;
         dragging = false;
         state = State.Aim;
+        if (virtualStick != null) virtualStick.SetRunning(false);
         RestoreCoins();
         vehicle.SetPositionAndRotation(startPosition, startRotation);
         SnapToGround(startRotation * Vector3.forward, true);
@@ -1040,11 +1052,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
             if (coin != null) coin.SetActive(true);
         }
 
-        foreach (GameObject item in collectedBoardUpgrades)
-        {
-            if (item != null) item.SetActive(true);
-        }
-        collectedBoardUpgrades.Clear();
         collectedCoins.Clear();
         collectedCoinIds.Clear();
         triggeredDashIds.Clear();
@@ -1096,9 +1103,12 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     static T FindSceneObjectOfType<T>() where T : Component
     {
-        foreach (T item in Resources.FindObjectsOfTypeAll<T>())
+        // Luna's FindObjectsOfTypeAll omits inactive scene objects. Search their roots instead.
+        foreach (Transform root in Resources.FindObjectsOfTypeAll<Transform>())
         {
-            if (item != null && item.gameObject.scene.IsValid()) return item;
+            if (root == null || root.parent != null || !root.gameObject.scene.IsValid()) continue;
+            T item = root.GetComponentInChildren<T>(true);
+            if (item != null) return item;
         }
 
         return null;

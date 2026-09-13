@@ -13,6 +13,7 @@ public class LunaManager : MonoBehaviour
     [LunaPlaygroundField("Action to EndGame")] public int CountAction = 10;
     [LunaPlaygroundField("Starting Gold")] public int startingGold = 10000;
     [LunaPlaygroundField("Car Speed Multiplier")] public float carSpeedMultiplier = 1f;
+    [LunaPlaygroundField("Airborne Gravity Multiplier")] public float airborneGravityMultiplier = 2f;
     public bool isCretiveEnd;
     public Button[] lstBtnInstall;
     public GameObject EndCard;

@@ -63,7 +63,14 @@ namespace Gre.pjcode.Scenes.InGame
             _details = Instantiate(_title, _card);
             _details.name = "RewardDetails";
             _details.color = Color.white;
-            _details.resizeTextMaxSize = 40;
+            _details.font = _title.font;
+            _details.fontStyle = _title.fontStyle;
+            _details.alignment = TextAnchor.MiddleCenter;
+            _details.resizeTextForBestFit = false;
+            _details.fontSize = 40;
+            _details.horizontalOverflow = HorizontalWrapMode.Wrap;
+            _details.verticalOverflow = VerticalWrapMode.Overflow;
+            _details.raycastTarget = false;
             Fit(_details.rectTransform, new Vector2(.06f, .25f), new Vector2(.94f, .44f));
             var buttonRect = new GameObject("ContinueButton", typeof(RectTransform), typeof(Image), typeof(Button)).GetComponent<RectTransform>();
             buttonRect.SetParent(_card, false);
@@ -77,7 +84,12 @@ namespace Gre.pjcode.Scenes.InGame
             label.name = "Label";
             label.text = "CONTINUE";
             label.color = Color.white;
-            label.resizeTextMaxSize = 42;
+            label.font = _title.font;
+            label.fontStyle = _title.fontStyle;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.resizeTextForBestFit = false;
+            label.fontSize = 42;
+            label.raycastTarget = false;
             Fit(label.rectTransform, new Vector2(.04f, .08f), new Vector2(.96f, .92f));
         }
 

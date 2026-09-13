@@ -23,8 +23,9 @@ public static class BoardRewardCheck
         var collect = typeof(PlayableBootstrap).GetMethod("TryCollectBoardUpgrade", flags);
         var claim = typeof(PlayableBootstrap).GetMethod("ClaimResultAndReset", flags);
         var pending = typeof(PlayableBootstrap).GetField("pendingBoardColumns", flags);
-        var pickup = UnityEngine.Object.FindObjectsOfType<Transform>(true).First(t => t.CompareTag("Attachment")).GetComponentInChildren<Collider>(true);
-        Require(pickup != null, "Existing attachment pickup collider");
+        Require(typeof(PlayableBootstrap).GetField("getItemUi", flags).GetValue(bootstrap) == reward, "Find initially hidden reward UI");
+        var pickups = UnityEngine.Object.FindObjectsOfType<Transform>(true).Where(t => t.CompareTag("Attachment")).Select(t => t.GetComponentInChildren<Collider>(true)).Where(c => c != null).Take(4).ToArray();
+        Require(pickups.Length == 4, "Four distinct attachment pickup colliders");
         ui.BuyButton.onClick.Invoke();
         var parts = (List<RuntimePuzzlePartIcon>)typeof(InGamePuzzleUiView).GetField("_runtimeParts", flags).GetValue(ui);
         var cells = (List<RectTransform>)typeof(InGamePuzzleUiView).GetField("_runtimeCells", flags).GetValue(ui);
@@ -39,6 +40,7 @@ public static class BoardRewardCheck
         Vector2[] originalCells = cells.Select(cell => cell.anchoredPosition).ToArray();
         for (int width = 5; width <= 8; width++)
         {
+            var pickup = pickups[width - 5];
             state.SetValue(bootstrap, Enum.Parse(state.FieldType, "Run"));
             collect.Invoke(bootstrap, new object[] { pickup });
             collect.Invoke(bootstrap, new object[] { pickup });
@@ -46,6 +48,7 @@ public static class BoardRewardCheck
             Require(ui.GridSize.x == width - 1, "Reward pending until result claim");
             state.SetValue(bootstrap, Enum.Parse(state.FieldType, "Done"));
             claim.Invoke(bootstrap, null);
+            Require(!pickup.gameObject.activeInHierarchy, "Collected attachment stays hidden next turn");
             Require(ui.GridSize == new Vector2Int(width, 4) && cells.Count == width * 4, "One new column");
             Require(Enumerable.Range(0, 4).All(i => ui.GetAttachmentButton(i).gameObject.activeSelf == (i >= width - 4)), "Only the corresponding column button disappears");
             int addedLeft = (width - 4 + 1) / 2;
@@ -67,7 +70,7 @@ public static class BoardRewardCheck
         }
         Require(Vector2.Distance(((RectTransform)part.transform).anchoredPosition, originalPosition) < .01f, "Balanced growth keeps original part center at 8 columns");
         state.SetValue(bootstrap, Enum.Parse(state.FieldType, "Run"));
-        collect.Invoke(bootstrap, new object[] { pickup });
+        collect.Invoke(bootstrap, new object[] { pickups[0] });
         Require((int)pending.GetValue(bootstrap) == 0, "No unusable reward at maximum size");
         state.SetValue(bootstrap, Enum.Parse(state.FieldType, "Done"));
         claim.Invoke(bootstrap, null);
@@ -118,6 +121,25 @@ public static class BoardRewardCheck
         Require(Application.isPlaying, "Start Play Mode first");
         var ui = UnityEngine.Object.FindObjectOfType<InGamePuzzleUiView>(true);
         var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var specs = (Gre.UI.CustomText[])typeof(InGamePuzzleUiView).GetField("_performanceValueTexts", flags).GetValue(ui);
+        ui.SetPerformance(new[] { 78, 26, 105, 26 });
+        Canvas.ForceUpdateCanvases();
+        var gridRect = (RectTransform)typeof(InGamePuzzleUiView).GetField("_gridRoot", flags).GetValue(ui);
+        var specRect = (RectTransform)specs[0].transform.parent.parent.parent;
+        Bounds specBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(ui.transform, specRect);
+        Bounds gridBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(ui.transform, gridRect);
+        Require(specBounds.min.y > gridBounds.max.y, "Spec row is above the grid without overlap");
+        foreach (var spec in specs)
+        {
+            var row = (RectTransform)spec.transform.parent;
+            var corners = new Vector3[4];
+            spec.rectTransform.GetWorldCorners(corners);
+            Require(corners.All(c => row.rect.Contains((Vector2)row.InverseTransformPoint(c) * .999f)), "Spec value stays inside its column");
+        }
+        var reward = UnityEngine.Object.FindObjectOfType<InGameGetItemUiView>(true);
+        reward.Show(null, "BOARD EXPANSION", "+1 COLUMN\n4 x 4 > 5 x 4");
+        Require(reward.GetComponentsInChildren<Text>().Where(t => t.name == "RewardDetails" || t.name == "Label").All(t => t.fontSize >= 40 && t.alignment == TextAnchor.MiddleCenter && !t.resizeTextForBestFit), "Readable centered reward text");
+        reward.gameObject.SetActive(false);
         var cells = (List<RectTransform>)typeof(InGamePuzzleUiView).GetField("_runtimeCells", flags).GetValue(ui);
         float pitch = Vector2.Distance(cells[0].anchoredPosition, cells[1].anchoredPosition);
         Require(cells[0].rect.width < pitch, "Grid cells have a visible gap");
@@ -164,6 +186,14 @@ public static class BoardRewardCheck
         part.OnDrag(e);
         var preview = (List<Image>)typeof(InGamePuzzleUiView).GetField("_placementPreview", flags).GetValue(ui);
         Require(preview.Count(i => i.gameObject.activeSelf) == part.Pattern.Count, "White shadow matches part shape");
+        for (int i = 0; i < part.Pattern.Count; i++)
+        {
+            Vector2Int cell = new Vector2Int(target % ui.GridSize.x, target / ui.GridSize.x) + part.Pattern[i];
+            RectTransform expected = cells[cell.y * ui.GridSize.x + cell.x];
+            RectTransform shadow = preview[i].rectTransform;
+            Require(shadow.anchorMin == expected.anchorMin && shadow.anchorMax == expected.anchorMax && shadow.pivot == expected.pivot, "Shadow uses grid anchors and pivot");
+            Require(Vector3.Distance(shadow.position, expected.position) < .01f && Vector2.Distance(shadow.rect.size, expected.rect.size) < .01f, "Shadow overlaps its target grid cell");
+        }
         Require(preview.Where(i => i.gameObject.activeSelf).All(i => i.color.r == 1f && i.color.g == 1f && i.color.b == 1f && !i.raycastTarget), "Shadow is white and does not block input");
         part.OnPointerUp(e);
         part.OnEndDrag(e);

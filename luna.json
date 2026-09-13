@@ -6339,10 +6339,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.EventSystems.EventTrigger.Entry",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.UI.Clipping",
                 "excluded": true
             },
@@ -6383,10 +6379,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.EventSystems.EventTrigger",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.EventSystems.PhysicsRaycaster",
                 "excluded": true
             },
@@ -6416,7 +6408,7 @@
             },
             {
                 "name": "UnityEngine.EventSystems.EventTriggerType",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.EventSystems.MoveDirection",
@@ -6600,7 +6592,7 @@
             },
             {
                 "name": "UnityEngine.EventSystems.ICancelHandler",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.EventSystems.ISubmitHandler",
@@ -6648,7 +6640,7 @@
             },
             {
                 "name": "UnityEngine.EventSystems.EventTrigger.TriggerEvent",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset",
@@ -8448,14 +8440,6 @@
             },
             {
                 "name": "DG.Tweening.Plugins.Core.ITPlugin$4",
-                "excluded": false
-            },
-            {
-                "name": "Gre.pjcode.Scenes.InGame.WingPartView",
-                "excluded": true
-            },
-            {
-                "name": "Gre.pjcode.Common.VirtualStick.VirtualStick",
                 "excluded": false
             },
             {
@@ -15224,7 +15208,7 @@
                     },
                     {
                         "name": "Exp",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "PingPong",
@@ -16992,7 +16976,7 @@
                     },
                     {
                         "name": "TransformPoint$1",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "TransformPoint",
@@ -17088,7 +17072,7 @@
                     },
                     {
                         "name": "GetEnumerator",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Find",
@@ -17918,7 +17902,7 @@
                     },
                     {
                         "name": "offsetMin#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "offsetMax#get",
@@ -17926,7 +17910,7 @@
                     },
                     {
                         "name": "offsetMax#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "pivot#get",
@@ -18958,7 +18942,7 @@
                     },
                     {
                         "name": "maskable#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "rootCanvasRect#get",
@@ -19120,7 +19104,7 @@
                     },
                     {
                         "name": "enabled#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "pixelsPerUnitMultiplier#get",
@@ -19332,7 +19316,7 @@
                     },
                     {
                         "name": "alignment#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "text#get",
@@ -19344,11 +19328,11 @@
                     },
                     {
                         "name": "font#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "font#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontSize#get",
@@ -19356,15 +19340,15 @@
                     },
                     {
                         "name": "fontSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontStyle#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontStyle#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "resizeTextMaxSize#get",
@@ -19372,7 +19356,7 @@
                     },
                     {
                         "name": "resizeTextMaxSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "resizeTextMinSize#get",
@@ -19380,7 +19364,7 @@
                     },
                     {
                         "name": "resizeTextMinSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "textGenerator#get",
@@ -19396,7 +19380,7 @@
                     },
                     {
                         "name": "resizeTextForBestFit#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "flexibleHeight#get",
@@ -19432,7 +19416,7 @@
                     },
                     {
                         "name": "horizontalOverflow#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "verticalOverflow#get",
@@ -19440,7 +19424,7 @@
                     },
                     {
                         "name": "verticalOverflow#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "supportRichText#get",
@@ -19500,7 +19484,7 @@
                     },
                     {
                         "name": "OnRectTransformDimensionsChange",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetGenerationSettings",
@@ -26266,7 +26250,7 @@
                     },
                     {
                         "name": "isKinematic#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "isKinematic#set",
@@ -26302,7 +26286,7 @@
                     },
                     {
                         "name": "interpolation#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "inertiaTensor#get",
@@ -28726,43 +28710,43 @@
                     },
                     {
                         "name": "colorGradient#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "colorGradient#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "textureMode#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "textureMode#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "alignment#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "alignment#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "widthCurve#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "widthCurve#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "time#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "time#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "startWidth#get",
@@ -28770,7 +28754,7 @@
                     },
                     {
                         "name": "startWidth#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "endWidth#get",
@@ -28778,39 +28762,39 @@
                     },
                     {
                         "name": "endWidth#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "widthMultiplier#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "widthMultiplier#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "numCornerVertices#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "numCornerVertices#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "numCapVertices#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "numCapVertices#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "minVertexDistance#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "minVertexDistance#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "startColor#get",
@@ -28818,7 +28802,7 @@
                     },
                     {
                         "name": "startColor#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "endColor#get",
@@ -28826,15 +28810,15 @@
                     },
                     {
                         "name": "endColor#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "init",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ctor",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "AddPosition",
@@ -28858,7 +28842,7 @@
                     },
                     {
                         "name": "OnEnable",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDisable",
@@ -28866,23 +28850,23 @@
                     },
                     {
                         "name": "OnBeforeRender",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnCameraPreCull",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Update",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "UpdatePoints",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Clear",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -29916,7 +29900,7 @@
                     },
                     {
                         "name": "font#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontSize#get",
@@ -29924,11 +29908,11 @@
                     },
                     {
                         "name": "fontSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontStyle#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "fontStyle#set",
@@ -29940,7 +29924,7 @@
                     },
                     {
                         "name": "bestFit#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "minSize#get",
@@ -29948,7 +29932,7 @@
                     },
                     {
                         "name": "minSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "maxSize#get",
@@ -29956,7 +29940,7 @@
                     },
                     {
                         "name": "maxSize#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "alignment#get",
@@ -29964,7 +29948,7 @@
                     },
                     {
                         "name": "alignment#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "alignByGeometry#get",
@@ -29996,7 +29980,7 @@
                     },
                     {
                         "name": "verticalOverflow#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "lineSpacing#get",
@@ -34042,7 +34026,7 @@
                     },
                     {
                         "name": "SetClass",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -34168,11 +34152,11 @@
                     },
                     {
                         "name": "minHeight#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "preferredHeight#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "flexibleHeight#get",
@@ -35220,23 +35204,27 @@
                 "instanceMethods": [
                     {
                         "name": "OnPointerDown",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnBeginDrag",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDrag",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnEndDrag",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnPointerUp",
-                        "excluded": true
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
                     }
                 ]
             },
@@ -35324,11 +35312,11 @@
                     },
                     {
                         "name": "UnlockBooster",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "GetAttachment",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetBooster",
@@ -35556,7 +35544,7 @@
                     },
                     {
                         "name": "CreateUiRect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SetChildrenActive",
@@ -35580,7 +35568,7 @@
                     },
                     {
                         "name": "AttachmentIconSprite#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "PlayButton#get",
@@ -35620,7 +35608,7 @@
                     },
                     {
                         "name": "SetBoostEvolvePrice",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "RefreshGridVisible",
@@ -35820,6 +35808,30 @@
                     },
                     {
                         "name": "RebuildBoardGrid",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BoostUpgradePrice#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpgradeBooster",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CellVisualSize",
+                        "excluded": false
+                    },
+                    {
+                        "name": "HidePlacementPreview",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDisable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowPlacementPreview",
                         "excluded": false
                     }
                 ]
@@ -36093,6 +36105,22 @@
                     {
                         "name": "CreateBlock",
                         "excluded": false
+                    },
+                    {
+                        "name": "OnInitializePotentialDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnBeginDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnEndDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FitInTray",
+                        "excluded": false
                     }
                 ]
             },
@@ -36291,10 +36319,6 @@
                         "excluded": false
                     },
                     {
-                        "name": "GetDashObject",
-                        "excluded": false
-                    },
-                    {
                         "name": "GetTaggedObject",
                         "excluded": false
                     },
@@ -36400,6 +36424,18 @@
                     },
                     {
                         "name": "UpdateCarSteeringView",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateVehiclePresentation",
+                        "excluded": false
+                    },
+                    {
+                        "name": "TryCollectBoost",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UseBooster",
                         "excluded": false
                     }
                 ]
@@ -36659,6 +36695,14 @@
                     {
                         "name": "FindRect",
                         "excluded": false
+                    },
+                    {
+                        "name": "BoostButton#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetBoosterAvailable",
+                        "excluded": false
                     }
                 ]
             },
@@ -36772,15 +36816,15 @@
                 "instanceMethods": [
                     {
                         "name": "Fit",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Show",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "BuildView",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -36886,6 +36930,170 @@
                     },
                     {
                         "name": "UpdateInternal",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Common.VirtualStick.VirtualStick",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetRunning",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BeginPointer",
+                        "excluded": false
+                    },
+                    {
+                        "name": "DragPointer",
+                        "excluded": false
+                    },
+                    {
+                        "name": "EndPointer",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDisable",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnApplicationFocus",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ResetStick",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.EventSystems.EventTrigger.Entry",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ctor",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.EventSystems.EventTrigger",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "triggers#get",
+                        "excluded": false
+                    },
+                    {
+                        "name": "triggers#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerEnter",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerExit",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDrop",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerDown",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerUp",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPointerClick",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnSelect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDeselect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnScroll",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnMove",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnUpdateSelected",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnInitializePotentialDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnBeginDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnEndDrag",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnSubmit",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnCancel",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Execute",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.WingPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InactivateInternal",
                         "excluded": false
                     }
                 ]
