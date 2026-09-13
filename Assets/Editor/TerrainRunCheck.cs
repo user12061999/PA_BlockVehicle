@@ -217,8 +217,8 @@ public static class TerrainRunCheck
             Require(ui.BoostLevel == 2 && (int)typeof(InGamePuzzleUiView).GetField("_gold", Flags).GetValue(ui) == 0, "Level two costs 2000 gold");
             Call(ui, "SetGold", 100000);
             for (int i = 0; i < 10; i++) Call(ui, "UpgradeBooster");
-            Require(ui.BoostLevel == 6 && (int)typeof(InGamePuzzleUiView).GetField("_gold", Flags).GetValue(ui) == 74500, "Booster respects original upgrade prices and level-six cap");
-            foreach (int level in new[] { 1, 6 })
+            Require(ui.BoostLevel == 5 && (int)typeof(InGamePuzzleUiView).GetField("_gold", Flags).GetValue(ui) == 84500, "Booster respects original upgrade prices and level-five cap");
+            foreach (int level in new[] { 1, 5 })
             {
                 ui.SetBoostLevel(level, true);
                 Set(driver, "boosterUsed", false);

@@ -8501,10 +8501,6 @@
             {
                 "name": "PlayableBootstrap.State",
                 "excluded": false
-            },
-            {
-                "name": "Gre.pjcode.Scenes.InGame.WaterWheelPartView",
-                "excluded": true
             }
         ],
         "unusedMethods": [
@@ -19472,11 +19468,11 @@
                     },
                     {
                         "name": "CalculateLayoutInputHorizontal",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "CalculateLayoutInputVertical",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDidApplyAnimationProperties",
@@ -35833,6 +35829,10 @@
                     {
                         "name": "ShowPlacementPreview",
                         "excluded": false
+                    },
+                    {
+                        "name": "AutoMerge",
+                        "excluded": false
                     }
                 ]
             },
@@ -37090,6 +37090,32 @@
                     },
                     {
                         "name": "ActivateInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InactivateInternal",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "Gre.pjcode.Scenes.InGame.WaterWheelPartView",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "InitializeInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ActivateInternal",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateInternal",
                         "excluded": false
                     },
                     {

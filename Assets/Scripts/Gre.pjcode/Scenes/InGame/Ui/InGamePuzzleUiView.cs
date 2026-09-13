@@ -169,6 +169,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_playButton != null) _playButton.onClick.AddListener(() => SetOpen(false));
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
             if (_boostEvolveButton != null) _boostEvolveButton.onClick.AddListener(UpgradeBooster);
+            if (_autoMergeButton != null) _autoMergeButton.onClick.AddListener(AutoMerge);
             if (_bonusBoxOpenButton != null) _bonusBoxOpenButton.onClick.AddListener(PlayworksBridge.InstallFullGame);
 
             SetGold(GetStartingGold());
@@ -266,18 +267,25 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void SetBoostLevel(int level, bool unlockFlag)
         {
-            BoostLevel = Mathf.Clamp(level, 0, 6);
+            BoostLevel = Mathf.Clamp(level, 0, 5);
             BoosterUnlocked = unlockFlag || BoostLevel > 0;
             bool show = level > 0 || unlockFlag;
             if (_boostEvolveRoot != null) _boostEvolveRoot.SetActive(show);
-            if (_boostLevelText != null) _boostLevelText.text = level <= 0 ? string.Empty : level >= 6 ? "MAX" : $"Lv.{level}";
-            if (_boostEvolveButtonMax != null) _boostEvolveButtonMax.SetActive(level >= 6);
+            if (_boostLevelText != null) _boostLevelText.text = BoostLevel == 0 ? string.Empty : BoostLevel == 5 ? "MAX" : $"Lv.{BoostLevel}";
+            if (_boostEvolveButtonMax != null) _boostEvolveButtonMax.SetActive(BoostLevel == 5);
+            Transform meter = _boostEvolveRoot == null ? null : _boostEvolveRoot.transform.Find("LevelMeter");
+            if (meter != null)
+                for (int i = 0; i < meter.childCount; i++)
+                {
+                    Transform fill = meter.GetChild(i).Find(meter.GetChild(i).name);
+                    if (fill != null) fill.gameObject.SetActive(i < BoostLevel);
+                }
             SetBoostEvolvePrice(BoostUpgradePrice);
         }
 
         void UpgradeBooster()
         {
-            if (!BoosterUnlocked || BoostLevel >= 6 || _gold < BoostUpgradePrice) return;
+            if (!BoosterUnlocked || BoostLevel >= 5 || _gold < BoostUpgradePrice) return;
             int price = BoostUpgradePrice;
             SetBoostLevel(BoostLevel + 1, true);
             SetGold(_gold - price);
@@ -290,8 +298,8 @@ namespace Gre.pjcode.Scenes.InGame
             if (_boostEvolvePriceText != null) _boostEvolvePriceText.text = price > 0 ? price.ToString() : "FREE";
             if (_boostEvolveButton != null)
             {
-                _boostEvolveButton.gameObject.SetActive(BoostLevel < 6);
-                _boostEvolveButton.SetState(BoosterUnlocked && BoostLevel < 6 && _gold >= price ? ButtonState.Enable : ButtonState.Disable);
+                _boostEvolveButton.gameObject.SetActive(BoostLevel < 5);
+                _boostEvolveButton.SetState(BoosterUnlocked && BoostLevel < 5 && _gold >= price ? ButtonState.Enable : ButtonState.Disable);
             }
         }
 
@@ -318,7 +326,7 @@ namespace Gre.pjcode.Scenes.InGame
                     button.sizeDelta = new Vector2(CellVisualSize(pitch), _runtimeGridSize.y * pitch - _gridCellGap);
                 }
             }
-            if (_autoMergeButton != null) _autoMergeButton.SetActive(false);
+            if (_autoMergeButton != null) { _autoMergeButton.SetActive(true); _autoMergeButton.SetState(ButtonState.Enable); }
             if (_bonusBoxViewRoot != null) _bonusBoxViewRoot.SetActive(false);
         }
 
@@ -617,6 +625,24 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
     return -1;
 }
+
+        void AutoMerge()
+        {
+            HidePlacementPreview();
+            // ponytail: restarting pair search is cubic in the worst case, acceptable for the small board/tray; bucket by type/level if inventory grows.
+            for (int i = 0; i < _runtimeParts.Count; i++)
+                for (int j = i + 1; j < _runtimeParts.Count; j++)
+                {
+                    RuntimePuzzlePartIcon target = _runtimeParts[i];
+                    RuntimePuzzlePartIcon source = _runtimeParts[j];
+                    if (source.PartId != target.PartId || source.Level != target.Level) continue;
+                    if (source.IsPlaced && !target.IsPlaced) { var swap = target; target = source; source = swap; }
+                    MergePart(source, target);
+                    i = -1;
+                    break;
+                }
+            HidePerformancePreview();
+        }
 
         void MergePart(RuntimePuzzlePartIcon source, RuntimePuzzlePartIcon target)
         {
@@ -1135,6 +1161,8 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             _dragging = false;
             _pointerDownTime = Time.unscaledTime;
         }
+
+
 
         public void OnInitializePotentialDrag(PointerEventData eventData)
         {
