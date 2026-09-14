@@ -77,6 +77,7 @@ namespace Gre.pjcode.Scenes.InGame
         readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
         readonly List<RuntimePuzzlePartIcon> _placedParts = new List<RuntimePuzzlePartIcon>();
         readonly int[] _performanceValues = new int[(int)TerrainType.Max];
+        readonly Text[] _performanceAdditionTexts = new Text[(int)TerrainType.Max];
         readonly float[] _runTerrainPerformances = new float[(int)TerrainType.Max];
         CarView _carView;
         int _gold;
@@ -165,6 +166,25 @@ namespace Gre.pjcode.Scenes.InGame
                 value.resizeTextMaxSize = 48;
                 value.horizontalOverflow = HorizontalWrapMode.Wrap;
                 value.verticalOverflow = VerticalWrapMode.Truncate;
+                RectTransform additionRect = CreateUiRect("PerformanceAddition", row, 0f, 0f);
+                additionRect.anchorMin = new Vector2(.4f, 0f);
+                additionRect.anchorMax = new Vector2(1f, .5f);
+                additionRect.offsetMin = new Vector2(0f, 2f);
+                additionRect.offsetMax = new Vector2(0f, -2f);
+                Text addition = additionRect.gameObject.AddComponent<UnityEngine.UI.Text>();
+                addition.font = value.font;
+                addition.fontStyle = value.fontStyle;
+                addition.fontSize = 36;
+                addition.alignment = TextAnchor.MiddleCenter;
+                addition.color = _performancePreviewColor;
+                addition.resizeTextForBestFit = true;
+                addition.resizeTextMinSize = 18;
+                addition.resizeTextMaxSize = 36;
+                addition.horizontalOverflow = HorizontalWrapMode.Overflow;
+                addition.verticalOverflow = VerticalWrapMode.Truncate;
+                addition.raycastTarget = false;
+                addition.gameObject.SetActive(false);
+                _performanceAdditionTexts[i] = addition;
             }
             if (_playButton != null) _playButton.onClick.AddListener(() => SetOpen(false));
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
@@ -250,15 +270,24 @@ namespace Gre.pjcode.Scenes.InGame
             if (text == null) return;
 
             int currentValue = terrainIndex < _performanceValues.Length ? _performanceValues[terrainIndex] : 0;
-            string previewColor = ColorUtility.ToHtmlStringRGB(_performancePreviewColor);
-            text.supportRichText = true;
-            text.text = $"{currentValue} <color=#{previewColor}>+{value}</color>";
+            HidePerformancePreview();
+            text.text = currentValue.ToString();
+            text.rectTransform.anchorMin = new Vector2(.4f, .5f);
+            Text addition = _performanceAdditionTexts[terrainIndex];
+            addition.text = "+" + value;
+            addition.gameObject.SetActive(true);
             if (text.transform.parent != null) text.transform.parent.gameObject.SetActive(true);
             if (_performanceDiffRoot != null) _performanceDiffRoot.gameObject.SetActive(false);
         }
 
         internal void HidePerformancePreview()
         {
+            for (int i = 0; i < _performanceAdditionTexts.Length; i++)
+            {
+                if (_performanceAdditionTexts[i] != null) _performanceAdditionTexts[i].gameObject.SetActive(false);
+                if (_performanceValueTexts != null && i < _performanceValueTexts.Length && _performanceValueTexts[i] != null)
+                    _performanceValueTexts[i].rectTransform.anchorMin = new Vector2(.4f, 0f);
+            }
             if (_performanceDiffRoot != null) _performanceDiffRoot.gameObject.SetActive(false);
             if (_performanceDiffUpText != null) _performanceDiffUpText.text = string.Empty;
             if (_performanceDiffDownText != null) _performanceDiffDownText.text = string.Empty;

@@ -29912,7 +29912,7 @@
                     },
                     {
                         "name": "fontStyle#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "bestFit#get",
@@ -29968,7 +29968,7 @@
                     },
                     {
                         "name": "horizontalOverflow#set",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "verticalOverflow#get",

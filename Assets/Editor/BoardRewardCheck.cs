@@ -175,6 +175,12 @@ public static class BoardRewardCheck
         e.position = start + new Vector2(30f, 40f);
         part.OnBeginDrag(e);
         Require(part.transform.parent != home, "Vertical drag uses drag layer");
+        var additions = (Text[])typeof(InGamePuzzleUiView).GetField("_performanceAdditionTexts", flags).GetValue(ui);
+        Text addition = additions.Single(t => t != null && t.gameObject.activeInHierarchy);
+        int terrainIndex = Array.IndexOf(additions, addition);
+        Require(addition.rectTransform != specs[terrainIndex].rectTransform && addition.text.StartsWith("+") && !specs[terrainIndex].text.Contains("+"), "Preview bonus has its own Text");
+        Canvas.ForceUpdateCanvases();
+        Require(addition.rectTransform.rect.height >= addition.resizeTextMaxSize && addition.rectTransform.anchorMax.y <= specs[terrainIndex].rectTransform.anchorMin.y, "Bonus has one full line below current value");
         Require(part.transform.localScale == Vector3.one, "Dragging restores full grid size");
         int target = -1;
         var fit = typeof(InGamePuzzleUiView).GetMethod("CanPlace", flags);
@@ -197,6 +203,7 @@ public static class BoardRewardCheck
         Require(preview.Where(i => i.gameObject.activeSelf).All(i => i.color.r == 1f && i.color.g == 1f && i.color.b == 1f && !i.raycastTarget), "Shadow is white and does not block input");
         part.OnPointerUp(e);
         part.OnEndDrag(e);
+        Require(additions.All(t => t == null || !t.gameObject.activeSelf), "Bonus hides after drop");
         Require(part.IsPlaced && part.CellIndex == target && preview.All(i => !i.gameObject.activeSelf), "Drop uses preview target and clears shadow");
         Debug.Log("GridDragAndScroll PASS: spacing, masked scroll, drag routing, white preview and drop alignment.");
     }
