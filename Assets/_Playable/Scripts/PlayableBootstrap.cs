@@ -92,6 +92,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     Vector3 launchForce;
     float speed;
     float stopTime;
+    Vector3 previousPhysicsPosition;
     CarTerrainCollider terrainCollider;
     TerrainType runningTerrain = TerrainType.Max;
     float distance;
@@ -220,6 +221,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             SetSlingshotPullUiVisible(false);
             if (pull < maxPull / 12f) return;
             sphereBody.position = vehicle.position;
+            previousPhysicsPosition = sphereBody.position;
             sphereBody.isKinematic = false;
             sphereBody.linearVelocity = Vector3.zero;
             sphereBody.angularVelocity = Vector3.zero;
@@ -259,6 +261,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         float weight = GetForceWeight(multiplier);
         sphereBody.AddForce(new Vector3(forward.x, 0f, forward.z) * weight, ForceMode.Impulse);
         sphereBody.AddTorque(new Vector3(forward.z, -forward.x, 0f) * weight, ForceMode.Impulse);
+        carTracer.SetActivateBooster(1.5f);
     }
 
     void SetupPhysics()
@@ -438,7 +441,41 @@ public sealed class PlayableBootstrap : MonoBehaviour
     void FixedUpdate()
     {
         if (state != State.Run || sphereBody == null) return;
+        RecoverCrossedSurface();
         StepPhysics(Time.fixedDeltaTime);
+    }
+
+    void RecoverCrossedSurface()
+    {
+        Vector3 movement = sphereBody.position - previousPhysicsPosition;
+        float distanceMoved = movement.magnitude;
+        if (distanceMoved > 0.001f)
+        {
+            // Backstop for missed CCD contacts: only recover an actual surface crossing.
+            int count = Physics.RaycastNonAlloc(previousPhysicsPosition, movement / distanceMoved,
+                groundHits, distanceMoved, groundMask, QueryTriggerInteraction.Ignore);
+            float nearest = float.MaxValue;
+            RaycastHit surface = default;
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit hit = groundHits[i];
+                if (hit.collider == null || hit.collider.attachedRigidbody == sphereBody ||
+                    Vector3.Dot(movement, hit.normal) >= 0f || hit.distance >= nearest) continue;
+                surface = hit;
+                nearest = hit.distance;
+            }
+            if (nearest < float.MaxValue)
+            {
+                SphereCollider sphere = sphereBody.GetComponent<SphereCollider>();
+                Vector3 scale = sphere.transform.lossyScale;
+                float radius = sphere.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+                sphereBody.position = surface.point + surface.normal * (radius + 0.01f);
+                Vector3 velocity = sphereBody.linearVelocity;
+                float inwardSpeed = Vector3.Dot(velocity, surface.normal);
+                if (inwardSpeed < 0f) sphereBody.linearVelocity = velocity - surface.normal * inwardSpeed;
+            }
+        }
+        previousPhysicsPosition = sphereBody.position;
     }
 
     void StepPhysics(float deltaTime)

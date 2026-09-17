@@ -6,6 +6,7 @@ namespace Gre.pjcode.Scenes.InGame
     {
         [SerializeField] private float _addForceWeight = 0.5f;
         [SerializeField] private CarView _carView;
+        [SerializeField] private ParticleSystem Booster;
 
         public float AddForceWeight => _addForceWeight;
         public CarView CarView => _carView;
@@ -24,7 +25,11 @@ namespace Gre.pjcode.Scenes.InGame
         public void GetAttachment() { }
         public void SetBooster(bool isSet) { }
         public void AppearBooster() { }
-        public void SetActivateBooster(float time) { }
+
+        public void SetActivateBooster(float time)
+        {
+            Booster.Play();
+        }
         public void InactivateBooster() { }
         public void PlayBoosterAttachEffect() { }
         public void SustainDash(float forceWeight, float duration) { }
