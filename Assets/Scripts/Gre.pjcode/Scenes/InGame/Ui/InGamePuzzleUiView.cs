@@ -23,7 +23,7 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private RectTransform _gridRoot;
         [SerializeField] private CustomImage _boardGridPrefab;
         [SerializeField] private RectTransform _minoDragLayer;
-        [SerializeField] private CustomButton _buyButton;
+        [SerializeField] private CustomButton _buyButton,_buyButton1,_buyButton2;
         [SerializeField] private CustomButton _playButton;
         [SerializeField] private CustomButton _autoMergeButton;
         [SerializeField] private RectTransform _guideRoot;
@@ -226,6 +226,8 @@ namespace Gre.pjcode.Scenes.InGame
             if (_buyButton == null) return;
             _buyButton.SetText(price.ToString());
             _buyButton.SetState(_gold >= price ? ButtonState.Enable : ButtonState.Disable);
+            _buyButton1.SetState(_gold >= price ? ButtonState.Enable : ButtonState.Disable);
+            _buyButton2.SetState(_gold >= price ? ButtonState.Enable : ButtonState.Disable);
         }
 
         public void AddGold(int amount)
@@ -470,7 +472,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             if (_partDataAsset == null || _minoListRoot == null || _partDataAsset.PartDataList.Count == 0) return;
             UpdateBuyPrice();
-            if (_gold < _buyPrice)
+            if (_buyButton == null || !_buyButton.interactable || _gold < _buyPrice)
             {
                 PlayableSoundEffects.Play(PlayableSfx.Cancel);
                 return;

@@ -19,6 +19,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     [SerializeField] private string vehicleName = "CarSphere";
     [SerializeField] private float maxPull = 4f;
+    [SerializeField, Min(0.1f)] private float pullDragDistance = 480f;
     [SerializeField] private Rigidbody sphereBody;
     [SerializeField] private float linearDamping = 0.6f;
     [SerializeField] private float steerSpeed = 14f;
@@ -699,13 +700,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
     {
         Vector3 forward = startRotation * Vector3.forward;
         Vector3 right = startRotation * Vector3.right;
-        Vector2 drag = pointer - dragStart;
+        Vector2 drag = (pointer - dragStart);
         drag.x = Mathf.Clamp(drag.x, -350f, 350f);
-        drag.y = Mathf.Clamp(drag.y, -600f, 0f);
+        drag.y = Mathf.Clamp(drag.y*3, -600f, 0f);
         drag = Vector2.ClampMagnitude(drag, 600f);
         Vector3 pullOffset = (right * (drag.x * 0.007f) + forward * (drag.y * 0.0125f)) * 0.8f;
         launchForce = right * (-drag.x * 0.7f) + forward * -drag.y;
-        pull = maxPull * drag.magnitude / 600f;
+        pull = maxPull * Mathf.Clamp01(drag.magnitude / Mathf.Max(1f, pullDragDistance));
         UpdateSlingshotPullUi();
         Vector3 launchForward = launchForce.sqrMagnitude > 0.001f ? launchForce.normalized : forward;
         vehicle.SetPositionAndRotation(startPosition + pullOffset, Quaternion.LookRotation(launchForward, startRotation * Vector3.up));
