@@ -991,7 +991,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
         RectTransform CreateListItem(string objectName, float cellSize)
         {
-            float slotSize = cellSize * 3f;
+            float slotSize = cellSize * 2.5f;
             RectTransform item = InstantiatePrefabRect(_minoListItemPrefab, _minoListRoot);
             if (item == null) item = CreateUiRect(objectName, _minoListRoot, slotSize, slotSize);
             item.name = objectName;
@@ -1005,9 +1005,8 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (_minoListRoot == null) return;
 
             float cellSize = GetRuntimeCellSize();
-            // Tăng kích thước slot lên 3 ô (hoặc 3.5 ô) để chứa vừa các mảnh ghép dài/rộng
-            float slotSize = cellSize * 3f; 
-            float spacing = Mathf.Max(16f, _trayItemSpacing); // Tăng khoảng cách giữa các slot
+            float slotSize = cellSize * 2.5f;
+            float spacing = Mathf.Max(16f, _trayItemSpacing);
 
             LayoutGroup layoutGroup = _minoListRoot.GetComponent<LayoutGroup>();
             if (layoutGroup != null && layoutGroup.enabled)
@@ -1283,14 +1282,13 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         public void FitInTray()
         {
             if (IsPlaced || _homeParent == null || _rect.parent != _homeParent) return;
-            RectTransform viewport = _scroll == null ? _homeParent : _scroll.viewport;
-            if (viewport == null) viewport = _homeParent;
             // Luna does not implement CalculateRelativeRectTransformBounds.
             Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
             var corners = new Vector3[4];
             foreach (RectTransform child in _rect.GetComponentsInChildren<RectTransform>())
             {
+                if (child == _rect) continue;
                 child.GetWorldCorners(corners);
                 foreach (Vector3 corner in corners)
                 {
@@ -1300,8 +1298,9 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
                 }
             }
             Bounds bounds = new Bounds((min + max) * 0.5f, max - min);
-            float width = Mathf.Max(1f, _homeParent.rect.width - 24f);
-            float height = Mathf.Max(1f, Mathf.Min(_homeParent.rect.height, viewport.rect.height) - 24f);
+            const float trayPadding = 10f;
+            float width = Mathf.Max(1f, _homeParent.rect.width - trayPadding * 2f);
+            float height = Mathf.Max(1f, _homeParent.rect.height - trayPadding * 2f);
             float scale = Mathf.Min(1f, width / Mathf.Max(1f, bounds.size.x), height / Mathf.Max(1f, bounds.size.y));
             _rect.localScale = Vector3.one * scale;
             _homePosition = -(Vector2)bounds.center * scale;

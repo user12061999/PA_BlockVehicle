@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using Gre.UI;
 using Gre.pjcode.Scenes.InGame;
 using UnityEditor;
 using UnityEngine;
@@ -9,6 +10,12 @@ public static class TrayBoundsCheck
     [MenuItem("Tools/Playable/Check Tray Bounds")]
     public static void Run()
     {
+        var slotPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Data/Prefab/UiView/InGame/pfb_mino_list_item.prefab");
+        var frameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Data/Sprites/Ui/InGame/Ready/frame_common.png");
+        var frame = slotPrefab == null ? null : slotPrefab.GetComponent<CustomImage>();
+        if (frame == null || frame.sprite != frameSprite || frame.type != UnityEngine.UI.Image.Type.Sliced)
+            throw new Exception("Tray slot must use the sliced frame_common background");
+
         var home = new GameObject("Tray bounds check", typeof(RectTransform));
         try
         {
@@ -33,8 +40,8 @@ public static class TrayBoundsCheck
             for (int i = 0; i < 2; i++)
             {
                 // Editor-only reference API; excluded from the Luna player.
-                Bounds expected = RectTransformUtility.CalculateRelativeRectTransformBounds(root);
-                float scale = Mathf.Min(1f, 176f / expected.size.x, 136f / expected.size.y);
+                Bounds expected = RectTransformUtility.CalculateRelativeRectTransformBounds(root, child);
+                float scale = Mathf.Min(1f, 180f / expected.size.x, 140f / expected.size.y);
                 icon.FitInTray();
                 if (Mathf.Abs(root.localScale.x - scale) > 0.0001f ||
                     Vector2.Distance(root.anchoredPosition, -(Vector2)expected.center * scale) > 0.001f)

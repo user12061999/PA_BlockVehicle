@@ -703,7 +703,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         drag.x = Mathf.Clamp(drag.x, -350f, 350f);
         drag.y = Mathf.Clamp(drag.y, -600f, 0f);
         drag = Vector2.ClampMagnitude(drag, 600f);
-        Vector3 pullOffset = right * (drag.x * 0.007f) + forward * (drag.y * 0.0125f);
+        Vector3 pullOffset = (right * (drag.x * 0.007f) + forward * (drag.y * 0.0125f)) * 0.8f;
         launchForce = right * (-drag.x * 0.7f) + forward * -drag.y;
         pull = maxPull * drag.magnitude / 600f;
         UpdateSlingshotPullUi();
