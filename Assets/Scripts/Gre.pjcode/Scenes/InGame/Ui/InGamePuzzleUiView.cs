@@ -80,6 +80,7 @@ namespace Gre.pjcode.Scenes.InGame
         readonly List<RuntimePuzzlePartIcon> _runtimeParts = new List<RuntimePuzzlePartIcon>();
         readonly Dictionary<int, RuntimePuzzlePartIcon> _occupiedCells = new Dictionary<int, RuntimePuzzlePartIcon>();
         readonly List<RuntimePuzzlePartIcon> _placedParts = new List<RuntimePuzzlePartIcon>();
+        Image _mergeTargetLine;
         readonly int[] _performanceValues = new int[(int)TerrainType.Max];
         readonly Text[] _performanceAdditionTexts = new Text[(int)TerrainType.Max];
         readonly float[] _runTerrainPerformances = new float[(int)TerrainType.Max];
@@ -530,6 +531,7 @@ namespace Gre.pjcode.Scenes.InGame
         internal void DropPart(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 {
     HidePlacementPreview();
+    HideMergeTargetLine();
     HidePerformancePreview();
 
     // 1. Kiểm tra Merge trước
@@ -603,12 +605,26 @@ namespace Gre.pjcode.Scenes.InGame
             foreach (Image image in _placementPreview) if (image != null) image.gameObject.SetActive(false);
         }
 
-        void OnDisable() { HidePlacementPreview(); }
+        internal void HideMergeTargetLine()
+        {
+            if (_mergeTargetLine != null) _mergeTargetLine.gameObject.SetActive(false);
+        }
+
+        internal void RefreshMergeTargetLine(RuntimePuzzlePartIcon source)
+        {
+            HideMergeTargetLine();
+            RuntimePuzzlePartIcon target = FindNearestMergeableTarget(source);
+            if (target != null) ShowMergeTargetLine(source, target);
+        }
+
+        void OnDisable() { HidePlacementPreview(); HideMergeTargetLine(); }
 
         internal void ShowPlacementPreview(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         {
             HidePlacementPreview();
-            if (IsInTray(screenPosition) || GetMergeTarget(icon, screenPosition) != null) return;
+            RefreshMergeTargetLine(icon);
+            bool inTray = IsInTray(screenPosition);
+            if (inTray || GetMergeTarget(icon, screenPosition) != null) return;
             int index = FindBestFitCellIndex(icon, screenPosition);
             if (index < 0) return;
             while (_placementPreview.Count < icon.Pattern.Count)
@@ -629,6 +645,47 @@ namespace Gre.pjcode.Scenes.InGame
                 image.transform.SetAsLastSibling();
                 image.gameObject.SetActive(true);
             }
+        }
+
+        RuntimePuzzlePartIcon FindNearestMergeableTarget(RuntimePuzzlePartIcon source)
+        {
+            RuntimePuzzlePartIcon nearest = null;
+            float nearestDistance = float.PositiveInfinity;
+            foreach (RuntimePuzzlePartIcon candidate in _runtimeParts)
+            {
+                if (candidate == null || candidate == source || !candidate.gameObject.activeInHierarchy ||
+                    candidate.PartId != source.PartId || candidate.Level != source.Level) continue;
+                float distance = (candidate.transform.position - source.transform.position).sqrMagnitude;
+                if (distance >= nearestDistance) continue;
+                nearest = candidate;
+                nearestDistance = distance;
+            }
+
+            return nearest;
+        }
+
+        void ShowMergeTargetLine(RuntimePuzzlePartIcon source, RuntimePuzzlePartIcon target)
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+            if (_mergeTargetLine == null)
+            {
+                RectTransform rect = CreateUiRect("MergeTargetLine", canvas.transform, 1f, 10f);
+                _mergeTargetLine = rect.gameObject.AddComponent<Image>();
+                _mergeTargetLine.color = new Color(1f, 0.85f, 0.2f, 0.9f);
+                _mergeTargetLine.raycastTarget = false;
+            }
+
+            RectTransform canvasRect = canvas.transform as RectTransform;
+            Vector2 start = canvasRect.InverseTransformPoint(source.transform.position);
+            Vector2 end = canvasRect.InverseTransformPoint(target.transform.position);
+            Vector2 direction = end - start;
+            RectTransform lineRect = _mergeTargetLine.rectTransform;
+            lineRect.localPosition = new Vector3((start.x + end.x) * 0.5f, (start.y + end.y) * 0.5f, 0f);
+            lineRect.sizeDelta = new Vector2(direction.magnitude, 10f);
+            lineRect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+            lineRect.SetAsLastSibling();
+            _mergeTargetLine.gameObject.SetActive(true);
         }
 
 int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
@@ -1196,6 +1253,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             _scrolling = false;
             _dragging = false;
             _pointerDownTime = Time.unscaledTime;
+            if (!IsPlaced) _owner.RefreshMergeTargetLine(this);
         }
 
 
@@ -1209,7 +1267,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
         {
             Vector2 delta = eventData.position - eventData.pressPosition;
             _scrolling = !IsPlaced && _scroll != null && Time.unscaledTime - _pointerDownTime < 0.2f && Mathf.Abs(delta.x) > 2f * Mathf.Abs(delta.y);
-            if (_scrolling) { _scroll.OnBeginDrag(eventData); return; }
+            if (_scrolling) { _owner.HideMergeTargetLine(); _scroll.OnBeginDrag(eventData); return; }
             _dragging = true;
             if (_scroll != null) _scroll.StopMovement();
             PlayableSoundEffects.Play(PlayableSfx.PartPick);
@@ -1231,7 +1289,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (!_dragging) return;
+            if (!_dragging) { _owner.HideMergeTargetLine(); return; }
             _dragging = false;
             // Dùng vị trí thực tế của part hoặc vị trí nhả có bù offset
             _owner.DropPart(this, eventData.position + _dragScreenOffset);
@@ -1250,7 +1308,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (_scrolling) { _scroll.OnEndDrag(eventData); _scrolling = false; }
+            if (_scrolling) { _scroll.OnEndDrag(eventData); _scrolling = false; _owner.HideMergeTargetLine(); }
             else OnPointerUp(eventData);
         }
 

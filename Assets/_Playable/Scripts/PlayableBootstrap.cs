@@ -120,7 +120,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     readonly HashSet<int> triggeredDashIds = new HashSet<int>();
     bool boosterUsed;
     readonly List<GameObject> collectedCoins = new List<GameObject>();
-    PlayableTutorialGuide tutorialGuide;
+    [SerializeField] PlayableTutorialGuide tutorialGuide;
 
     void Awake()
     {
@@ -183,7 +183,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void Start()
     {
-        if (puzzleUi != null) tutorialGuide = PlayableTutorialGuide.Create(puzzleUi, vehicle);
+        if (tutorialGuide != null) tutorialGuide.Initialize(puzzleUi, vehicle);
         HideBuildUi();
         RestoreGameplayCameraPose();
         if (tutorialGuide != null) tutorialGuide.ShowAimGuide();

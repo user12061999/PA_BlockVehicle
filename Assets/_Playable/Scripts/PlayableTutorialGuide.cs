@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public sealed class PlayableTutorialGuide : MonoBehaviour
 {
     enum PuzzleStep { None, Buy, Place, Start }
-    const int TutorialDriveLimit = 3;
+    const int TutorialDriveLimit = 4;
     public static bool ShouldShowTutorial(int completedDrives) => completedDrives < TutorialDriveLimit;
 
     InGamePuzzleUiView _puzzle;
@@ -22,31 +22,18 @@ public sealed class PlayableTutorialGuide : MonoBehaviour
     PuzzleStep _step;
     int _completedDrives;
 
-    public static PlayableTutorialGuide Create(InGamePuzzleUiView puzzle, Transform vehicle)
-    {
-        var host = new GameObject("PlayableTutorialGuide");
-        var guide = host.AddComponent<PlayableTutorialGuide>();
-        guide.Initialize(puzzle, vehicle);
-        return guide;
-    }
-
-    void Initialize(InGamePuzzleUiView puzzle, Transform vehicle)
+    public void Initialize(InGamePuzzleUiView puzzle, Transform vehicle)
     {
         _puzzle = puzzle;
         _vehicle = vehicle;
-        _canvas = puzzle == null ? null : puzzle.GetComponentInParent<Canvas>();
-        if (_canvas == null) _canvas = FindObjectOfType<Canvas>();
+        _canvas = GetComponentInParent<Canvas>();
         if (_canvas == null || puzzle == null) { enabled = false; return; }
 
-        GameObject prefab = Resources.Load<GameObject>("TutorialHand");
-        if (prefab == null) { enabled = false; Debug.LogError("PlayableTutorialGuide requires Resources/TutorialHand.prefab."); return; }
-        var root = Instantiate(prefab, _canvas.transform, false);
-        root.transform.SetAsLastSibling();
-        root.name = "TutorialHand";
-        _fingerRect = root.GetComponent<RectTransform>();
-        _finger = root.GetComponent<Image>();
+        _finger = GetComponentInChildren<Image>(true);
+        if (_finger == null) { Debug.LogWarning("Place TutorialHand under PlayableTutorialGuide in the scene.", this); return; }
+        _fingerRect = _finger.rectTransform;
         _projectionCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? Camera.main : _canvas.worldCamera;
-        root.SetActive(false);
+        _finger.gameObject.SetActive(false);
 
         _puzzle.TutorialPartPurchased += OnPartPurchased;
         _puzzle.TutorialPartPlaced += OnPartPlaced;
