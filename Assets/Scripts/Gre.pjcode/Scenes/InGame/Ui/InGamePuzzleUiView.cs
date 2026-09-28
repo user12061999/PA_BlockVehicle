@@ -1341,17 +1341,20 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
             _rect.sizeDelta = new Vector2(max.x - min.x + 1, max.y - min.y + 1) * cellSize;
 
-            foreach (Vector2Int offset in pattern)
-            {
-                RectTransform block = CreateBlock(offset, cellSize, blockPrefab);
-                block.sizeDelta = Vector2.one * _owner.CellVisualSize(cellSize);
-                Image image = block.GetComponent<Image>();
-                if (image == null) image = block.gameObject.AddComponent<Image>();
-                if (blockSprite != null) image.sprite = blockSprite;
-                image.color = _owner.GetPartLevelColor(Level);
-                image.raycastTarget = true;
-                image.maskable = true;
-            }
+            Vector2 center = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
+            RectTransform block = CreateBlock(Vector2Int.zero, cellSize, blockPrefab);
+            // The pattern is already rotated; size the source image before applying its rotation.
+            block.sizeDelta = _spriteRotate % 2 == 0 ? _rect.sizeDelta : new Vector2(_rect.sizeDelta.y, _rect.sizeDelta.x);
+            block.anchoredPosition = center;
+            block.localEulerAngles = new Vector3(0f, 0f, _spriteRotate * 90f);
+            Image image = block.GetComponent<Image>();
+            if (image == null) image = block.gameObject.AddComponent<Image>();
+            if (blockSprite != null) image.sprite = blockSprite;
+            image.type = Image.Type.Simple;
+            image.preserveAspect = false;
+            image.color = _owner.GetPartLevelColor(Level);
+            image.raycastTarget = true;
+            image.maskable = true;
 
             RectTransform partRect = CreateBlock(Vector2Int.zero, cellSize * 1.25f * Mathf.Max(0.01f, _spriteScale), null);
             Image partImage = partRect.gameObject.AddComponent<Image>();
@@ -1359,10 +1362,39 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             partImage.sprite = sprite;
             partImage.preserveAspect = true;
             partImage.raycastTarget = false;
-            partRect.anchoredPosition = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
+            partRect.anchoredPosition = center;
             partRect.localEulerAngles = new Vector3(0f, 0f, _spriteRotate * 90f);
             FitInTray();
         }
+
+#if UNITY_EDITOR
+        [ContextMenu("Check BlockSprite Layout (Play Mode)")]
+        void CheckBlockSpriteLayout()
+        {
+            if (!Application.isPlaying || Pattern == null)
+                throw new System.InvalidOperationException("Run this check on an initialized part in Play Mode.");
+            var images = GetComponentsInChildren<Image>();
+            UnityEngine.Assertions.Assert.AreEqual(2, images.Length, "Expected one BlockSprite and one MinoSprite.");
+            Image block = transform.GetChild(0).GetComponent<Image>();
+            UnityEngine.Assertions.Assert.AreEqual(_blockSprite, block.sprite);
+            UnityEngine.Assertions.Assert.AreEqual(_owner.GetPartLevelColor(Level), block.color);
+            UnityEngine.Assertions.Assert.IsTrue(Quaternion.Angle(block.transform.localRotation, Quaternion.Euler(0f, 0f, _spriteRotate * 90f)) < 0.01f);
+            var corners = new Vector3[4];
+            block.rectTransform.GetWorldCorners(corners);
+            Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
+            Vector2 max = new Vector2(float.MinValue, float.MinValue);
+            foreach (Vector3 corner in corners)
+            {
+                Vector2 local = _rect.InverseTransformPoint(corner);
+                min = Vector2.Min(min, local);
+                max = Vector2.Max(max, local);
+            }
+            foreach (Vector2Int cell in Pattern)
+                UnityEngine.Assertions.Assert.IsTrue(Rect.MinMaxRect(min.x - 0.01f, min.y - 0.01f, max.x + 0.01f, max.y + 0.01f).Contains((Vector2)cell * _cellSize), "BlockSprite must cover every occupied cell.");
+            UnityEngine.Assertions.Assert.IsTrue(((max - min) - _rect.sizeDelta).sqrMagnitude < 0.01f, "Rotated image must fit the pattern bounds.");
+            Debug.Log("BlockSprite layout check passed.", this);
+        }
+#endif
 
         RectTransform CreateBlock(Vector2Int offset, float cellSize, CustomImage prefab)
         {

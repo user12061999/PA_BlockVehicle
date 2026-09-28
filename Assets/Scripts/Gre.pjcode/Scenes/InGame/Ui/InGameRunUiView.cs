@@ -15,7 +15,7 @@ namespace Gre.pjcode.Scenes.InGame
             CacheViews();
             if (_boostButton == null) return;
             _boostButton.gameObject.SetActive(unlocked);
-            _boostButton.interactable = !used;
+            _boostButton.gameObject.SetActive(!used && unlocked);
         }
         [SerializeField] private CanvasGroup _runningGroup;
         [SerializeField] private TMP_Text _forwardDistanceText;
