@@ -120,6 +120,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     readonly HashSet<int> triggeredDashIds = new HashSet<int>();
     bool boosterUsed;
     readonly List<GameObject> collectedCoins = new List<GameObject>();
+    PlayableTutorialGuide tutorialGuide;
 
     void Awake()
     {
@@ -140,6 +141,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         carTracer = vehicle.GetComponent<CarSphereTracer>();
         CacheResultUi();
         CacheRunUi();
+        if (puzzleUi == null) puzzleUi = FindSceneObjectOfType<InGamePuzzleUiView>();
         virtualStick = FindSceneObjectOfType<VirtualStick>();
         if (virtualStick != null) virtualStick.SetRunning(false);
         if (runUi != null && runUi.BoostButton != null) runUi.BoostButton.onClick.AddListener(UseBooster);
@@ -177,6 +179,14 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
         PlayMusic();
         if (IsBuildUiVisible()) ApplyPuzzleCameraPose();
+    }
+
+    void Start()
+    {
+        if (puzzleUi != null) tutorialGuide = PlayableTutorialGuide.Create(puzzleUi, vehicle);
+        HideBuildUi();
+        RestoreGameplayCameraPose();
+        if (tutorialGuide != null) tutorialGuide.ShowAimGuide();
     }
 
     void Update()
@@ -228,12 +238,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
             sphereBody.angularVelocity = Vector3.zero;
             foreach (Collider c in vehicle.GetComponentsInChildren<Collider>()) c.enabled = false;
             ApplyDash(launchForce, 1.2f);
+            if (tutorialGuide != null) tutorialGuide.FinishAimGuide();
             stopTime = 0f;
             state = State.Run;
             if (virtualStick != null) virtualStick.SetRunning(true);
             boosterUsed = false;
             if (runUi != null) runUi.BeginRun();
-            if (runUi != null) runUi.SetBoosterAvailable(puzzleUi != null && puzzleUi.BoostLevel > 0, boosterUsed);
+            if (runUi != null) runUi.SetBoosterAvailable(puzzleUi != null && puzzleUi.BoosterUnlocked, boosterUsed);
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             if (GetCarSpeedMultiplier() > 0f) PlayMoveLoop();
             PlayMusic();
@@ -551,6 +562,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         sphereBody.isKinematic = true;
         if (carView != null) carView.InactivateAllParts();
         if (runUi != null) runUi.FinishRun(distance);
+        if (tutorialGuide != null) tutorialGuide.CompleteDrive();
         StopMoveLoop();
         StopMusic();
         ShowRunMarkers();
@@ -876,6 +888,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void ShowBuildUi()
     {
+        if (tutorialGuide != null) tutorialGuide.ShowPuzzleGuide();
         if (puzzleUi != null) puzzleUi.SetOpen(true, true);
         else if (buildUi != null) buildUi.SetActive(true);
         StopCameraTransition();
@@ -948,7 +961,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (state != State.Run) return;
         TryCollectBoardUpgrade(other);
         TryCollectCoin(other);
-        TryCollectBoost(other);
         TryTriggerDash(other);
     }
 
@@ -992,19 +1004,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
         return true;
     }
 
-    bool TryCollectBoost(Collider collider)
-    {
-        GameObject item = GetTaggedObject(collider, "BoostUnlock");
-        if (item == null) return false;
-        if (puzzleUi == null) return true;
-        item.SetActive(false);
-        if (puzzleUi.BoosterUnlocked) return true;
-        puzzleUi.SetBoostLevel(puzzleUi.BoostLevel, true);
-        if (carTracer != null) carTracer.UnlockBooster();
-        PlayableSoundEffects.Play(PlayableSfx.Coin);
-        return true;
-    }
-
     bool TryTriggerDash(Collider collider)
     {
         GameObject dash = GetTaggedObject(collider, "Dash");
@@ -1028,10 +1027,10 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void UseBooster()
     {
-        if (state != State.Run || boosterUsed || puzzleUi == null || puzzleUi.BoostLevel <= 0 || sphereBody == null || sphereBody.isKinematic) return;
+        if (state != State.Run || boosterUsed || puzzleUi == null || !puzzleUi.BoosterUnlocked || sphereBody == null || sphereBody.isKinematic) return;
         boosterUsed = true;
         if (runUi != null) runUi.SetBoosterAvailable(true, true);
-        float multiplier = 0.5f + (puzzleUi.BoostLevel - 1) * 0.1f;
+        float multiplier = 0.5f + (Mathf.Max(1, puzzleUi.BoostLevel) - 1) * 0.1f;
         ApplyDash(vehicle.forward * (600f * multiplier), 1f);
         ActivateJetBoosterEffects();
         if (carTracer != null) carTracer.PlayDashEffect();

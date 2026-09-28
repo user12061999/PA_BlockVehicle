@@ -1,5 +1,6 @@
 using Gre.UI;
 using System.Collections.Generic;
+using Action = System.Action;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,6 +10,9 @@ namespace Gre.pjcode.Scenes.InGame
 {
     public sealed class InGamePuzzleUiView : MonoBehaviour
     {
+        public event Action TutorialPartPurchased;
+        public event Action TutorialPartPlaced;
+        public event Action TutorialDriveStarted;
         enum BuyPriceMode
         {
             PriceList,
@@ -186,7 +190,7 @@ namespace Gre.pjcode.Scenes.InGame
                 addition.gameObject.SetActive(false);
                 _performanceAdditionTexts[i] = addition;
             }
-            if (_playButton != null) _playButton.onClick.AddListener(() => SetOpen(false));
+            if (_playButton != null) _playButton.onClick.AddListener(() => { TutorialDriveStarted?.Invoke(); SetOpen(false); });
             if (_buyButton != null) _buyButton.onClick.AddListener(BuyRuntimePart);
             if (_boostEvolveButton != null) _boostEvolveButton.onClick.AddListener(UpgradeBooster);
             if (_autoMergeButton != null) _autoMergeButton.onClick.AddListener(AutoMerge);
@@ -300,7 +304,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             BoostLevel = Mathf.Clamp(level, 0, 5);
             BoosterUnlocked = unlockFlag || BoostLevel > 0;
-            bool show = level > 0 || unlockFlag;
+            bool show = _boostEvolveButton != null || _boostEvolveRoot != null;
             if (_boostEvolveRoot != null) _boostEvolveRoot.SetActive(show);
             if (_boostLevelText != null) _boostLevelText.text = BoostLevel == 0 ? string.Empty : BoostLevel == 5 ? "MAX" : $"Lv.{BoostLevel}";
             if (_boostEvolveButtonMax != null) _boostEvolveButtonMax.SetActive(BoostLevel == 5);
@@ -316,7 +320,7 @@ namespace Gre.pjcode.Scenes.InGame
 
         void UpgradeBooster()
         {
-            if (!BoosterUnlocked || BoostLevel >= 5 || _gold < BoostUpgradePrice) return;
+            if (BoostLevel >= 5 || _gold < BoostUpgradePrice) return;
             int price = BoostUpgradePrice;
             SetBoostLevel(BoostLevel + 1, true);
             SetGold(_gold - price);
@@ -330,7 +334,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_boostEvolveButton != null)
             {
                 _boostEvolveButton.gameObject.SetActive(BoostLevel < 5);
-                _boostEvolveButton.SetState(BoosterUnlocked && BoostLevel < 5 && _gold >= price ? ButtonState.Enable : ButtonState.Disable);
+                _boostEvolveButton.SetState((BoosterUnlocked || BoostLevel == 0) && BoostLevel < 5 && _gold >= price ? ButtonState.Enable : ButtonState.Disable);
             }
         }
 
@@ -482,6 +486,7 @@ namespace Gre.pjcode.Scenes.InGame
             SetGold(_gold);
             PlayableSoundEffects.Play(PlayableSfx.Buy);
             CreateTrayPart(_buyCursor % _partDataAsset.PartDataList.Count, GetRuntimeCellSize());
+            TutorialPartPurchased?.Invoke();
             _buyCursor++;
             _buyCount++;
             UpdateBuyPrice();
@@ -587,6 +592,7 @@ namespace Gre.pjcode.Scenes.InGame
     RefreshTrayLayout();
     PlayableSoundEffects.Play(PlayableSfx.PartSet);
     AttachCarPart(icon);
+    TutorialPartPlaced?.Invoke();
     UpdatePerformanceFromPlacedParts();
 }
 
