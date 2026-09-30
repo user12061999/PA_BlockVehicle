@@ -8504,7 +8504,7 @@
             },
             {
                 "name": "PlayableTutorialGuide.PuzzleStep",
-                "excluded": true
+                "excluded": false
             }
         ],
         "unusedMethods": [
@@ -35560,7 +35560,7 @@
                     },
                     {
                         "name": "Board#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "BoostIconSprite#get",
@@ -35572,11 +35572,11 @@
                     },
                     {
                         "name": "PlayButton#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "BuyButton#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Awake",
@@ -35844,15 +35844,15 @@
                     },
                     {
                         "name": "RefreshMergeTargetLine",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "FindNearestMergeableTarget",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowMergeTargetLine",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },
@@ -37162,7 +37162,7 @@
                     },
                     {
                         "name": "IsVisible#get",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Initialize",
@@ -37174,7 +37174,7 @@
                     },
                     {
                         "name": "CanvasLocalPosition",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "WorldToCanvasPosition",
@@ -37194,15 +37194,15 @@
                     },
                     {
                         "name": "CompleteDrive",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowPuzzleGuide",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ShowBuyGuide",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "OnDriveStarted",
@@ -37218,11 +37218,11 @@
                     },
                     {
                         "name": "FindTrayPart",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Show",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "Hide",

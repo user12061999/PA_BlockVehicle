@@ -128,11 +128,22 @@ namespace Gre.pjcode.Scenes.InGame
                 };
             }
 
+            int activeSpecCount = 0;
+            foreach (CustomText value in _performanceValueTexts)
+            {
+                if (value == null) continue;
+                Transform row = value.transform.parent;
+                if (row.gameObject.activeSelf) activeSpecCount++;
+            }
+            int firstActiveSlot = (_performanceValueTexts.Length - activeSpecCount) / 2;
+            int activeSpecIndex = 0;
+
             for (int i = 0; i < _performanceValueTexts.Length; i++)
             {
                 CustomText value = _performanceValueTexts[i];
                 if (value == null) continue;
                 RectTransform row = (RectTransform)value.transform.parent;
+                if (!row.gameObject.activeSelf) continue;
                 RectTransform layout = (RectTransform)row.parent;
                 RectTransform spec = (RectTransform)layout.parent;
                 spec.anchorMin = new Vector2(0f, 1f);
@@ -146,8 +157,9 @@ namespace Gre.pjcode.Scenes.InGame
                 layout.anchorMin = Vector2.zero;
                 layout.anchorMax = Vector2.one;
                 layout.offsetMin = layout.offsetMax = Vector2.zero;
-                row.anchorMin = new Vector2((float)i / _performanceValueTexts.Length, 0f);
-                row.anchorMax = new Vector2((float)(i + 1) / _performanceValueTexts.Length, 1f);
+                int slot = firstActiveSlot + activeSpecIndex++;
+                row.anchorMin = new Vector2((float)slot / _performanceValueTexts.Length, 0f);
+                row.anchorMax = new Vector2((float)(slot + 1) / _performanceValueTexts.Length, 1f);
                 row.offsetMin = new Vector2(8f, 0f);
                 row.offsetMax = new Vector2(-8f, 0f);
                 var icon = row.GetComponentInChildren<UnityEngine.UI.Image>(true);
@@ -1256,8 +1268,6 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (!IsPlaced) _owner.RefreshMergeTargetLine(this);
         }
 
-
-
         public void OnInitializePotentialDrag(PointerEventData eventData)
         {
             if (!IsPlaced && _scroll != null) _scroll.OnInitializePotentialDrag(eventData);
@@ -1407,6 +1417,7 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
 
             Vector2 center = new Vector2((min.x + max.x) * 0.5f * cellSize, (min.y + max.y) * 0.5f * cellSize);
             RectTransform block = CreateBlock(Vector2Int.zero, cellSize, blockPrefab);
+            block.name = "BlockVisual";
             // The pattern is already rotated; size the source image before applying its rotation.
             block.sizeDelta = _spriteRotate % 2 == 0 ? _rect.sizeDelta : new Vector2(_rect.sizeDelta.y, _rect.sizeDelta.x);
             block.anchoredPosition = center;
@@ -1417,10 +1428,21 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             image.type = Image.Type.Simple;
             image.preserveAspect = false;
             image.color = _owner.GetPartLevelColor(Level);
-            image.raycastTarget = true;
+            image.raycastTarget = false;
             image.maskable = true;
 
+            foreach (Vector2Int offset in pattern)
+            {
+                RectTransform hitBlock = CreateBlock(offset, cellSize, null);
+                hitBlock.anchoredPosition = (Vector2)offset * cellSize;
+                Image hitImage = hitBlock.gameObject.AddComponent<Image>();
+                hitImage.color = Color.clear;
+                hitImage.raycastTarget = true;
+                hitImage.maskable = true;
+            }
+
             RectTransform partRect = CreateBlock(Vector2Int.zero, cellSize * 1.25f * Mathf.Max(0.01f, _spriteScale), null);
+            partRect.name = "PartImage";
             Image partImage = partRect.gameObject.AddComponent<Image>();
             partImage.name = "PartImage";
             partImage.sprite = sprite;
@@ -1438,11 +1460,22 @@ int FindBestFitCellIndex(RuntimePuzzlePartIcon icon, Vector2 screenPosition)
             if (!Application.isPlaying || Pattern == null)
                 throw new System.InvalidOperationException("Run this check on an initialized part in Play Mode.");
             var images = GetComponentsInChildren<Image>();
-            UnityEngine.Assertions.Assert.AreEqual(2, images.Length, "Expected one BlockSprite and one MinoSprite.");
-            Image block = transform.GetChild(0).GetComponent<Image>();
+            UnityEngine.Assertions.Assert.AreEqual(Pattern.Count + 2, images.Length, "Expected one BlockSprite, one MinoSprite, and one hit area per occupied cell.");
+            Image block = transform.Find("BlockVisual").GetComponent<Image>();
             UnityEngine.Assertions.Assert.AreEqual(_blockSprite, block.sprite);
             UnityEngine.Assertions.Assert.AreEqual(_owner.GetPartLevelColor(Level), block.color);
+            UnityEngine.Assertions.Assert.IsFalse(block.raycastTarget, "The bounding BlockSprite must not receive input.");
             UnityEngine.Assertions.Assert.IsTrue(Quaternion.Angle(block.transform.localRotation, Quaternion.Euler(0f, 0f, _spriteRotate * 90f)) < 0.01f);
+            int hitBlockCount = 0;
+            foreach (Transform child in transform)
+            {
+                if (child.name != "Block") continue;
+                UnityEngine.Assertions.Assert.IsTrue(hitBlockCount < Pattern.Count);
+                UnityEngine.Assertions.Assert.IsTrue(child.GetComponent<Image>().raycastTarget, "Occupied Block cells must receive input.");
+                UnityEngine.Assertions.Assert.IsTrue(((RectTransform)child).anchoredPosition == (Vector2)Pattern[hitBlockCount] * _cellSize, "Block hit areas must match pattern coordinates.");
+                hitBlockCount++;
+            }
+            UnityEngine.Assertions.Assert.AreEqual(Pattern.Count, hitBlockCount, "Each occupied cell must have one Block hit area.");
             var corners = new Vector3[4];
             block.rectTransform.GetWorldCorners(corners);
             Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
