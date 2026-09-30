@@ -213,6 +213,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
         {
             dragging = true;
             dragStart = pointer;
+            if (tutorialGuide != null) tutorialGuide.FinishAimGuide();
             SetSlingshotPullUiVisible(!IsBuildUiVisible());
             PlayMusic();
             PlayableSoundEffects.Play(PlayableSfx.Pull);
@@ -238,7 +239,6 @@ public sealed class PlayableBootstrap : MonoBehaviour
             sphereBody.angularVelocity = Vector3.zero;
             foreach (Collider c in vehicle.GetComponentsInChildren<Collider>()) c.enabled = false;
             ApplyDash(launchForce, 1.2f);
-            if (tutorialGuide != null) tutorialGuide.FinishAimGuide();
             stopTime = 0f;
             state = State.Run;
             if (virtualStick != null) virtualStick.SetRunning(true);

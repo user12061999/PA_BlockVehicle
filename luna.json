@@ -8501,6 +8501,10 @@
             {
                 "name": "PlayableBootstrap.State",
                 "excluded": false
+            },
+            {
+                "name": "PlayableTutorialGuide.PuzzleStep",
+                "excluded": true
             }
         ],
         "unusedMethods": [
@@ -15208,7 +15212,7 @@
                     },
                     {
                         "name": "PingPong",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "SmoothDamp",
@@ -17486,7 +17490,7 @@
                     },
                     {
                         "name": "WorldToScreenPoint",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ScreenToWorldPoint",
@@ -17506,7 +17510,7 @@
                     },
                     {
                         "name": "WorldToViewportPoint",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "ScreenToViewportPoint",
@@ -35833,6 +35837,22 @@
                     {
                         "name": "AutoMerge",
                         "excluded": false
+                    },
+                    {
+                        "name": "HideMergeTargetLine",
+                        "excluded": false
+                    },
+                    {
+                        "name": "RefreshMergeTargetLine",
+                        "excluded": true
+                    },
+                    {
+                        "name": "FindNearestMergeableTarget",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowMergeTargetLine",
+                        "excluded": true
                     }
                 ]
             },
@@ -36431,15 +36451,15 @@
                         "excluded": false
                     },
                     {
-                        "name": "TryCollectBoost",
-                        "excluded": false
-                    },
-                    {
                         "name": "UseBooster",
                         "excluded": false
                     },
                     {
                         "name": "RecoverCrossedSurface",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Start",
                         "excluded": false
                     }
                 ]
@@ -37125,6 +37145,92 @@
                     {
                         "name": "InactivateInternal",
                         "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "PlayableTutorialGuide",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShouldShowTutorial",
+                        "excluded": false
+                    },
+                    {
+                        "name": "IsVisible#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Initialize",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Update",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CanvasLocalPosition",
+                        "excluded": true
+                    },
+                    {
+                        "name": "WorldToCanvasPosition",
+                        "excluded": false
+                    },
+                    {
+                        "name": "SetCanvasPosition",
+                        "excluded": false
+                    },
+                    {
+                        "name": "ShowAimGuide",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FinishAimGuide",
+                        "excluded": false
+                    },
+                    {
+                        "name": "CompleteDrive",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowPuzzleGuide",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ShowBuyGuide",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDriveStarted",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPartPurchased",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnPartPlaced",
+                        "excluded": false
+                    },
+                    {
+                        "name": "FindTrayPart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Show",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Hide",
+                        "excluded": false
+                    },
+                    {
+                        "name": "OnDestroy",
+                        "excluded": true
                     }
                 ]
             }
