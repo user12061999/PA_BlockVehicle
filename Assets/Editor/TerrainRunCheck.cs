@@ -182,7 +182,7 @@ public static class TerrainRunCheck
             actual.linearVelocity = Vector3.zero;
             Call(driver, "HandlePhysicsTrigger", boostCollider);
             physics.Simulate(0.02f);
-            Require(actual.linearVelocity == Vector3.zero && boost.activeSelf && evolve.activeSelf && !ui.BoosterUnlocked, "Touching a boost item does not unlock BoosterEvolve");
+            Require(actual.linearVelocity == Vector3.zero && boost.activeSelf && !evolve.activeSelf && ui.BoosterUnlocked, "Booster is available from the first run while BoosterEvolve stays hidden");
             Call(driver, "TryTriggerDash", padCollider);
             Call(driver, "TryTriggerDash", padCollider);
             physics.Simulate(0.02f);
@@ -201,7 +201,7 @@ public static class TerrainRunCheck
             Call(driver, "TryCollectBoardUpgrade", attachmentCollider);
             Require((int)typeof(PlayableBootstrap).GetField("pendingBoardColumns", Flags).GetValue(driver) == 1 && !attachment.activeSelf, "Only attachment awards one grid column");
             Call(driver, "RestoreCoins");
-            Require(!attachment.activeSelf && pad.activeSelf && boost.activeSelf && evolve.activeSelf && !ui.BoosterUnlocked, "Reset keeps the locked booster button visible and does not collect boost items");
+            Require(!attachment.activeSelf && pad.activeSelf && boost.activeSelf && !evolve.activeSelf && ui.BoosterUnlocked, "Reset keeps the first-run booster available and BoosterEvolve hidden");
             ui.SetBoostLevel(0, false);
             Call(ui, "SetGold", 1000);
             Call(ui, "UpgradeBooster");

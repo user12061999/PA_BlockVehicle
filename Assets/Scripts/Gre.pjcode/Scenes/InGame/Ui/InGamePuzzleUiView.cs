@@ -210,7 +210,7 @@ namespace Gre.pjcode.Scenes.InGame
             if (_bonusBoxOpenButton != null) _bonusBoxOpenButton.onClick.AddListener(PlayworksBridge.InstallFullGame);
 
             SetGold(GetStartingGold());
-            SetBoostLevel(0, false);
+            SetBoostLevel(0, true);
             BuildRuntimePuzzle();
             UpdatePerformanceFromPlacedParts();
             HidePerformancePreview();
@@ -317,8 +317,7 @@ namespace Gre.pjcode.Scenes.InGame
         {
             BoostLevel = Mathf.Clamp(level, 0, 5);
             BoosterUnlocked = unlockFlag || BoostLevel > 0;
-            bool show = _boostEvolveButton != null || _boostEvolveRoot != null;
-            if (_boostEvolveRoot != null) _boostEvolveRoot.SetActive(show);
+            if (_boostEvolveRoot != null) _boostEvolveRoot.SetActive(false);
             if (_boostLevelText != null) _boostLevelText.text = BoostLevel == 0 ? string.Empty : BoostLevel == 5 ? "MAX" : $"Lv.{BoostLevel}";
             if (_boostEvolveButtonMax != null) _boostEvolveButtonMax.SetActive(BoostLevel == 5);
             Transform meter = _boostEvolveRoot == null ? null : _boostEvolveRoot.transform.Find("LevelMeter");
