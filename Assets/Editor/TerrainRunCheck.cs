@@ -84,14 +84,9 @@ public static class TerrainRunCheck
                     if (current == TerrainType.Water) { damping += 0.075f; performance *= 2.5f; }
                     reference.linearDamping = Mathf.Max(damping - performance, 0.01f);
                     reference.AddForce(Physics.gravity * (1.5f * (contacts.IsGrounded ? 3f : 3f - values[(int)TerrainType.Air] * 2f)), ForceMode.Acceleration);
-                    if (reference.linearVelocity.sqrMagnitude < 49f)
-                        reference.linearVelocity = Vector3.MoveTowards(reference.linearVelocity, Vector3.zero, 0.2f);
-                    else
-                    {
-                        Vector3 direction = reference.linearVelocity.normalized;
-                        float slope = Vector3.Angle(Vector3.up, direction) - 90f;
-                        if (slope > 0f) reference.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
-                    }
+                    Vector3 direction = reference.linearVelocity.normalized;
+                    float slope = Vector3.Angle(Vector3.up, direction) - 90f;
+                    if (slope > 0f) reference.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
                     Call(driver, "StepPhysics", 0.02f);
                     physics.Simulate(0.02f);
                     Require(Vector3.Distance(actual.linearVelocity, reference.linearVelocity) < 0.002f, "Velocity diverged from original rules: " + terrain + " frame " + frame);

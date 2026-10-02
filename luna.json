@@ -6367,10 +6367,6 @@
                 "excluded": true
             },
             {
-                "name": "UnityEngine.UI.AspectRatioFitter",
-                "excluded": true
-            },
-            {
                 "name": "UnityEngine.UI.CoroutineTween.FloatTween",
                 "excluded": true
             },
@@ -6424,7 +6420,7 @@
             },
             {
                 "name": "UnityEngine.UI.AspectRatioFitter.AspectMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "UnityEngine.UI.IMeshModifier",
@@ -7071,10 +7067,6 @@
                 "excluded": true
             },
             {
-                "name": "DG.Tweening.Core.ABSAnimationComponent",
-                "excluded": true
-            },
-            {
                 "name": "DG.Tweening.Core.Debugger",
                 "excluded": true
             },
@@ -7084,18 +7076,6 @@
             },
             {
                 "name": "DG.Tweening.Core.DOTweenExternalCommand",
-                "excluded": true
-            },
-            {
-                "name": "DG.Tweening.Core.DOTweenSettings",
-                "excluded": true
-            },
-            {
-                "name": "DG.Tweening.Core.DOTweenSettings.ModulesSetup",
-                "excluded": true
-            },
-            {
-                "name": "DG.Tweening.Core.DOTweenSettings.SafeModeOptions",
                 "excluded": true
             },
             {
@@ -7292,7 +7272,7 @@
             },
             {
                 "name": "DG.Tweening.AutoPlay",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.AxisConstraint",
@@ -7308,7 +7288,7 @@
             },
             {
                 "name": "DG.Tweening.Core.DOTweenSettings.SettingsLocation",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.Core.Enums.FilterType",
@@ -7316,7 +7296,7 @@
             },
             {
                 "name": "DG.Tweening.Core.Enums.NestedTweenFailureBehaviour",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.Core.Enums.OperationType",
@@ -7324,11 +7304,11 @@
             },
             {
                 "name": "DG.Tweening.Core.Enums.RewindCallbackMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.Core.Enums.SafeModeLogBehaviour",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.Core.Enums.SpecialStartupMode",
@@ -7380,7 +7360,7 @@
             },
             {
                 "name": "DG.Tweening.Ease",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.HandlesDrawMode",
@@ -7396,11 +7376,11 @@
             },
             {
                 "name": "DG.Tweening.LogBehaviour",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.LoopType",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.PathMode",
@@ -7420,15 +7400,15 @@
             },
             {
                 "name": "DG.Tweening.RotateMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.ScrambleMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.ShakeRandomnessMode",
-                "excluded": true
+                "excluded": false
             },
             {
                 "name": "DG.Tweening.SpiralMode",
@@ -7440,10 +7420,6 @@
             },
             {
                 "name": "DG.Tweening.UpdateType",
-                "excluded": true
-            },
-            {
-                "name": "DG.Tweening.DOTweenAnimation",
                 "excluded": true
             },
             {
@@ -15376,7 +15352,7 @@
                     },
                     {
                         "name": "MinMaxRect",
-                        "excluded": true
+                        "excluded": false
                     },
                     {
                         "name": "NormalizedToPoint",
@@ -36465,6 +36441,14 @@
                     {
                         "name": "GetFinishDistance",
                         "excluded": false
+                    },
+                    {
+                        "name": "WinRun",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CompleteRun",
+                        "excluded": false
                     }
                 ]
             },
@@ -37238,6 +37222,274 @@
                     },
                     {
                         "name": "OnDestroy",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "UnityEngine.UI.AspectRatioFitter",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "aspectMode#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "aspectMode#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "aspectRatio#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "aspectRatio#set",
+                        "excluded": true
+                    },
+                    {
+                        "name": "rectTransform#get",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "UpdateRect",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetSizeDeltaToProduceSize",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetParentSize",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnEnable",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetDirty",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnRectTransformDimensionsChange",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "DG.Tweening.Core.ABSAnimationComponent",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "DORestart",
+                        "excluded": true
+                    }
+                ]
+            },
+            {
+                "className": "DG.Tweening.Core.DOTweenSettings",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "DG.Tweening.Core.DOTweenSettings.ModulesSetup",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "DG.Tweening.Core.DOTweenSettings.SafeModeOptions",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "init",
+                        "excluded": false
+                    }
+                ]
+            },
+            {
+                "className": "DG.Tweening.DOTweenAnimation",
+                "staticMethods": [],
+                "instanceMethods": [
+                    {
+                        "name": "Dispatch_OnReset",
+                        "excluded": true
+                    },
+                    {
+                        "name": "TypeToDOTargetType",
+                        "excluded": true
+                    },
+                    {
+                        "name": "init",
+                        "excluded": false
+                    },
+                    {
+                        "name": "Awake",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Start",
+                        "excluded": true
+                    },
+                    {
+                        "name": "Reset",
+                        "excluded": true
+                    },
+                    {
+                        "name": "OnDestroy",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RewindThenRecreateTween",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RewindThenRecreateTweenAndPlay",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RecreateTween",
+                        "excluded": true
+                    },
+                    {
+                        "name": "RecreateTweenAndPlay",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CreateTween",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetTweens",
+                        "excluded": true
+                    },
+                    {
+                        "name": "SetAnimationTarget",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlay",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayBackwards",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayForward",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPause",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOTogglePause",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORewind",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORestart",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORestart$1",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOComplete",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOKill",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPauseAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayBackwardsById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayBackwardsAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayForwardById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayForwardAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOPlayNext",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORewindAndPlayNext",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORewindAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORestartById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DORestartAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOKillById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "DOKillAllById",
+                        "excluded": true
+                    },
+                    {
+                        "name": "CreateEditorPreview",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetTweenGO",
+                        "excluded": true
+                    },
+                    {
+                        "name": "GetTweenTarget",
+                        "excluded": true
+                    },
+                    {
+                        "name": "ReEvaluateRelativeTween",
                         "excluded": true
                     }
                 ]

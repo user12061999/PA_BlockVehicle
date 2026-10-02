@@ -26,7 +26,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [SerializeField] private LayerMask groundMask = ~0;
     [SerializeField] private float groundRayHeight = 8f;
     [SerializeField] private float groundOffset = 0.08f;
-    [SerializeField] private float dashForceMultiplier = 0.35f;
+    [SerializeField] private float dashForceMultiplier = 0.7f;
     [SerializeField] private float dashBoosterEffectDuration = 2f;
     [SerializeField] private int coinAmountFallback = 100;
     [SerializeField] private float gameEndedDelay = 0.25f;
@@ -431,7 +431,13 @@ public sealed class PlayableBootstrap : MonoBehaviour
         steer = virtualStick != null ? virtualStick.Direction.x : 0f;
         ControlSphere(Time.deltaTime);
         speed = sphereBody.linearVelocity.magnitude;
-        distance = Mathf.Max(distance, sphereBody.position.z - startPosition.z);
+        float currentZ = sphereBody.position.z;
+        if (currentZ < startPosition.z + distance - 10f)
+        {
+            FinishRun();
+            return;
+        }
+        distance = Mathf.Max(distance, currentZ - startPosition.z);
         if (runUi != null) runUi.UpdateRun(distance, speed);
         bool grounded = terrainCollider != null && terrainCollider.IsGrounded;
         stopTime = grounded && speed <= 3f ? stopTime + Time.deltaTime : 0f;
@@ -515,14 +521,9 @@ public sealed class PlayableBootstrap : MonoBehaviour
         if (!Application.isEditor && !terrainCollider.IsGrounded)
             gravityWeight *= LunaManager.ins == null ? 2f : Mathf.Max(1f, LunaManager.ins.airborneGravityMultiplier);
         sphereBody.AddForce(Physics.gravity * (1.5f * gravityWeight), ForceMode.Acceleration);
-        bool braking = sphereBody.linearVelocity.sqrMagnitude < 49f;
-        if (braking) sphereBody.linearVelocity = Vector3.MoveTowards(sphereBody.linearVelocity, Vector3.zero, 10f * deltaTime);
-        else
-        {
-            Vector3 direction = sphereBody.linearVelocity.normalized;
-            float slope = Vector3.Angle(Vector3.up, direction) - 90f;
-            if (slope > 0f) sphereBody.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
-        }
+        Vector3 direction = sphereBody.linearVelocity.normalized;
+        float slope = Vector3.Angle(Vector3.up, direction) - 90f;
+        if (slope > 0f) sphereBody.AddForce(direction * Mathf.Lerp(0f, 15f, slope / 90f), ForceMode.Force);
     }
 
     void UpdateVehiclePresentation(float deltaTime)
