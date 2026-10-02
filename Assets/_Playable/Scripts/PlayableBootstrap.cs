@@ -67,6 +67,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
     [Header("Run Markers")]
     [SerializeField] private Transform finishFlag;
     [SerializeField] private Transform recordLine;
+    [SerializeField] private BoxCollider finishCollider;
     [SerializeField] private float finishFlagAnimationDuration = 0.35f;
     [Header("Loop Audio")]
     [SerializeField] private AudioClip sfxMoveLoop;
@@ -243,7 +244,7 @@ public sealed class PlayableBootstrap : MonoBehaviour
             state = State.Run;
             if (virtualStick != null) virtualStick.SetRunning(true);
             boosterUsed = false;
-            if (runUi != null) runUi.BeginRun();
+            if (runUi != null) runUi.BeginRun(GetFinishDistance());
             if (runUi != null) runUi.SetBoosterAvailable(puzzleUi != null && puzzleUi.BoosterUnlocked, boosterUsed);
             PlayableSoundEffects.Play(PlayableSfx.Launch);
             if (GetCarSpeedMultiplier() > 0f) PlayMoveLoop();
@@ -430,10 +431,11 @@ public sealed class PlayableBootstrap : MonoBehaviour
         steer = virtualStick != null ? virtualStick.Direction.x : 0f;
         ControlSphere(Time.deltaTime);
         speed = sphereBody.linearVelocity.magnitude;
-        distance = Mathf.Max(distance, sphereBody.position.z);
+        distance = Mathf.Max(distance, sphereBody.position.z - startPosition.z);
         if (runUi != null) runUi.UpdateRun(distance, speed);
-        stopTime = sphereBody.linearVelocity.z > 0f && speed > 3f ? stopTime : stopTime + Time.deltaTime;
-        if (stopTime >= 0.5f || sphereBody.position.y < startPosition.y - 200f) FinishRun();
+        bool grounded = terrainCollider != null && terrainCollider.IsGrounded;
+        stopTime = grounded && speed <= 3f ? stopTime + Time.deltaTime : 0f;
+        if (stopTime >= 0.5f) FinishRun();
     }
 
     void ControlSphere(float deltaTime)
@@ -555,8 +557,19 @@ public sealed class PlayableBootstrap : MonoBehaviour
 
     void FinishRun()
     {
+        CompleteRun(false);
+    }
+
+    void WinRun()
+    {
+        CompleteRun(true);
+    }
+
+    void CompleteRun(bool won)
+    {
         if (state == State.Done) return;
 
+        distance = Mathf.Max(distance, sphereBody.position.z - startPosition.z);
         state = State.Done;
         if (virtualStick != null) virtualStick.SetRunning(false);
         sphereBody.isKinematic = true;
@@ -567,9 +580,17 @@ public sealed class PlayableBootstrap : MonoBehaviour
         StopMusic();
         ShowRunMarkers();
         PlayableSoundEffects.Play(PlayableSfx.Finish);
-        OpenResultUi();
-        if (gameEndedRoutine != null) StopCoroutine(gameEndedRoutine);
-        gameEndedRoutine = StartCoroutine(NotifyPlayActionAfterResultUi());
+        if (won)
+        {
+            if (LunaManager.ins != null) LunaManager.ins.ShowWinCard();
+            else PlayworksBridge.GameEnded();
+        }
+        else
+        {
+            OpenResultUi();
+            if (gameEndedRoutine != null) StopCoroutine(gameEndedRoutine);
+            gameEndedRoutine = StartCoroutine(NotifyPlayActionAfterResultUi());
+        }
     }
 
     void ResetRun()
@@ -959,9 +980,15 @@ public sealed class PlayableBootstrap : MonoBehaviour
     void HandlePhysicsTrigger(Collider other)
     {
         if (state != State.Run) return;
+        if (finishCollider != null && other == finishCollider) { WinRun(); return; }
         TryCollectBoardUpgrade(other);
         TryCollectCoin(other);
         TryTriggerDash(other);
+    }
+
+    float GetFinishDistance()
+    {
+        return finishCollider == null ? 1f : Mathf.Max(1f, finishCollider.transform.position.z - startPosition.z);
     }
 
     void HandlePhysicsTriggerExit(Collider other)

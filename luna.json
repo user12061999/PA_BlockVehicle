@@ -36461,6 +36461,10 @@
                     {
                         "name": "Start",
                         "excluded": false
+                    },
+                    {
+                        "name": "GetFinishDistance",
+                        "excluded": false
                     }
                 ]
             },
@@ -36726,6 +36730,10 @@
                     },
                     {
                         "name": "SetBoosterAvailable",
+                        "excluded": false
+                    },
+                    {
+                        "name": "BeginRun$1",
                         "excluded": false
                     }
                 ]

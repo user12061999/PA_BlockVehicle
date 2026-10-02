@@ -3011,22 +3011,6 @@ MonoBehaviour:
     keywords:
       "\L\u2025": []
   - shaderCompilerPlatform: 5
-    shader: {fileID: 4800000, guid: 65188bde2bbc449d3aecb15fde28b0a1, type: 3}
-    passType: 0
-    passId: 0
-    subShaderIndex: 0
-    upToDate: 0
-    keywords:
-      "\L\u2025": []
-  - shaderCompilerPlatform: 9
-    shader: {fileID: 4800000, guid: 65188bde2bbc449d3aecb15fde28b0a1, type: 3}
-    passType: 0
-    passId: 0
-    subShaderIndex: 0
-    upToDate: 0
-    keywords:
-      "\L\u2025": []
-  - shaderCompilerPlatform: 5
     shader: {fileID: 4800000, guid: bccaaca1f83315c4aad8d95e28fd9149, type: 3}
     passType: 0
     passId: 0
@@ -3052,6 +3036,54 @@ MonoBehaviour:
       "\L\u2025": []
   - shaderCompilerPlatform: 9
     shader: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
+    passType: 0
+    passId: 0
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 5
+    shader: {fileID: 4800000, guid: 8d2bb70cbf9db8d4da26e15b26e74248, type: 3}
+    passType: 13
+    passId: 2
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 9
+    shader: {fileID: 4800000, guid: 8d2bb70cbf9db8d4da26e15b26e74248, type: 3}
+    passType: 13
+    passId: 2
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 5
+    shader: {fileID: 4800000, guid: 65188bde2bbc449d3aecb15fde28b0a1, type: 3}
+    passType: 0
+    passId: 0
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 9
+    shader: {fileID: 4800000, guid: 65188bde2bbc449d3aecb15fde28b0a1, type: 3}
+    passType: 0
+    passId: 0
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 5
+    shader: {fileID: 4800000, guid: e5ce8cf65a256401fb018fd78ff89b81, type: 3}
+    passType: 0
+    passId: 0
+    subShaderIndex: 0
+    upToDate: 0
+    keywords:
+      "\L\u2025": []
+  - shaderCompilerPlatform: 9
+    shader: {fileID: 4800000, guid: e5ce8cf65a256401fb018fd78ff89b81, type: 3}
     passType: 0
     passId: 0
     subShaderIndex: 0
@@ -3060,8 +3092,53 @@ MonoBehaviour:
       "\L\u2025": []
   _includedShaderVariants: []
   _excludedShaderVariants: []
-  version: 437
+  version: 578
   _shaderParsedShaders:
+  - ParsedSubShaders:
+    - Index: 0
+      Passes:
+      - Shader: {fileID: 4800000, guid: bccaaca1f83315c4aad8d95e28fd9149, type: 3}
+        ShaderVariants: []
+        DefinedKeywords:
+          "\L\u2025": []
+        KeywordGroups: []
+        KeywordsMinimalCardinality: 0
+        ContainsInvalidVariant: 0
+        VariantStructures: []
+        CompilationErrors: []
+        HasDepthReader: 0
+        Id: 0
+        SubShaderIndex: 0
+        SerializedObjectId: 0
+        Tags:
+        - Key: IGNOREPROJECTOR
+          Value: true
+        - Key: QUEUE
+          Value: Transparent
+        - Key: RenderType
+          Value: Transparent
+        UsePass:
+          shader: 
+          pass: 
+        GrabPassTextureName: 
+        PlatformMask: -1
+      Shader: {fileID: 4800000, guid: bccaaca1f83315c4aad8d95e28fd9149, type: 3}
+      Tags:
+      - Key: IGNOREPROJECTOR
+        Value: true
+      - Key: QUEUE
+        Value: Transparent
+      - Key: RenderType
+        Value: Transparent
+    Shader: {fileID: 4800000, guid: bccaaca1f83315c4aad8d95e28fd9149, type: 3}
+    ShaderPath: Assets/ThirdParty/JMO Assets/Cartoon FX (legacy)/Shaders/CFXM_MobileParticleAdd_Alpha8.shader
+    ShaderDefinedKeywords:
+    - FOG_EXP
+    - FOG_EXP2
+    - FOG_LINEAR
+    fallbackShader: {fileID: 0}
+    CompilationErrors: []
+    Variants: []
   - ParsedSubShaders:
     - Index: 0
       Passes:
@@ -4282,6 +4359,55 @@ MonoBehaviour:
     ShaderPath: Packages/com.unity.render-pipelines.universal/Shaders/Utils/FallbackError.shader
     ShaderDefinedKeywords: []
     fallbackShader: {fileID: 4800000, guid: 36e335017ad71d54fbb10842863188ae, type: 3}
+    CompilationErrors: []
+    Variants: []
+  - ParsedSubShaders:
+    - Index: 0
+      Passes:
+      - Shader: {fileID: 203, guid: 0000000000000000f000000000000000, type: 0}
+        ShaderVariants: []
+        DefinedKeywords:
+          "\L\u2025": []
+        KeywordGroups: []
+        KeywordsMinimalCardinality: 0
+        ContainsInvalidVariant: 0
+        VariantStructures: []
+        CompilationErrors: []
+        HasDepthReader: 0
+        Id: 0
+        SubShaderIndex: 0
+        SerializedObjectId: 0
+        Tags:
+        - Key: IGNOREPROJECTOR
+          Value: true
+        - Key: PreviewType
+          Value: Plane
+        - Key: QUEUE
+          Value: Transparent
+        - Key: RenderType
+          Value: Transparent
+        UsePass:
+          shader: 
+          pass: 
+        GrabPassTextureName: 
+        PlatformMask: -1
+      Shader: {fileID: 203, guid: 0000000000000000f000000000000000, type: 0}
+      Tags:
+      - Key: IGNOREPROJECTOR
+        Value: true
+      - Key: PreviewType
+        Value: Plane
+      - Key: QUEUE
+        Value: Transparent
+      - Key: RenderType
+        Value: Transparent
+    Shader: {fileID: 203, guid: 0000000000000000f000000000000000, type: 0}
+    ShaderPath: Resources/unity_builtin_extra
+    ShaderDefinedKeywords:
+    - FOG_EXP
+    - FOG_EXP2
+    - FOG_LINEAR
+    fallbackShader: {fileID: 0}
     CompilationErrors: []
     Variants: []
   - ParsedSubShaders:

@@ -27,7 +27,6 @@ namespace Gre.pjcode.Scenes.InGame
         [SerializeField] private RectTransform _progressGaugePin;
         [SerializeField] private TMP_Text _progressGaugePinText;
         [SerializeField] private RectTransform _progressGaugeBestPin;
-        [SerializeField] private float _roadLength = 120f;
         [SerializeField] private float _speedNeedleMaxAngle = 120f;
         [SerializeField] private float _speedNeedleMinAngle = -120f;
         [SerializeField] private float _maxDisplaySpeedKmh = 160f;
@@ -44,9 +43,14 @@ namespace Gre.pjcode.Scenes.InGame
         public void BeginRun()
         {
             CacheViews();
-            _targetDistance = Mathf.Max(1f, _roadLength);
             SetRunning(true);
             UpdateRun(0f, 0f);
+        }
+
+        public void BeginRun(float targetDistance)
+        {
+            _targetDistance = Mathf.Max(1f, targetDistance);
+            BeginRun();
         }
 
         public void UpdateRun(float distance, float speed)
@@ -54,8 +58,6 @@ namespace Gre.pjcode.Scenes.InGame
             CacheViews();
             float safeDistance = Mathf.Max(0f, distance);
             float safeSpeed = Mathf.Max(0f, speed);
-            _targetDistance = Mathf.Max(1f, _roadLength);
-
             float progress = Mathf.Clamp01(safeDistance / _targetDistance);
             float bestProgress = Mathf.Clamp01(_bestDistance / _targetDistance);
             int meters = Mathf.RoundToInt(safeDistance);
@@ -86,7 +88,6 @@ namespace Gre.pjcode.Scenes.InGame
 
         public void ResetRun()
         {
-            _targetDistance = Mathf.Max(1f, _roadLength);
             SetRunning(false);
             UpdateRun(0f, 0f);
         }
